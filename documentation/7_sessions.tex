@@ -1,0 +1,46 @@
+% imports
+\input{media/7_charger/solutionExample}
+\input{media/7_charger/secondSolutionExample}
+\input{media/7_charger/refactorExample}
+\input{media/7_charger/secondProgramVars}
+\section{Charge Schedules}
+The results from the Quadratic Program defined in the previous section give us a general estimate of how much and when buses should charge, however we must still address two primary issues. The first is defining concrete continuous time start and stop times for each charge sessionand the second is limiting the charge sessions to a finite number of chargers. After solving the first program, we take the results and derive {\it preliminary} intervals and average power consumptions for each charge session.  For example, consider a solution to a three bus, two charger scenario given in Fig. \ref{fig:solutionExample}.
+Note that there appears to be three buses charging at the same time from $t_5$ to $t_6$ even though there are only two chargers.  We can reformulate this solution in terms of continuous start and stop variables and a variable charge rate so that the {\it duration} of each charge session may be relaxed. The objective is to store the given energy in the corresponding bus within the given charge interval.  Note how few of the charge sessions utilize the chargers to full capacity. This implies that there exists a smaller charge window in which equivalent power can be delivered. This allow us to use the charge durations from the solution from Fig. \ref{fig:solutionExample} as bounds on {\it allowable} charge windows instead of absolute truth. An example of how Fig. \ref{fig:solutionExample} may be reformulated is given in Fig. \ref{fig:refactorExample}. Note how the actual charge sessions don't necessarily need to take up all the time they were initially allocated in the first solution and that these times can fluctuate if the average charge rate is less than the maximum charger capacity. In this example, we assume a maximum charge capacity of 350kW.  Note how the third charge session does have to be exactly where it was scheduled because the average is equal to the maximum charge rate.
+If we examin just the schedule for Bus 1, we note that there are four essential variables for the corresponding charge session: $a(i,r)$, $b(i,r)$, $f(i,r)$ and $d(i,r)$ which represent the minimum start time, actual start time, actual end time, and maximum end time respectively. The problem we must now solve is one of arranging these ``rectangles'' such that each one is larger than it's minimum width (or charge time).  We must also account for the number of chargers. It can be helpful to view the problem as a bin packing problem, where each session must fit within the ``swim lane'' of a charger.  For example, taking the charge sessions given in Fig. \ref{fig:refactorExample} and arranging them so that there is no overlap between sessions will yield a valid solution as shown in Fig. \ref{fig:secondSolutionExample}.
+\par From Fig. \ref{fig:secondProgramVars}, we know that $a(i,r), b(i,r),f(i,r)$ and $d(i,r)$ must be such that 
+\begin{equation*}\begin{aligned}
+	a(i,r) \le b(i,r) \\
+	b(i,r) \le f(i,r) \\
+	f(i,r) \le d(i,r). 	
+\end{aligned}\end{equation*}
+Where $a(i,r)$ and $d(i,r)$ are known from the previous optimization problem, and $b(i,r)$ and $f(i,r)$ are optimization variables.
+\par We desire to solve this second optimization method in a greedy fashion using a heuristic approach. Let $\mathcal{B}$ be the set of all charge sessions which are sorted according to their {\it latest} start time.  Begin by removing the first, or earliest, $n_{\text{charger}}$ sessions and placing them in separate queues for a charger. For the remainder of the charge sessions, we remove the next item from the list, determine which chargers are available to service this request by checking that the previous service can finish before the next will start, and then select the charger which yields the smallest amount of overlap in session availability.
+\begin{algorithm}[!ht]
+\DontPrintSemicolon
+\KwIn{Sorted List of Charge Sessions}
+\KwOut{Charge Schedule for Each Charger}
+\For{i = 1:$n_{\text{charger}}$}
+{
+	charger[i].append(inputList.pop())
+}
+\While{inputList not empty}
+{
+	item = inputList.pop()\;
+	\For{i = 1:$n_{\text{charger}}$}
+	{
+		bestOverlap = inf\;
+		bestCharger = -1\;
+		\If{charger $i$ is available}		
+		{
+			\If{overlap is less than bestOverlap}
+			{
+				bestOverlap = itemOverlap\;
+				bestCharger = i\;
+			}
+		}
+	}
+	charger[bestCharger].append(item)\;
+}
+\caption{Pseudocode that illustrates how charge sessions are assigned}
+\label{alg:chargeAssign}
+\end{algorithm}

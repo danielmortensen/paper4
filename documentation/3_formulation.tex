@@ -1,0 +1,23 @@
+% imports 
+\input{media/3_formulation/charges} 
+\input{media/3_formulation/busPower}
+\input{media/3_formulation/busAvail} 
+\section{Formulation} 
+The cost objective that we desire to minimize is modeled after \cite{rocky_mountain_power_rocky_2021}, which contains two primary elements: the cost of energy, and power demand. Energy is billed per kWh for on-peak and off-peak hours. The on-peak rate is more expensive because there is generally more demand for power during this time, whereas off-peak hours tend to be less expensive. The demand is covered in two separate chargers.  The first is a facilities charge which is billed per kW for the highest 15-minute average power use over the course of the month. The second is a demand charge, which is also billed per kW, but is only billed for the highest 15-minute average power usesd during on-peak hours. The rates for each component are given in Table \ref{tab:charges}.  
+
+Before we may compute the total monthly cost of electricity, we must define expressions for the average power and energy over time.  Let each day be divided into 15-minute intervals for each bus where the average power expended for bus $i$ during time $j$ is denoted $p(i,j)$ as shown in Fig. \ref{fig:busPower}. The resulting solution of the program we will develop will yield the average power expended by each bus during each period of time.
+\par One constraint for which the solution must account is bus availability.  When a bus is out of the station, the maximum average power for that time must be zero. For example, if bus 1 were out on route for $t_5, t_6,$ and $t_7$, then the average power for those periods would be equal to zero as shown in Fig. \ref{fig:busAvail}. Let $\bm{b}_{p(i,j)}$ be the average power used by bus $i$ at time index $j$, and $\bm{b}$ be a vector which contains $b_{p(i,j)}$ for each bus and time index. Also let $\mathcal{A} \subset {i\times j}$  be the set of all indices where bus $i$ is in the station during time $t_j$ and $\tilde{\mathcal{A}}$ be its complement. Furthermore, let $p_{\text{max}}$ be the maximum power that a charger can deliver. 
+\par We define a set of constraints so that buses do not use power when not in the station by letting
+\begin{equation}\label{eqn:obj:power1}\begin{aligned}
+	b_{p(i,j)} &= 0 \ \forall i,j \in \tilde{\mathcal{A}}  \\
+	b_{p(i,j)} &\le p_{\text{max}} \ \forall i,j \in \mathcal{A} \\
+	-b_{p(i,j)} &\le 0              \ \forall i,j \in \mathcal{A} 
+\end{aligned}\end{equation}
+\par The constraints in Eq. \ref{eqn:obj:power1} however to not account for buses that must charge for partial periods.  For example, if the day were divided into 15-minute time blocks, but a bus began charging at 10:07, then an average power of $p_{\text{max}}$ for that time slot would be inaccurate. Therefore, Eq. \ref{eqn:obj:power1} must be modified so that the average power for each block correctly reflects partial availability.  Let $\alpha(i,j)$ give the percentage of time that bus $i$ is available during time $j$. Eq. \ref{eqn:obj:power1} can be rewritten as
+\begin{equation}\label{eqn:obj:power2}\begin{aligned}
+	-b_{p(i,j)} &\le 0 \ \forall i,j \\
+	b_{p(i,j)}  &\le p_{\text{max}}\cdot \alpha(i,j) \ \forall  i,j\\
+\end{aligned}\end{equation}
+
+
+

@@ -1,0 +1,42 @@
+\documentclass[lettersize,journal]{IEEEtran}
+\usepackage{bm}
+\usepackage{calc}
+\usepackage{algorithm2e}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{colortbl}
+\usepackage{supertabular}
+\usepackage{amsmath,amsfonts}
+\usepackage{tikz}
+\usepackage{subfig}
+\hyphenation{op-tical net-works semi-conduc-tor IEEE-Xplore}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\usepackage{balance}
+\usepackage[backend=bibtex, style=numeric, sorting=none]{biblatex}
+\bibliography{references}
+
+\begin{document}
+\title{A Light Weight Approach to Minimize Charging Cost for Electric Bus Fleets}
+\author{Daniel Mortensen, Jacob Gunther\thanks{}}
+
+\markboth{Transactions on Intelligent Transportation Systems}%
+{}
+
+\maketitle 
+\input{1_abstract.tex}
+\input{2_introduction.tex}
+\input{3_formulation.tex}
+\input{4_battery.tex}
+\input{5_charger}
+\input{6_objective.tex}
+\input{7_sessions.tex}
+%\input{8_results.tex}
+%\input{9_future.tex}
+\section*{Acknowledgment}This material is based in part upon work supported by the National Science Foundation through the ASPIRE Engineering Research Center under Grant No. EEC-1941524, the Department of Energy through a prime award with ABB under Grant No. DE-EE0009194, and PacifiCorp under contract number 3590. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the authors and do not necessarily reflect the views of the National Science Foundation, the Department of Energy, or Pacificorp.
+%\newpage 
+\input{9_bigasstable}
+\printbibliography
+\end{document}
+
+

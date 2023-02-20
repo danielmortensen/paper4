@@ -1,0 +1,37 @@
+\begin{figure*}
+\centering
+\begin{tikzpicture}
+	\node[rectangle, draw=gray!50, fill=gray!10, minimum width=5.8in, minimum height=0.4in](bus1Box) at (7.75,0.8){};
+	\node(bus1BoxLabel) at (-0.2, 0.8){Bus 1}; 
+	
+	\node[rectangle, draw=gray!50, fill=gray!10, minimum width=5.8in, minimum height=0.4in](bus2Box) at (7.75,2){};
+	\node(bus1BoxLabel) at (-0.2, 2.0){Bus 2};
+	
+	\node[rectangle, draw=gray!50, fill=gray!10, minimum width=5.8in, minimum height=0.4in](bus3Box) at (7.75,3.2){};
+	\node(bus1BoxLabel) at (-0.2, 3.2){Bus 3};
+	
+	\foreach \curLab/\preLab[count=\c, evaluate=\c as \pos using {0.5 + (\c - 1)*14.5/9}] in {t_1/t_1, t_2/t_1, t_3/t_2, t_4/t_3, t_5/t_4, t_6/t_7, t_7/t_6, t_8/t_7, t_9/t_8, t_{end}/t_9}
+	{
+		\node[label=below:$\curLab$](b\c) at (\pos, 0){};
+		\node(t) at (\pos, 3.8){};
+		\draw[dashed, line width=0.5pt] (b\c.north) -- (t.north); 
+		\ifnum\c>1 
+			\node(b1Curr) at (\pos, 0.8 - 0.2){};
+			\node(b2Curr) at (\pos, 2.0 - 0.2){};
+			\node(b3Curr) at (\pos, 3.2 - 0.2){};
+			\def\temp{\number\numexpr\c - 1}
+			\draw[->, line width=0.5pt] (b1Prev.east) -- node[midway, above]{\scalebox{0.8}{$p(1,\temp)$}}(b1Curr.west);
+			\draw[->, line width=0.5pt] (b2Prev.east) -- node[midway, above]{\scalebox{0.8}{$p(2,\temp)$}}(b2Curr.west);
+			\draw[->, line width=0.5pt] (b3Prev.east) -- node[midway, above]{\scalebox{0.8}{$p(3,\temp)$}}(b3Curr.west);	
+		\fi
+			\node(b1Prev) at (\pos, 0.8 - 0.2){};
+			\node(b2Prev) at (\pos, 2.0 - 0.2){};
+			\node(b3Prev) at (\pos, 3.2 - 0.2){};	
+	}
+	\path (b9.south) -- node[midway, below=0.1in]{$\hdots$}(b10.south);
+
+\end{tikzpicture}
+\caption{Demonstrates how bus power use is conceptualized}
+\label{fig:busPower}
+\end{figure*}
+
