@@ -19,6 +19,11 @@ fVar = sVar + nTime - 1;
 Param.pc = sVar:fVar;
 sVar = fVar + 1;
 
+% variables for slack 'g' term to be used for absolute value expression
+fVar = sVar +  (nTime - 1)*nBus - 1;
+Param.g = sVar:fVar;
+sVar = fVar + 1;
+
 % index for facilities power (max over all power)
 Param.facilities = sVar;
 sVar = sVar + 1;
