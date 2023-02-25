@@ -21,7 +21,7 @@ sVar = fVar + 1;
 
 % variables for slack 'g' term to be used for absolute value expression
 fVar = sVar +  (nTime - 1)*nBus - 1;
-Param.g = sVar:fVar;
+Param.g = reshape(sVar:fVar,[nBus, nTime - 1]);
 sVar = fVar + 1;
 
 % index for facilities power (max over all power)

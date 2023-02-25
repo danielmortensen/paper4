@@ -25,7 +25,7 @@ for iBus = 1:Sim.nBus
             A(iConVar + 0,:) = [iCon, iH(iBus, iTime - 0) ,  1     ];
             A(iConVar + 1,:) = [iCon, iH(iBus, iTime - 1) , -1     ];
             A(iConVar + 2,:) = [iCon, iBp(iBus, iTime - 1), -deltaT];
-            b(iCon) = delta(iBus, iTime - 1);
+            b(iCon) = -delta(iBus, iTime - 1);
             iCon = iCon + 1;
             iConVar = iConVar + 3;
         end

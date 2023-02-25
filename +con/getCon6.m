@@ -15,7 +15,7 @@ iConVar = 1;
 for iTime = 1:nTime
     A(iConVar + 0,:) = [iCon + 0, iPc(iTime), -1];
     A(iConVar + 1,:) = [iCon + 0, iPt(iTime),  1];
-    b(iCon + 0) = -u(iTime);
+    b(iCon + 0) = u(iTime);
     iConVar = iConVar + 2;
     iCon = iCon + 1;
 end

@@ -1,4 +1,4 @@
-nBus = 1; nCharger = 1;
+nBus = 45; nCharger = 5;
 Var = util.getVarParam(nBus);
 Sim = util.getSimParam(nBus, nCharger);
 [A1, b1, nCon1, descr1, eq1] = con.getCon1(Sim,Var);
