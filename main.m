@@ -1,6 +1,8 @@
-nBus = 45; nCharger = 5;
-Var = util.getVarParam(nBus);
-Sim = util.getSimParam(nBus, nCharger);
+nBus = 55; nCharger = 5; dt = 1*60; % one minute intervals
+useGurobi = false;
+Sim = util.getSimParam(nBus, nCharger, dt);
+Var = util.getVarParam(Sim);
+Sim.u = Sim.u*5;
 [A1, b1, nCon1, descr1, eq1] = con.getCon1(Sim,Var);
 [A2, b2, nCon2, descr2, eq2] = con.getCon2(Sim,Var);
 [A3, b3, nCon3, descr3, eq3] = con.getCon3(Sim,Var);
@@ -11,29 +13,54 @@ Sim = util.getSimParam(nBus, nCharger);
 [A8, b8, nCon8, descr8, eq8] = con.getCon8(Sim,Var);
 [A9, b9, nCon9, descr9, eq9] = con.getCon9(Sim,Var);
 [A10, b10, nCon10, descr10, eq10] = con.getCon10(Sim,Var);
+[A11, b11, nCon11, descr11, eq11] = con.getCon11(Sim,Var);
 obj1 = con.getObj1(Sim, Var);
 obj2 = con.getObj2(Sim, Var);
 
 % concatenate each constraint
-A = [A1; A2; A3; A4; A5; A6; A7; A8; A9; A10];
-b = [b1; b2; b3; b4; b5; b6; b7; b8; b9; b10];
-nCon = nCon1 + nCon2 + nCon3 + nCon4 + nCon5 + nCon6 + nCon7 + nCon8 + nCon9 + nCon10;
-eq = [eq1; eq2; eq3; eq4; eq5; eq6; eq7; eq8; eq9; eq10];
+Ain = [A1; A3; A7; A8; A10];
+bin = [b1; b3; b7; b8; b10];
+Aeq = [A2; A4; A5; A6; A9; A11];
+beq = [b2; b4; b5; b6; b9; b11];
+A = [Ain; Aeq];
+b = [bin; beq];
+nCon = nCon1 + nCon2 + nCon3 + nCon4 + nCon5 + nCon6 + nCon7 + nCon8 + nCon9 + nCon10 + nCon11;
+eq = [eq1; eq2; eq3; eq4; eq5; eq6; eq7; eq8; eq9; eq10; eq11];
 
 % double check dimensions
 assert(size(A,1) == nCon);
 assert(numel(b) == nCon);
 assert(size(A,2) == Var.nVar);
+obj = obj1*5 + obj2;
 
+if useGurobi
 % form gurobi model
 model.vtype = repmat('C',[Var.nVar,1]);
 model.A = A;
 model.rhs = b;
 model.sense = eq;
-model.obj = obj1 + obj2;
+model.obj = obj;
 
 % solve model
-sol = gurobi(model,struct('DualReductions',0,'iisRequest',1));
+sol = gurobi(model);...,struct('DualReductions',0,'iisRequest',1));
+else
+    sol = struct();
+    tic;
+    sol.x = linprog(obj,Ain,bin,Aeq,beq);
+    t = toc
+end
 
+% extract charge schedules
+schedule = reshape(sol.x(Var.b),[Sim.nBus,Sim.nTime]);
+figure; imagesc(schedule);
 
+for iBus = 1:Sim.nBus
+    subplot(Sim.nBus,1,iBus); hold on; 
+    plot(sol.x(Var.h(iBus,:)));
+    plot(sol.x(Var.b(iBus,:)));    legend('SOC','Power');
+end
 
+figure; plot(sol.x(Var.p15)); hold on; 
+plot(Sim.u); plot(sol.x(Var.pc)); 
+yline(sol.x(Var.demand),'red'); yline(sol.x(Var.facilities),'green'); 
+legend('total power','uncontrolled','charger','demand','facilities');

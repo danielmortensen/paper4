@@ -7,17 +7,22 @@ or
 \begin{equation}
 	p_t(j) - p_c(j) - u(j) = 0 \ \forall j.
 \end{equation}
-Note that the rate schedule requires both the maximum overall average power, denoted $p_{\text{facilities}}$, and the maximum average power during on-peak hours, or $p_{\text{demand}}$. Let $\mathcal{S}_{\text{on}}$ be the set of time indices belonging to on-peak hours, and recall that the max over all average power values is greater than or equal to $p_t(j)$ for all $j$. We can express this constraint as
+\par The next step is to compute the fifteen minute average power use for each time step, denoted $p_{\text{15}}$. We do this by letting 
 \begin{equation*}
-	p_{\text{facilities}} \ge p_t(j) \ \forall j
+p_{\text{15}}(j) = \frac{1}{n}\sum_{l \in \{j_{15}\}}p_t(l)
+\end{equation*}
+where $\{j_{15}\}$ is the set of all indices 15 minutes prior to $j$ and $n$ is the cardinality of $\{j_{15}\}$.
+Next, note that the rate schedule requires both the maximum overall average power, denoted $p_{\text{facilities}}$, and the maximum average power during on-peak hours, or $p_{\text{demand}}$. Let $\mathcal{S}_{\text{on}}$ be the set of time indices belonging to on-peak hours, and recall that the max over all average power values is greater than or equal to $p_{15}(j)$ for all $j$. We can express this constraint is
+\begin{equation*}
+	p_{\text{facilities}} \ge p_{15}(j) \ \forall j
 \end{equation*}
 or alternatively as
 \begin{equation}
-	p_t(j) - p_{\text{facilities}} \le 0 \ \forall j
+	p_{15}(j) - p_{\text{facilities}} \le 0 \ \forall j
 \end{equation}
-Because $p_{\text{facilities}}$ will be used in the objective function, the value for $p_{\text{facilities}}$ will be minimised until it is equal to the largest value in $p_t$. Following a similar logic, we also define a set of constraints for the maximum average on-peak power, $p_{\text{demand}}$ so that
+Because $p_{\text{facilities}}$ will be used in the objective function, the value for $p_{\text{facilities}}$ will be minimised until it is equal to the largest value in $p_{15}$. Following a similar logic, we also define a set of constraints for the maximum average on-peak power, $p_{\text{demand}}$ so that
 \begin{equation}
-	p_t(i) - p_{\text{demand}} \le 0 \ \forall i \in \mathcal{S}_{\text{on}}
+	p_{15}(i) - p_{\text{demand}} \le 0 \ \forall i \in \mathcal{S}_{\text{on}}
 \end{equation}
 The next step in computing the objective function is to compute the total {\it energy} consumed during on and off-peak hours respectively.  Let $e_{\text{on}}$ be the total energy consumed during on-peak hours and $e_{\text{off}}$ be the energy consumed during off-peak hours. We can compute energy as the product of average power and time.  In our case, we compute this as 
 \begin{equation}\begin{aligned}

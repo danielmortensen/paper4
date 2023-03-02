@@ -1,6 +1,6 @@
-function Param = getSimParam(nBus, nCharger)
-% number of time intervals
-Param.nTime = 3600*24/(15*60); 
+function Param = getSimParam(nBus, nCharger, dt)
+% number of time intervals, where dt is given in seconds
+Param.nTime = 3600*24/dt; 
 
 % number of buses
 Param.nBus = nBus;
@@ -15,7 +15,7 @@ Param.pMaxKW = 350;
 Param.hMaxKWH = 450; 
 
 % change in time (seconds) between time indices
-Param.deltaTSec = 15*60; % fifteen minutes in seconds.
+Param.deltaTSec = dt;
 
 % initial state of charge of buses
 Param.eta = ones([1,nBus])*0.8*Param.hMaxKWH; 
@@ -24,7 +24,7 @@ Param.eta = ones([1,nBus])*0.8*Param.hMaxKWH;
 Param.hMin = ones([1,nBus])*0.2*Param.hMaxKWH;
 
 % discharge over routes
-[Param.delta, Param.alpha, Param.tArrive, Param.tDepart] = ...
+[Param.delta, Param.alpha, Param.tArrive, Param.tDepart, Param.sessions] = ...
     getRoutes(nBus, Param.nTime, Param.deltaTSec);
 
 % On-Peak Energy Rate in dollars/kWh
@@ -41,21 +41,27 @@ Param.muPAll = 4.81;
 
 % On-Peak time indices: 3pm - 10pm
 Param.S = false([1,Param.nTime]);
-iStart = 15*3600/(15*60);
-iFinal = 22*3600/(15*60) - 1;
+iStart = floor(15*3600/dt);
+iFinal = ceil(22*3600/dt) - 1;
 Param.S(iStart:iFinal) = true;
 
 % Average power for uncontrolled loads
-Param.u = getUncontrolledLoad();
+Param.u = getUncontrolledLoad(dt);
 end
 
-function uncontrolled = getUncontrolledLoad()
+function uncontrolled = getUncontrolledLoad(dt)
     path = "\\wsl.localhost\Ubuntu\home\dmortensen\paper4\data\TPSS_Cov15.mat";
     data = load(path);
     uncontrolled = data.mu;
+
+    % resample at new rate
+    nInitial = numel(uncontrolled);
+    nDesired = 3600*24/dt;
+    uncontrolled = resample(uncontrolled,nDesired,nInitial);
+    assert(numel(uncontrolled) == nDesired);
 end
 
-function [discharge, alpha, tArrive, tDepart] = getRoutes(nBus, nTime, deltaT)
+function [discharge, alpha, tArrive, tDepart, session] = getRoutes(nBus, nTime, deltaT)
 dirRoutes = "\\wsl.localhost\Ubuntu\home\dmortensen\paper4\data\routesTable.csv";
 routes = readtable(dirRoutes);
 routes = sortrows(routes,'nRoute','descend');
@@ -71,47 +77,45 @@ tDepart = simRoutes(:,2:3:end);
 dSoc = -simRoutes(:,3:3:end);
 
 % convert arrival times to indices + remainders
-iArrival = tArrive/deltaT;
-rArrival = iArrival - floor(iArrival);
-iArrival = floor(iArrival);
+iArrival = floor(tArrive/deltaT);
 
 % convert departure times to indices + remainders
-iDepart = tDepart/deltaT;
-rDepart = iDepart - floor(iDepart);
-iDepart = floor(iDepart);
+iDepart = floor(tDepart/deltaT);
 
 %preallocate alpha values
 alpha = ones([nBus,nTime]);
 discharge = zeros([nBus,nTime]);
+session = cell([nBus,max(nRoute)]);
 for iBus = 1:nBus
     for iRoute = 1:nRoute(iBus) - 1
 
         % define indices and remainders
         ai = iArrival(iBus,iRoute + 1);
-        ar = rArrival(iBus,iRoute + 1);
         di = iDepart(iBus,iRoute);
-        dr = rDepart(iBus,iRoute);
-        if any(isnan([ai,ar,di,dr]))
+        rLen = ai - di;
+        if any(isnan([ai,di])) || rLen == 0
             break;
         end
 
         % compute percentage the bus is available for each index
         dis = dSoc(iBus, iRoute);
-        rLen = (ai + ar) - (di + dr);
         disPerIndex = dis/rLen;
-        if di == ai
-            alpha(iBus,ai) = 1 - (ar - dr);
-            discharge(iBus,ai) = (ar - dr)*disPerIndex;
-        else
-            alpha(iBus,ai) = (1 - ar);
-            discharge(iBus,ai) = ar*disPerIndex;
-            alpha(iBus,di) = dr;
-            discharge(iBus,di) = (1 - dr)*disPerIndex;
-            if ai - di > 2
-                alpha(iBus,di+1:ai-1) = 0;
-                discharge(iBus,di + 1:ai - 1) = disPerIndex;
-            end
-        end        
+        session{iBus,iRoute} = struct("iArrive",iArrival,"iDepart",iDepart);
+        alpha(iBus,di:ai) = 0;
+        discharge(iBus,di:ai) = disPerIndex;
+%         if di == ai
+%             alpha(iBus,ai) = 1 - (ar - dr);
+%             discharge(iBus,ai) = (ar - dr)*disPerIndex;
+%         else
+%             alpha(iBus,ai) = (1 - ar);
+%             discharge(iBus,ai) = ar*disPerIndex;
+%             alpha(iBus,di) = dr;
+%             discharge(iBus,di) = (1 - dr)*disPerIndex;
+%             if ai - di > 2
+%                 alpha(iBus,di+1:ai-1) = 0;
+%                 discharge(iBus,di + 1:ai - 1) = disPerIndex;
+%             end
+%         end        
     end
 end
 end

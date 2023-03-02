@@ -1,6 +1,6 @@
 function [A, b, nCon, descr, eq] = getCon8(Sim, Var)
 % unpack relevent variables
-iPt = Var.pt;
+iP15 = Var.p15;
 iDem = Var.demand;
 isOn = Sim.S;
 nTime = Sim.nTime;
@@ -14,7 +14,7 @@ iCon = 1;
 iConVar = 1;
 for iTime = 1:nTime
     if isOn(iTime)
-        A(iConVar + 0,:) = [iCon + 0, iPt(iTime),  1];
+        A(iConVar + 0,:) = [iCon + 0, iP15(iTime),  1];
         A(iConVar + 1,:) = [iCon + 0, iDem,       -1];       
         b(iCon + 0) = 0;
         iConVar = iConVar + 2;

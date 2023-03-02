@@ -1,7 +1,8 @@
-function Param = getVarParam(nBus)
+function Param = getVarParam(P)
 
 % The number of 15-minute time periods in a day.
-nTime = 3600*24/(15*60);
+nTime = P.nTime;
+nBus = P.nBus;
 sVar = 1;
 
 % the number of variables for average power
@@ -17,6 +18,11 @@ sVar = fVar + 1;
 % the number of variables for total charger power use
 fVar = sVar + nTime - 1;
 Param.pc = sVar:fVar;
+sVar = fVar + 1;
+
+% variable indices for 15-minute average power values
+fVar = sVar + nTime - 1;
+Param.p15 = sVar:fVar;
 sVar = fVar + 1;
 
 % variables for slack 'g' term to be used for absolute value expression
