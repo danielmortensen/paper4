@@ -40,6 +40,8 @@
 	\multicolumn{6}{l}{Charge Schedules}  \\[-9pt] \myendline
 	$a(i,r)$ & The beginning of the allowable charge interval for bus $i$'s $r^{\text{th}}$ charge session. & $\mathbb{R}_+$ & $b(i,r)$ & The commanded start time for bus $i$'s $r^{\text{th}}$ charge session& $\mathbb{N}$\\ \myendline
 	$f(i,r)$ & The commanded end time for bus $i$'s $r^{\text{th}}$ charge session. & $\mathbb{R}_+$ & $d(i,r)$ & The end time of the allowable charge interval for bus $i$'s $r^{\text{th}}$ charge session. & $\mathbb{R}_+$ \\\myendline
+	$\sigma(i,r,k)$& A selector variable which is one when bus $i$ charges at charger $k$ for session $r$. & $\{0,1\}$ & $M$ & The number of seconds in a day & $\mathbb{Z}_+$ \\ \myendline
+	$l_{(i,r),(i',r')}$ & A selector variable which is one when bus $i$ charges before bus $i'$ during the $r$ and $r'$ sessions respectively. & \scalebox{0.8}{$(i,r) \times (i',r')$} & & & \\ \myendline
 	%
 \end{supertabular}
 \twocolumn

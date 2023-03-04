@@ -24,7 +24,7 @@ Param.eta = ones([1,nBus])*0.8*Param.hMaxKWH;
 Param.hMin = ones([1,nBus])*0.2*Param.hMaxKWH;
 
 % discharge over routes
-[Param.delta, Param.alpha, Param.tArrive, Param.tDepart, Param.sessions] = ...
+[Param.delta, Param.alpha, Param.tArrive, Param.tDepart, Param.nRoute] = ...
     getRoutes(nBus, Param.nTime, Param.deltaTSec);
 
 % On-Peak Energy Rate in dollars/kWh
@@ -61,7 +61,7 @@ function uncontrolled = getUncontrolledLoad(dt)
     assert(numel(uncontrolled) == nDesired);
 end
 
-function [discharge, alpha, tArrive, tDepart, session] = getRoutes(nBus, nTime, deltaT)
+function [discharge, alpha, tArrive, tDepart, nRoute] = getRoutes(nBus, nTime, deltaT)
 dirRoutes = "\\wsl.localhost\Ubuntu\home\dmortensen\paper4\data\routesTable.csv";
 routes = readtable(dirRoutes);
 routes = sortrows(routes,'nRoute','descend');
@@ -77,7 +77,7 @@ tDepart = simRoutes(:,2:3:end);
 dSoc = -simRoutes(:,3:3:end);
 
 % convert arrival times to indices + remainders
-iArrival = floor(tArrive/deltaT);
+iArrival = ceil(tArrive/deltaT);
 
 % convert departure times to indices + remainders
 iDepart = floor(tDepart/deltaT);
@@ -85,7 +85,6 @@ iDepart = floor(tDepart/deltaT);
 %preallocate alpha values
 alpha = ones([nBus,nTime]);
 discharge = zeros([nBus,nTime]);
-session = cell([nBus,max(nRoute)]);
 for iBus = 1:nBus
     for iRoute = 1:nRoute(iBus) - 1
 
@@ -100,22 +99,8 @@ for iBus = 1:nBus
         % compute percentage the bus is available for each index
         dis = dSoc(iBus, iRoute);
         disPerIndex = dis/rLen;
-        session{iBus,iRoute} = struct("iArrive",iArrival,"iDepart",iDepart);
         alpha(iBus,di:ai) = 0;
         discharge(iBus,di:ai) = disPerIndex;
-%         if di == ai
-%             alpha(iBus,ai) = 1 - (ar - dr);
-%             discharge(iBus,ai) = (ar - dr)*disPerIndex;
-%         else
-%             alpha(iBus,ai) = (1 - ar);
-%             discharge(iBus,ai) = ar*disPerIndex;
-%             alpha(iBus,di) = dr;
-%             discharge(iBus,di) = (1 - dr)*disPerIndex;
-%             if ai - di > 2
-%                 alpha(iBus,di+1:ai-1) = 0;
-%                 discharge(iBus,di + 1:ai - 1) = disPerIndex;
-%             end
-%         end        
     end
 end
 end
