@@ -1,6 +1,6 @@
 nBus = 55; nCharger = 5; dt = 1*60; % one minute intervals
-useGurobi = true; makePlots = false; computePrimary = false;
-
+useGurobi = true; makePlots = false; computePrimary = true;
+tic; 
 if computePrimary
     Sim = util.getSimParam(nBus, nCharger, dt);
     Var = util.getVarParam(Sim);
@@ -70,6 +70,27 @@ if computePrimary
     end
 end
 
+Sim2 = util2.getSimParam(Sim, Var, sol.x);
+Var2 = util2.getVarParam(Sim2);
+[A1, b1, nCon1, descr1, eq1] = con2.getCon1(Sim2,Var2);
+[A2, b2, nCon2, descr2, eq2] = con2.getCon2(Sim2,Var2);
+[A3, b3, nCon3, descr3, eq3] = con2.getCon3(Sim2,Var2);
+[A4, b4, nCon4, descr4, eq4] = con2.getCon4(Sim2,Var2);
+obj = con2.getObj(Sim2,Var2);
+
+A = [A1; A2; A3; A4];
+b = [b1; b2; b3; b4];
+eq = [eq1; eq2; eq3; eq4];
+vtype = [Var2.bType; Var2.fType; Var2.lType; Var2.sigmaType];
+model.A = A;
+model.rhs = b;
+model.sense = eq;
+model.obj = obj;
+model.vtype = vtype;
+sol = gurobi(model);
+time = toc
+
+if 0
 % extract to sessions
 sessions = nan([sum(Sim.nRoute),6]);
 iSession = 1;
@@ -149,6 +170,7 @@ for iSession = 1:size(sessions,1)
     end
     chargerQueue(queuePosIdx(bestCharger),bestCharger,:) = session;
     queuePosIdx(bestCharger) = queuePosIdx(bestCharger) + 1;    
+end
 end
 
 % initialize charger queues
