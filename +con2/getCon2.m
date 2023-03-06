@@ -16,7 +16,7 @@ for  iBus = 1:Sim.nBus
             A(iConstVal + 0,:) = [iConst + 0, iSigma(iBus,iRoute,iCharger),1];
             iConstVal = iConstVal + 1;            
         end
-        b(iConst) = 0;
+        b(iConst) = 1;
         iConst = iConst + 1;        
     end
 end

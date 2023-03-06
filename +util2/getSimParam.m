@@ -6,16 +6,25 @@ tStart = nan([Sim.nBus,max(Sim.nRoute)]);
 tFinal = nan([Sim.nBus,max(Sim.nRoute)]);
 mWidth = nan([Sim.nBus,max(Sim.nRoute)]);
 for iBus = 1:Sim.nBus
+    counter = 1;
     for iRoute = 1:Sim.nRoute(iBus)
-        charge = x(Var.b(iBus,iArrive:iDepart));
+        charge = x(Var.b(iBus,iArrive(iBus,iRoute):iDepart(iBus,iRoute)));
         iCharge = charge ~= 0;
-        iStart = find(iCharge, 1, 'first');
-        iFinal = find(iCharge, 1, 'last');
-        energy = sum(charge)*Sim.deltaTSec/3600;
-        tStart(iBus,iRoute) = (iStart - 1)*Sim.deltaTSec;
-        tFinal(iBus,iRoute) = (iFinal - 1)*Sim.deltaTSec;
-        mWidth(iBus,iRoute) = energy/Sim.pMaxKW*3600;
+        iStart = find(iCharge, 1, 'first') + iArrive(iBus,iRoute) - 1;
+        iFinal = find(iCharge, 1, 'last') + iArrive(iBus,iRoute) - 1;
+        if ~isempty(iStart)
+            energy = sum(charge)*Sim.deltaTSec/3600;
+            tStart(iBus,counter) = (iStart - 1)*Sim.deltaTSec;
+            tFinal(iBus,counter) = (iFinal - 1)*Sim.deltaTSec;
+            mWidth(iBus,counter) = energy/Sim.pMaxKW*3600;
+            iArrive(iBus,counter) = iArrive(iBus,iRoute);
+            iDepart(iBus,counter) = iDepart(iBus,iRoute);
+            counter = counter + 1;
+        end
     end
+    Sim.nRoute(iBus) = counter - 1;
+    iArrive(iBus,counter:end) = nan;
+    iDepart(iBus,counter:end) = nan;
 end
 
 % identify which routes may conflict

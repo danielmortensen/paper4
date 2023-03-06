@@ -1,7 +1,9 @@
-nBus = 55; nCharger = 5; dt = 1*60; % one minute intervals
-useGurobi = true; makePlots = false; computePrimary = true;
+nBus = 20; nCharger = 5; dt = 1*60; % one minute intervals
+useGurobi = true; makePlots = false; computePrimary = true; computeSecondary = true;
+useQuadraticLoss = true; nBusPerBatch = 20; nChargerPerBatch = 5;
 tic; 
 if computePrimary
+    clear('model');
     Sim = util.getSimParam(nBus, nCharger, dt);
     Var = util.getVarParam(Sim);
     Sim.u = Sim.u*5;
@@ -70,25 +72,57 @@ if computePrimary
     end
 end
 
-Sim2 = util2.getSimParam(Sim, Var, sol.x);
-Var2 = util2.getVarParam(Sim2);
-[A1, b1, nCon1, descr1, eq1] = con2.getCon1(Sim2,Var2);
-[A2, b2, nCon2, descr2, eq2] = con2.getCon2(Sim2,Var2);
-[A3, b3, nCon3, descr3, eq3] = con2.getCon3(Sim2,Var2);
-[A4, b4, nCon4, descr4, eq4] = con2.getCon4(Sim2,Var2);
-obj = con2.getObj(Sim2,Var2);
+if computeSecondary
+    clear('model');
+    Sim2 = util2.getSimParam(Sim, Var, sol.x);
+    Var2 = util2.getVarParam(Sim2);
+    [A1, b1, nCon1, descr1, eq1] = con2.getCon1(Sim2,Var2);
+    [A2, b2, nCon2, descr2, eq2] = con2.getCon2(Sim2,Var2);
+    [A3, b3, nCon3, descr3, eq3] = con2.getCon3(Sim2,Var2);
+    [A4, b4, nCon4, descr4, eq4] = con2.getCon4(Sim2,Var2);
 
-A = [A1; A2; A3; A4];
-b = [b1; b2; b3; b4];
-eq = [eq1; eq2; eq3; eq4];
-vtype = [Var2.bType; Var2.fType; Var2.lType; Var2.sigmaType];
-model.A = A;
-model.rhs = b;
-model.sense = eq;
-model.obj = obj;
-model.vtype = vtype;
-sol = gurobi(model);
-time = toc
+    A = [A1; A2; A3; A4];
+    b = [b1; b2; b3; b4];
+    eq = [eq1; eq2; eq3; eq4];
+    vtype = [Var2.bType; Var2.fType; Var2.lType; Var2.sigmaType];
+    model.A = A;
+    model.rhs = b;
+    model.sense = eq;
+    model.vtype = vtype;
+    if useQuadraticLoss
+        [Q, obj] = con2.getObj(Sim2,Var2);
+        model.obj = obj;
+        model.Q = Q;
+    else
+        obj = con2.getObj2(Sim2,Var2);
+        model.obj = obj;
+    end
+    sol = gurobi(model,struct('MIPGap',0.2));
+    time = toc
+end
+
+busPower = zeros([nBus,Sim.nTime]);
+for iBus =1:Sim2.nBus
+    for iRoute = 1:Sim2.nRoute(iBus)
+        e = Sim2.mWidth(iBus,iRoute)*Sim.pMaxKW/3600;
+        tStart = sol.x(Var2.b(iBus,iRoute));
+        tFinal = sol.x(Var2.f(iBus,iRoute));
+        p = e/((tFinal - tStart)/3600);
+        is = floor(tStart/Sim.deltaTSec);
+        rs = (tStart - is*Sim.deltaTSec)/Sim.deltaTSec;
+        ifin = floor(tFinal/Sim.deltaTSec);
+        rfin = (tFinal - ifin*Sim.deltaTSec)/Sim.deltaTSec;
+        if is == ifin
+            busPower(iBus,is + 1) = busPower(iBus,is + 1) + (rfin - rs)*p;
+        else
+            busPower(iBus,is + 1) = busPower(iBus,is + 1) + (1 - rs)*p;
+            busPower(iBus,ifin + 1) = busPower(iBus,ifin + 1) + rfin*p;
+            busPower(iBus,is + 2:ifin) = busPower(iBus,is + 2:ifin) + p;
+        end
+    end
+end
+
+
 
 if 0
 % extract to sessions
