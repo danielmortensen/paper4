@@ -1,23 +1,18 @@
-function Params = getAllSimParam(Sim, Var, x, nBusPerBatch, nChargePerBatch)
-% determine number of buses in each group
-nMinBus = floor(nBusPerBatch/2);
-div = Sim.nBus/nBusPerBatch;
-nGroup = ceil(div);
-nBusPerGroup = repmat(nBusPerBatch,nGroup);
-nChargePerGroup = repmat(nChargePerBatch,nGroup);
-r = (div - floor(div))*nBusPerBatch;
-if r < nMinBus
-    nBusPerGroup(end) = r + nMinBus;    
-    nBusPerGroup(end-1) = nBusPerGroup(end-1) - nMinBus;
+function Params = getAllSimParam(Sim, Var, x, groups)
+% determine number of buses and chargers in each group
 
-    nChargeRemain = Sim.nCharger - sum(nChargePerGroup(1:end-2));
-    nChargePerGroup(end-1) = floor(nChargeRemain/2);
-    nChargePerGroup(end) = Sim.nCharger - sum(nChargePerGroup(1:end-1));
-else
-    nBusPerGroup(end) = r;
-    nChargePerGroup(end) = Sim.nCharger - sum(nChargePerGroup(1:end-1));
+% compute parameters for each group
+Params = cell([groups.nGroup,1]);
+for iGroup = 1:groups.nGroup
+    subsim.busId = find(groups.groupId == iGroup); ...busId(counter:counter + nBus(iGroup) - 1);
+    subsim.nBus = numel(subsim.busId);
+    subsim.nCharger = groups.nCharger(iGroup);
+    subsim.deltaTSec = Sim.deltaTSec;
+    subsim.nRoute = Sim.nRoute(subsim.busId);
+    subsim.tDepart = Sim.tDepart(subsim.busId,:);
+    subsim.tArrive = Sim.tArrive(subsim.busId,:);
+    subsim.pMaxKW = Sim.pMaxKW;
+    Params{iGroup} = util2.getSimParam(subsim,Var,x);
+    Params{iGroup}.busId = subsim.busId;
 end
-busCounter = 1;
-allParam = cell([nGroup,1]);
-
 end

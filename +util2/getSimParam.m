@@ -6,9 +6,10 @@ tStart = nan([Sim.nBus,max(Sim.nRoute)]);
 tFinal = nan([Sim.nBus,max(Sim.nRoute)]);
 mWidth = nan([Sim.nBus,max(Sim.nRoute)]);
 for iBus = 1:Sim.nBus
-    counter = 1;
+    counter = 1;    
+    busId = Sim.busId(iBus);
     for iRoute = 1:Sim.nRoute(iBus)
-        charge = x(Var.b(iBus,iArrive(iBus,iRoute):iDepart(iBus,iRoute)));
+        charge = x(Var.b(busId,iArrive(iBus,iRoute):iDepart(iBus,iRoute)));
         iCharge = charge ~= 0;
         iStart = find(iCharge, 1, 'first') + iArrive(iBus,iRoute) - 1;
         iFinal = find(iCharge, 1, 'last') + iArrive(iBus,iRoute) - 1;

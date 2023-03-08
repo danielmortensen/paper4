@@ -52,7 +52,7 @@ assert(max(A(:,1)) == nConst);
 assert(numel(b) == nConst);
 
 
-descr = "minimum charge window width";
+descr = "resolve conflict";
 eq = repmat('<',[nConst,1]);
 A = sparse(A(:,1), A(:,2), A(:,3), nConst, Var.nVar);
 end

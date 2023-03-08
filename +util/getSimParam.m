@@ -10,6 +10,7 @@ Param.nCharger = nCharger;
 
 % maximum charge rate in kW
 Param.pMaxKW = 350; 
+Param.pMaxDelta = 20; % always leave a little room :)
 
 % maximum battery capacity in kWh
 Param.hMaxKWH = 450; 

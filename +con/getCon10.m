@@ -29,6 +29,6 @@ end
 assert(~any(isnan(A(:))));
 assert(~any(isnan(b)));
 assert(max(A(:,1)) == nCon);
-descr = "constraint to propagate soc values from one time to another";
+descr = "compute absolute value of difference between adjacent charge values";
 eq = repmat('<',[nCon,1]);
 A = sparse(A(:,1), A(:,2), A(:,3), nCon, Var.nVar);

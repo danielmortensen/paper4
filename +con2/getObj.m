@@ -7,6 +7,7 @@ function [A, obj] = getObj(Sim, Var)
 % obj(iB) = 1;
 % obj(iF) = -1;
 A = nan([2*sum(Sim.nRoute,'omitnan'),3]);
+nAllRoute = sum(Sim.nRoute);
 obj = zeros([Var.nVar,1]);
 counter = 1;
 for iBus = 1:Sim.nBus

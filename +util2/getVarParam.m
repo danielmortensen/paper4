@@ -74,5 +74,10 @@ for iBus = 1:nBus
     end
 end
 Param.sigmaType = repmat('B',[nAllRoute*nCharger,1]);
+sVar = fVar + 1;
+
+% assign total number of variables
 Param.nVar = fVar;
+
+
 end
