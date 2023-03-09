@@ -1,4 +1,4 @@
-nBus = 60; nCharger = 60; dt = 1*60; % one minute intervals
+nBus = 60; nCharger = 4; dt = 1*60; % one minute intervals
 useGurobi = true; makePlots = false; computePrimary = true; computeSecondary = true;
 useQuadraticLoss = true; nGroup = 2;
 tic; 
@@ -73,7 +73,7 @@ if computePrimary
         legend('total power','uncontrolled','charger','demand','facilities');
     end
     groups = computeGroups(Sim1, Var, Sol1.x, nGroup);
-    fprintf("Finished second problem\n");
+    fprintf("Finished group separation problem\n");
 
 end
 
@@ -107,7 +107,8 @@ if computeSecondary
             obj = con2.getObj2(Sim2,Var2);
             model.obj = obj;
         end
-        Sols2{iSim} = gurobi(model,struct('MIPGap',0.2,'OutputFlag',0,'DualReductions',0)); ...,'DualReductions',0));
+        fprintf('beginning sub-problem %i of %i\n',iSim,numel(Sims2));
+        Sols2{iSim} = gurobi(model,struct('MIPGap',0.02,'OutputFlag',0,'DualReductions',0)); ...,'DualReductions',0));
         Vars2{iSim} = Var2;
         if Sols2{iSim}.status == "INFEASIBLE"
             fprintf("MODEL WAS INFEASIBLE, DO NOT PASS GO, DO NOT COLLECT 200 DOLLARS\n");
@@ -115,7 +116,6 @@ if computeSecondary
         end
         fprintf("completed sub-problem %i of %i\n",iSim,numel(Sims2));
     end
-    time = toc
 end
 
 
@@ -136,7 +136,10 @@ model.sense = eq;
 model.vtype = vtype;
 model.obj = obj3;
 model.Q = Q3;
-sol3 = gurobi(model,struct('MIPGap',0.02,'DualReductions',0));...,'OutputFlag',0,'DualReductions',0)); ...,'DualReductions',0));
+fprintf('begin variable charge problem\n');
+sol3 = gurobi(model,struct('MIPGap',0.02,'OutputFlag',0));...,'OutputFlag',0,'DualReductions',0)); 
+fprintf('Finished variable charge problem\n');
+time = toc;
 
 % compute results
 plan.schedule = reshape(sol3.x(Var3.schedule),[Sim3.nBus,Sim3.nTime]);
@@ -148,6 +151,10 @@ opt = computeResults(opt, Sim1);
 percentIncrease = (plan.cost - opt.cost)/opt.cost*100;
 fprintf("Time: %0.2f, plan cost: %0.2f, opt cost: %0.2f, percent increase: %0.2f\n",time,plan.cost,opt.cost,percentIncrease);
 
+% make plots
+figure; plot(plan.avgPower); hold on; plot(opt.avgPower); legend('plan','optimal');
+xline(15*3600/Sim1.deltaTSec);
+xline(22*3500/Sim1.deltaTSec);
 
 % compute power for all buses with uncontrolled loads
 % allBusPower = zeros([1,Sim1.nTime]);
@@ -271,7 +278,7 @@ model.obj = obj;
 % solve problem
 fprintf("solving group separation problem\n");
 sol = gurobi(model,struct('OutputFlag',0,'MIPGap',0.55)); ...struct('MIPGap',0.3));
-fprintf("finished group separation problelm\n");
+fprintf("finished group separation problem\n");
 % % create feasiable solution
 % feasSol = zeros([Var2.nVar,1]);
 % 
