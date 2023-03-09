@@ -1,26 +1,26 @@
-nBus = 60; nCharger = 4; dt = 1*60; % one minute intervals
+nBus = 80; nCharger = 6; dt = 1*60; % one minute intervals
 useGurobi = true; makePlots = false; computePrimary = true; computeSecondary = true;
 useQuadraticLoss = true; nGroup = 2;
 tic; 
 if computePrimary
     clear('model');
     Sim1 = util.getSimParam(nBus, nCharger, dt);
-    Var = util.getVarParam(Sim1);
+    Var1 = util.getVarParam(Sim1);
     Sim1.u = Sim1.u*5;
-    [A1, b1, nCon1, descr1, eq1] = con.getCon1(Sim1,Var);
-    [A2, b2, nCon2, descr2, eq2] = con.getCon2(Sim1,Var);
-    [A3, b3, nCon3, descr3, eq3] = con.getCon3(Sim1,Var);
-    [A4, b4, nCon4, descr4, eq4] = con.getCon4(Sim1,Var);
-    [A5, b5, nCon5, descr5, eq5] = con.getCon5(Sim1,Var);
-    [A6, b6, nCon6, descr6, eq6] = con.getCon6(Sim1,Var);
-    [A7, b7, nCon7, descr7, eq7] = con.getCon7(Sim1,Var);
-    [A8, b8, nCon8, descr8, eq8] = con.getCon8(Sim1,Var);
-    [A9, b9, nCon9, descr9, eq9] = con.getCon9(Sim1,Var);
-    [A10, b10, nCon10, descr10, eq10] = con.getCon10(Sim1,Var);
-    [A11, b11, nCon11, descr11, eq11] = con.getCon11(Sim1,Var);
-    [A12, b12, nCon12, descr12, eq12] = con.getCon12(Sim1,Var);
-    obj1 = con.getObj1(Sim1, Var);
-    obj2 = con.getObj2(Sim1, Var);
+    [A1, b1, nCon1, descr1, eq1] = con.getCon1(Sim1,Var1);
+    [A2, b2, nCon2, descr2, eq2] = con.getCon2(Sim1,Var1);
+    [A3, b3, nCon3, descr3, eq3] = con.getCon3(Sim1,Var1);
+    [A4, b4, nCon4, descr4, eq4] = con.getCon4(Sim1,Var1);
+    [A5, b5, nCon5, descr5, eq5] = con.getCon5(Sim1,Var1);
+    [A6, b6, nCon6, descr6, eq6] = con.getCon6(Sim1,Var1);
+    [A7, b7, nCon7, descr7, eq7] = con.getCon7(Sim1,Var1);
+    [A8, b8, nCon8, descr8, eq8] = con.getCon8(Sim1,Var1);
+    [A9, b9, nCon9, descr9, eq9] = con.getCon9(Sim1,Var1);
+    [A10, b10, nCon10, descr10, eq10] = con.getCon10(Sim1,Var1);
+    [A11, b11, nCon11, descr11, eq11] = con.getCon11(Sim1,Var1);
+    [A12, b12, nCon12, descr12, eq12] = con.getCon12(Sim1,Var1);
+    obj1 = con.getObj1(Sim1, Var1);
+    obj2 = con.getObj2(Sim1, Var1);
 
     % concatenate each constraint
     Ain = [A1; A3; A7; A8; A10; A12];
@@ -35,12 +35,12 @@ if computePrimary
     % double check dimensions
     assert(size(A,1) == nCon);
     assert(numel(b) == nCon);
-    assert(size(A,2) == Var.nVar);
+    assert(size(A,2) == Var1.nVar);
     obj = obj1*5 + obj2;
 
     if useGurobi
         % form gurobi model
-        model.vtype = repmat('C',[Var.nVar,1]);
+        model.vtype = repmat('C',[Var1.nVar,1]);
         model.A = A;
         model.rhs = b;
         model.sense = eq;
@@ -58,28 +58,28 @@ if computePrimary
     optimalCost = Sol1.x'*obj2;
     if makePlots
         % extract charge schedules
-        schedule = reshape(Sol1.x(Var.b),[Sim1.nBus,Sim1.nTime]);
+        schedule = reshape(Sol1.x(Var1.b),[Sim1.nBus,Sim1.nTime]);
         figure; imagesc(schedule);
 
         for iBus = 1:Sim1.nBus
             subplot(Sim1.nBus,1,iBus); hold on;
-            plot(Sol1.x(Var.h(iBus,:)));
-            plot(Sol1.x(Var.b(iBus,:)));    legend('SOC','Power');
+            plot(Sol1.x(Var1.h(iBus,:)));
+            plot(Sol1.x(Var1.b(iBus,:)));    legend('SOC','Power');
         end
 
-        figure; plot(Sol1.x(Var.p15)); hold on;
-        plot(Sim1.u); plot(Sol1.x(Var.pc));
-        yline(Sol1.x(Var.demand),'red'); yline(Sol1.x(Var.facilities),'green');
+        figure; plot(Sol1.x(Var1.p15)); hold on;
+        plot(Sim1.u); plot(Sol1.x(Var1.pc));
+        yline(Sol1.x(Var1.demand),'red'); yline(Sol1.x(Var1.facilities),'green');
         legend('total power','uncontrolled','charger','demand','facilities');
     end
-    groups = computeGroups(Sim1, Var, Sol1.x, nGroup);
+    groups = computeGroups(Sim1, Var1, Sol1.x, nGroup);
     fprintf("Finished group separation problem\n");
 
 end
 
 if computeSecondary
     clear('model');
-    Sims2 = util2.getAllSimParam(Sim1,Var,Sol1.x, groups);
+    Sims2 = util2.getAllSimParam(Sim1,Var1,Sol1.x, groups);
     Sols2 = cell([numel(Sims2),1]);
     Vars2 = cell([numel(Sims2),1]);
     for iSim = 1:numel(Sims2)
