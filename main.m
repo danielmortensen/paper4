@@ -1,26 +1,26 @@
-nBus = 60; nCharger = 4; dt = 1*60; % one minute intervals
-useGurobi = true; makePlots = false; computePrimary = false; computeSecondary = false;
+nBus = 60; nCharger = 60; dt = 1*60; % one minute intervals
+useGurobi = true; makePlots = false; computePrimary = true; computeSecondary = true;
 useQuadraticLoss = true; nGroup = 2;
 tic; 
 if computePrimary
     clear('model');
-    Sim = util.getSimParam(nBus, nCharger, dt);
-    Var = util.getVarParam(Sim);
-    Sim.u = Sim.u*5;
-    [A1, b1, nCon1, descr1, eq1] = con.getCon1(Sim,Var);
-    [A2, b2, nCon2, descr2, eq2] = con.getCon2(Sim,Var);
-    [A3, b3, nCon3, descr3, eq3] = con.getCon3(Sim,Var);
-    [A4, b4, nCon4, descr4, eq4] = con.getCon4(Sim,Var);
-    [A5, b5, nCon5, descr5, eq5] = con.getCon5(Sim,Var);
-    [A6, b6, nCon6, descr6, eq6] = con.getCon6(Sim,Var);
-    [A7, b7, nCon7, descr7, eq7] = con.getCon7(Sim,Var);
-    [A8, b8, nCon8, descr8, eq8] = con.getCon8(Sim,Var);
-    [A9, b9, nCon9, descr9, eq9] = con.getCon9(Sim,Var);
-    [A10, b10, nCon10, descr10, eq10] = con.getCon10(Sim,Var);
-    [A11, b11, nCon11, descr11, eq11] = con.getCon11(Sim,Var);
-    [A12, b12, nCon12, descr12, eq12] = con.getCon12(Sim,Var);
-    obj1 = con.getObj1(Sim, Var);
-    obj2 = con.getObj2(Sim, Var);
+    Sim1 = util.getSimParam(nBus, nCharger, dt);
+    Var = util.getVarParam(Sim1);
+    Sim1.u = Sim1.u*5;
+    [A1, b1, nCon1, descr1, eq1] = con.getCon1(Sim1,Var);
+    [A2, b2, nCon2, descr2, eq2] = con.getCon2(Sim1,Var);
+    [A3, b3, nCon3, descr3, eq3] = con.getCon3(Sim1,Var);
+    [A4, b4, nCon4, descr4, eq4] = con.getCon4(Sim1,Var);
+    [A5, b5, nCon5, descr5, eq5] = con.getCon5(Sim1,Var);
+    [A6, b6, nCon6, descr6, eq6] = con.getCon6(Sim1,Var);
+    [A7, b7, nCon7, descr7, eq7] = con.getCon7(Sim1,Var);
+    [A8, b8, nCon8, descr8, eq8] = con.getCon8(Sim1,Var);
+    [A9, b9, nCon9, descr9, eq9] = con.getCon9(Sim1,Var);
+    [A10, b10, nCon10, descr10, eq10] = con.getCon10(Sim1,Var);
+    [A11, b11, nCon11, descr11, eq11] = con.getCon11(Sim1,Var);
+    [A12, b12, nCon12, descr12, eq12] = con.getCon12(Sim1,Var);
+    obj1 = con.getObj1(Sim1, Var);
+    obj2 = con.getObj2(Sim1, Var);
 
     % concatenate each constraint
     Ain = [A1; A3; A7; A8; A10; A12];
@@ -47,43 +47,43 @@ if computePrimary
         model.obj = obj;
 
         % solve model
-        sol = gurobi(model, struct('OutputFlag',0));...,struct('DualReductions',0,'iisRequest',1));
+        Sol1 = gurobi(model, struct('OutputFlag',0));...,struct('DualReductions',0,'iisRequest',1));
         fprintf("Finished first problem\n");
     else
-        sol = struct();
+        Sol1 = struct();
         tic;
-        sol.x = linprog(obj,Ain,bin,Aeq,beq);
+        Sol1.x = linprog(obj,Ain,bin,Aeq,beq);
         t = toc
     end
-    optimalCost = sol.x'*obj2;
+    optimalCost = Sol1.x'*obj2;
     if makePlots
         % extract charge schedules
-        schedule = reshape(sol.x(Var.b),[Sim.nBus,Sim.nTime]);
+        schedule = reshape(Sol1.x(Var.b),[Sim1.nBus,Sim1.nTime]);
         figure; imagesc(schedule);
 
-        for iBus = 1:Sim.nBus
-            subplot(Sim.nBus,1,iBus); hold on;
-            plot(sol.x(Var.h(iBus,:)));
-            plot(sol.x(Var.b(iBus,:)));    legend('SOC','Power');
+        for iBus = 1:Sim1.nBus
+            subplot(Sim1.nBus,1,iBus); hold on;
+            plot(Sol1.x(Var.h(iBus,:)));
+            plot(Sol1.x(Var.b(iBus,:)));    legend('SOC','Power');
         end
 
-        figure; plot(sol.x(Var.p15)); hold on;
-        plot(Sim.u); plot(sol.x(Var.pc));
-        yline(sol.x(Var.demand),'red'); yline(sol.x(Var.facilities),'green');
+        figure; plot(Sol1.x(Var.p15)); hold on;
+        plot(Sim1.u); plot(Sol1.x(Var.pc));
+        yline(Sol1.x(Var.demand),'red'); yline(Sol1.x(Var.facilities),'green');
         legend('total power','uncontrolled','charger','demand','facilities');
     end
-    groups = computeGroups(Sim, Var, sol.x, nGroup);
+    groups = computeGroups(Sim1, Var, Sol1.x, nGroup);
     fprintf("Finished second problem\n");
 
 end
 
 if computeSecondary
     clear('model');
-    allSim = util2.getAllSimParam(Sim,Var,sol.x, groups);
-    allSol = cell([numel(allSim),1]);
-    allVar = cell([numel(allSim),1]);
-    for iSim = 1:numel(allSim)
-        Sim2 = allSim{iSim};
+    Sims2 = util2.getAllSimParam(Sim1,Var,Sol1.x, groups);
+    Sols2 = cell([numel(Sims2),1]);
+    Vars2 = cell([numel(Sims2),1]);
+    for iSim = 1:numel(Sims2)
+        Sim2 = Sims2{iSim};
         Var2 = util2.getVarParam(Sim2);
 
         [A1, b1, nCon1, descr1, eq1] = con2.getCon1(Sim2,Var2);
@@ -107,36 +107,111 @@ if computeSecondary
             obj = con2.getObj2(Sim2,Var2);
             model.obj = obj;
         end
-        allSol{iSim} = gurobi(model,struct('MIPGap',0.2,'OutputFlag',0,'DualReductions',0)); ...,'DualReductions',0));
-        allVar{iSim} = Var2;
-        if allSol{iSim}.status == "INFEASIBLE"
+        Sols2{iSim} = gurobi(model,struct('MIPGap',0.2,'OutputFlag',0,'DualReductions',0)); ...,'DualReductions',0));
+        Vars2{iSim} = Var2;
+        if Sols2{iSim}.status == "INFEASIBLE"
             fprintf("MODEL WAS INFEASIBLE, DO NOT PASS GO, DO NOT COLLECT 200 DOLLARS\n");
             return;
         end
-        fprintf("completed sub-problem %i of %i\n",iSim,numel(allSim));
+        fprintf("completed sub-problem %i of %i\n",iSim,numel(Sims2));
     end
     time = toc
 end
 
+
+Sim3 = util4.getSimParam(Sim1,Var1,Sol1, Sims2,Vars2,Sols2,groups);
+Var3 = util4.getVarParam(Sim3);
+[A1, b1, nConst1, descr1, eq1] = con4.getCon1(Sim3, Var3);
+[A2, b2, nConst2, descr2, eq2] = con4.getCon2(Sim3, Var3);
+[A3, b3, nConst3, descr3, eq3] = con4.getCon3(Sim3, Var3);
+[Q3, obj3] = con4.getObj(Sim3, Var3);
+
+A = [A1;A2;A3;];
+b = [b1;b2;b3;];
+eq = [eq1;eq2;eq3;];
+vtype = [Var3.scheduletype; Var3.allpowertype];
+model.A = A;
+model.rhs = b;
+model.sense = eq;
+model.vtype = vtype;
+model.obj = obj3;
+model.Q = Q3;
+sol3 = gurobi(model,struct('MIPGap',0.02,'DualReductions',0));...,'OutputFlag',0,'DualReductions',0)); ...,'DualReductions',0));
+
+% compute results
+plan.schedule = reshape(sol3.x(Var3.schedule),[Sim3.nBus,Sim3.nTime]);
+plan.uncontrolled = Sim1.u;
+opt.schedule = reshape(Sol1.x(Var1.b),[Sim1.nBus,Sim1.nTime]);
+opt.uncontrolled = Sim1.u;
+plan = computeResults(plan, Sim1);
+opt = computeResults(opt, Sim1);
+percentIncrease = (plan.cost - opt.cost)/opt.cost*100;
+fprintf("Time: %0.2f, plan cost: %0.2f, opt cost: %0.2f, percent increase: %0.2f\n",time,plan.cost,opt.cost,percentIncrease);
+
+
 % compute power for all buses with uncontrolled loads
-allBusPower = zeros([1,Sim.nTime]);
-for iSol = 1:numel(allSol)
-    p = computeBusPower(allSim{iSol},allVar{iSol}, allSol{iSol}.x, Sim);
-    allBusPower = allBusPower + sum(p,1);
-end
-allPower = allBusPower + Sim.u;
+% allBusPower = zeros([1,Sim1.nTime]);
+% for iSol = 1:numel(Sols2)
+%     p = computeBusPower(Sims2{iSol},Vars2{iSol}, Sols2{iSol}.x, Sim1);
+%     allBusPower = allBusPower + sum(p,1);
+% end
+% allPower = allBusPower + Sim1.u;
+% 
+% % resample to 15-minute average power
+% nPerWindow = (60*15)/Sim1.deltaTSec;
+% avgPower = conv(allPower, ones([1,nPerWindow])/nPerWindow,'same');
+% facilitiesMax = max(avgPower);
+% demandMax = max(avgPower(Sim1.S));
+% offPeakEnergy = sum(allPower(~Sim1.S))*Sim1.deltaTSec/3600;
+% onPeakEnergy = sum(allPower(Sim1.S))*Sim1.deltaTSec/3600;
+% cost = facilitiesMax*Sim1.muPAll + demandMax*Sim1.muPOn + 30*(offPeakEnergy*Sim1.muEOff + onPeakEnergy*Sim1.muEOn);
+% percentIncrease = (cost - optimalCost)/optimalCost*100;
 
-% resample to 15-minute average power
+function plan = computeResults(plan, Sim)
+
+% compute total power
+busPower = squeeze(sum(plan.schedule,1));
+power = busPower + Sim.u;
+
+% compute on and off-peak energy
+eOn = sum(power(Sim.S))*Sim.deltaTSec/3600;
+eOff = sum(power(~Sim.S))*Sim.deltaTSec/3600;
+
+% compute 15-minute average
 nPerWindow = (60*15)/Sim.deltaTSec;
-avgPower = conv(allPower, ones([1,nPerWindow])/nPerWindow,'same');
-facilitiesMax = max(avgPower);
-demandMax = max(avgPower(Sim.S));
-offPeakEnergy = sum(allPower(~Sim.S))*Sim.deltaTSec/3600;
-onPeakEnergy = sum(allPower(Sim.S))*Sim.deltaTSec/3600;
-cost = facilitiesMax*Sim.muPAll + demandMax*Sim.muPOn + 30*(offPeakEnergy*Sim.muEOff + onPeakEnergy*Sim.muEOn);
-percentIncrease = (cost - optimalCost)/optimalCost*100;
+window = ones([1,nPerWindow])/nPerWindow;
+avgPower = conv(power,window,'same');
 
+% compute demand and facilities charges
+mOn = max(avgPower(Sim.S));
+iMOn = find(avgPower == mOn);
+[mAll, iMAll] = max(avgPower);
 
+% compute charges for a 30-day month
+demand = mOn*Sim.muPOn;
+facilities = mAll*Sim.muPAll;
+consumptionOn = eOn*Sim.muEOn*30;
+consumptionOff = eOff*Sim.muEOff*30;
+
+% total cost
+cost = demand + facilities + consumptionOn + consumptionOff;
+
+% package for use
+plan.busPower = busPower;
+plan.allPower = power;
+plan.avgPower = avgPower;
+plan.onPeakEnergy = eOn;
+plan.offPeakEnergy = eOff;
+plan.onPeakMax = mOn;
+plan.onPeakMaxIdx = iMOn;
+plan.allMax = mAll;
+plan.allMaxIdx = iMAll;
+plan.charges.demand = demand;
+plan.charges.facilities = facilities;
+plan.charges.consumptionOn = consumptionOn;
+plan.charges.consumptionOff = consumptionOff;
+plan.cost = cost;
+end
 
 function busPower = computeBusPower(Sim, Var, x, Sim2)
 busPower = zeros([Sim.nBus,Sim2.nTime]);
