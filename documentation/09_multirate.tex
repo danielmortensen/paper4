@@ -1,2 +1,22 @@
 \section{Multi-Rate Charging}
-Discuss final program here
+Up to this point, we have computed the ``optimal'' schedule which assumes any bus can charge without regard to the number of chargers. We then separate buses into groups to reduce the scope of the problem and treat each sub-problem separately while we assign them to specific chargers and determine the final start and stop times for each bus's charge session. \par At this point, Each charge session assumes the same charge rate at each time step during a session. This can lead to high instantaneous power use, especially when the number of chargers is large. In this step, we combine the results of each sub-problem from the previous step into a preliminary final solution which includes start and stop times for each charge session, charger assignments, and the average charge rate for each session. 
+\par In this section, we use these results to compute a fine-tuned solution which varies the charge rate at each time step so that the power profile for the resulting solution more closely matches ``optimal'' profile given in the first linar program. Let $x(i,j)$ represent the power used for bus $i$ during timestep $j$ and $z(j)$ be the total power used by the buses at time $j$. 
+\par We desire to minimize the difference between $x(i,j)$ and $p_c(i,j)$ for each $i,j$. Before we can formulate the final objective function, we must first consider constraints that preserve the information from the previous programs which includes both the energy delivered per session, and each session's start and stop times.
+\par First, define $\gamma(i,d)$ as a $n_{\text{time}}\times 1$ vector which is one when bus $i$ is scheduled to charge for charge session $d$. We assume $\gamma(i,d)$ to be known as these values can be infered from the original start and stop times given in the third program.  The variable $\gamma(i,d)$ can be used to enforce the energy constraints so that
+\begin{equation}
+	\gamma(i,d)'x(i,:) = e(i,d) \ \forall i,d
+\end{equation}
+where $x(i,:)$ is the optimization variable for this problem that relates to the charge schedule for bus $i$ and $e(i,d)$ is the required energy for charge session $i,d$.
+\par The next constraint is used to compute the total power used by all buses per time interval, $z(j)$ so that
+\begin{equation*}
+	z(j) = \sum_ix(i,j) \ \forall j	
+\end{equation*}
+or alternatively in standard form as 
+\begin{equation*}
+	z(j) - \sum_ix(i,j) = 0\ \forall j.
+\end{equation*}
+\par Now that each variable has been defined, we give the loss function as the squared difference between the charge profile $z(j)$ and the optimal schedule $p_c(j)$ so that
+\begin{equation}
+	J_{\text{multi-rate}} = \sum_i \lVert p_c(j) - z(j) \rVert_2^2
+\end{equation}
+

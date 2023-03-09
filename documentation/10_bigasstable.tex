@@ -1,4 +1,5 @@
-\onecolumn	
+\onecolumn
+\newcommand\mybar{\kern1pt\rule[-\dp\strutbox]{.8pt}{\baselineskip}\kern1pt}
 \newcommand{\coloredhline}{\arrayrulecolor{gray!20} \hline \\[0.01in]\arrayrulecolor{black}}
 \newcommand{\myendline}{\\ \coloredhline}
 \label{tab:paperVariables}
@@ -9,26 +10,28 @@
 	\toprule%-----------------------------------------------------------------------------
 	\multicolumn{6}{l}{Indices} \myendline
 	i & Bus index     & $\mathbb{N}$ & j & Time Index & $\mathbb{N}$\\ \myendline
-	k & Charger index & $\mathbb{N}$ & r & Route Index \\[0.15in]
+	k & Charger index & $\mathbb{N}$ & r & Route Index \\ \myendline
+  m & group index   & $\mathbb{N}$ &   &             \\[0.15in]
 	\hline \\[-5pt]
-	\multicolumn{6}{l}{Formulation} \\[-9pt]\myendline
+	\multicolumn{6}{l}{Optimal Solution | Formulation} \\[-9pt]\myendline
 	$n_{\text{bus}}$&\parbox{0.3\textwidth}{The number of buses in the optimization framework.}                                                           & $\mathbb{Z}$            & $n_{\text{time}}$                      &\parbox{0.3\textwidth}{ The number of time indices in a day.                                                                                 }      & $\mathbb{Z}^+$ \\\myendline
 	$b_{p(i,j)}$   & \parbox{0.3\textwidth}{The average power consumed by bus $i$ during time period $j$.}                                                                              & $\mathbb{R}$           & $t_j$         &\parbox{0.3\textwidth}{ The time at time index $j$. This paper also refers to the period of time from $t_j$ to $t_{j+1}$ as ``period $t_j$''.}      & $\mathbb{R}$\\\myendline 
 	$\bm{b}$       & \parbox{0.3\textwidth}{A vector containing each value for $b_{p(i,j)}$.}                                                                                          & $\mathbb{R}^{n_{\text{bus}}\cdot n_{\text{time}}}$           & $\alpha(i,j)$ &\parbox{0.3\textwidth}{the percentage of time bus $i$ spends in the station from $t_j$ to $t_{j+1}$. }                              & $[0,1]$\\\myendline
 	$\mathcal{A}$  & \parbox{0.3\textwidth}{The set of all $i\times j$ elements where bus $i$ can charge at time index $j$}                                  & $i\times j$             & $p_{\text{max}}$ &\parbox{0.3\textwidth}{The maximum power a bus charger can deliver to a bus in kW. This paper assumes a value of 350 for most examples and results.} & $\mathbb{R}^+  $\\\myendline
 	$\mathcal{\tilde{A}}$  & \parbox{0.3\textwidth}{The complement of $\mathcal{A}$.}                                                                        & $i\times j$  \\[0.5in]
 	\hline \\[-0.07in]
-	\multicolumn{6}{l}{Battery} \\[-9pt] \myendline
+	\multicolumn{6}{l}{Optimal Solution | Battery} \\[-9pt] \myendline
 	$h_{\text{min}}$ & The minimum allowable state of charge                           & $\left ( 0,h_{\text{max}} \right )$                & $h_{\text{max}}$  & The maximum state of charge                                                   & $\mathbb{R}^+$                                     \\ \myendline 
 	$\eta_i$         & The beginning state of charge for bus $i$                       & $\left ( h_{\text{min}}, h_{\text{max}} \right )$  & $h(ij)$           & The state of charge for bus $i$ at time $t_j$. & $\left ( h_{\text{min}}, h_{\text{max}} \right )$\\ \myendline
 	$\Delta T$       & The change in time from $t_j$ to $t_{j+1}$                      &$\mathbb{R}^+ $  & $\bm{h}$             & A vector containing all state of charge values.                                        & $\mathbb{R}_+^{n_{\text{bus}}\cdot n_{\text{time}}}$                                   \\ \myendline
 	$\delta(ij)$     & The battery discharge for bus $i$ during time period $j$.               & $\mathbb{R}_+$                                     & $h(i,\text{end})$& Bus $i$'s final state of charge.                                              & $\left ( h_{\text{min}}, h_{\text{max}} \right )$\\[0.3in]
 	\hline \\[-0.07in]
-	\multicolumn{6}{l}{Charger Management} \\[-9pt] \myendline 
+	\multicolumn{6}{l}{Optimal Solution | Cumulative Load Management} \\[-9pt] \myendline 
 	$n_{\text{charger}}$             & The time index for the start of bus $i$'s $j^{\text{th}}$ stop                                                    & $\mathbb{Z}_+$                   & $p_c(j)$            & The average power consumed by all buses during time period $j$. & $\mathbb{R}$                    \\ \myendline
-	$\bm{p_c}$                       & A vector containing all values of $p_c(j)$.                                                                       & $\mathbb{R}_{+}^{n_{\text{time}}}$                   & $J_{\text{thrash}}$          & A secondary objective function which penalizes multiple plug-in instances per charge session.& $\mathbb{R}_+$                  \\[0.3in] 
+	$\bm{p_c}$                       & A vector containing all values of $p_c(j)$.                                                                       & $\mathbb{R}_{+}^{n_{\text{time}}}$                   & $J_{\text{thrash}}$          & A secondary objective function which penalizes multiple plug-in instances per charge session.& $\mathbb{R}_+$ \\ \myendline
+	$g(i,j)$                         & A slack variable used to compute the absolute value of $\lvert b_{p(i,j)} - b_{p(i,j-1)}\rvert$ & $\mathbb{R}_+$& & &                \\[0.3in] 
 	\hline \\[-0.07in]
-	\multicolumn{6}{l}{Objective}  \\[-9pt] \myendline
+	\multicolumn{6}{l}{Optimal Solution | Objective}  \\[-9pt] \myendline
 	$\mu_{\text{e-on}}$         & On-Peak Energy Rate                                                            & $\mathbb{R}_+$                                & $\mu_{\text{e-off}}$       & Off-Peak Energy Rate                                                                                     & $\mathbb{R}_+$                 \\ \myendline
 	$\mu_{\text{p-on}}$         & On-Peak Demand Power Rate                                                      & $\mathbb{R}_+$                                & $\mu_{\text{p-all}}$       & Facilities Power Rate                                                                                    & $\mathbb{R}_+$                 \\ \myendline
 	$\mathcal{S}_{\text{on}}$   & The set of on-peak time indices                                                & \scalebox{0.9}{$\{1,...,n_{\text{time}}\}$}   & $p_{\text{demand}}$        & Maximum average power during on-peak periods                                                             & $\mathbb{R}$                 \\ \myendline
@@ -36,12 +39,25 @@
 	$u(j)$                      & The average power over time $j$ consumed by the uncontrolled loads             & $\mathbb{R}_+^{n_{\text{time}}}$            & $\bm{p}_t$                 & a vector containing $p_t(i)$ for all $i$.                                                                  & $\mathbb{R}_+^{n_{\text{time}}}$ \\ \myendline 
 	$e_{\text{on}}$             & The total amount of energy consumed by the bus chargers and uncontrolled loads during off-peak hours.& $\mathbb{R}_+$                              & $e_{\text{off}}$             & The total energy consumed by the bus chargers and uncontrolled loads during on-peak hours.               & $\mathbb{R}_+$ \\ \myendline 
 	$J_{\text{cost}}$           & The section of the objective function pertaining to the fiscal expense of charging buses. & $\mathbb{R}$                & $J_{\text{all}}$               & The expression for the complete objective function. & $\mathbb{R}$ \\[0.3in]
-	\hline \\[-0.07in]
+	\hline \\[-0.07in] 
+	\multicolumn{6}{l}{Scalability}  \\[-9pt] \myendline
+	$n_{\text{group}}$         & The number of groups in which to divide the buses and available chargers in preparation for the third program.                                                           & $\mathbb{Z}_+$                                & $n_{\text{charger}}^m$      & The number of chargers assigned to group $m$.             & $\mathbb{Z}_+$ \myendline
+  $n_{\text{bus}}^m$         & The number of buses in group $m$.                                                                                      &$\mathbb{Z}_+$ & $p(j,m)$ & The total power used during time index $j$ by all buses in group $m$. & $\mathbb{R}_+$      \myendline
+  $\beta(i,m)$               & A binary selector variable which is one when bus $i$ is in gropu $m$ and zero otherwise.                               &$\{0,1\}$      & $n_{\text{charger}}^m$ & The number of chargers assigned to group $m$            & $\mathbb{Z}_+$      \myendline
+  $\phi(i,i')$                  & The inner product of the optimal charge schedules for buses $i$ and $i'$ respectively.                                 &$\mathbb{R}_+$&$v(i,i',g)$ & A variable that is $w(i,i')$ when buses $i$ and $i'$ are in group $g$ and zero otherwise. & $\mathbb{Z}_+$    \myendline
+  $M_s$                      & The maximum value for $\phi(i,i')$.                                                                                       &$\mathbb{R}_+$&$J_{\text{select}}$ & The objective function for the group-selection problem & $\mathbb{R}_+$ \\[0.3in]
+	\hline \\[-0.07in] 
 	\multicolumn{6}{l}{Charge Schedules}  \\[-9pt] \myendline
 	$a(i,r)$ & The beginning of the allowable charge interval for bus $i$'s $r^{\text{th}}$ charge session. & $\mathbb{R}_+$ & $b(i,r)$ & The commanded start time for bus $i$'s $r^{\text{th}}$ charge session& $\mathbb{N}$\\ \myendline
 	$f(i,r)$ & The commanded end time for bus $i$'s $r^{\text{th}}$ charge session. & $\mathbb{R}_+$ & $d(i,r)$ & The end time of the allowable charge interval for bus $i$'s $r^{\text{th}}$ charge session. & $\mathbb{R}_+$ \\\myendline
 	$\sigma(i,r,k)$& A selector variable which is one when bus $i$ charges at charger $k$ for session $r$. & $\{0,1\}$ & $M$ & The number of seconds in a day & $\mathbb{Z}_+$ \\ \myendline
-	$l_{(i,r),(i',r')}$ & A selector variable which is one when bus $i$ charges before bus $i'$ during the $r$ and $r'$ sessions respectively. & \scalebox{0.8}{$(i,r) \times (i',r')$} & & & \\ \myendline
+	\scalebox{0.8}{$l(i,r,i',r')$} & A selector variable which is one when bus $i$ charges before bus $i'$ during the $r$ and $r'$ sessions respectively. & $\{0,1\}$& & & \\[0.3in]
+	\hline \\[-0.07in]	
+	\multicolumn{6}{l}{Multi-Rate Charging}  \\[-9pt] \myendline
+	$x(i,j)$ & The final charge schedule for bus $i$ at time $j$, yielding the power at which bus $i$ will charge.& $\mathbb{R}_+$ & $z(j)$ & The total power used by all buses at time $j$. $\mathbb{R}_+$ \\ \myendline
+  $\gamma(i,d)$ & A binary vector which is one at all time steps where bus $i$ charges during charge session $d$. &$\{0,1\}^{n_{\text{time}}}$& $e(i,r)$               &The amount of energy to be delivered to bus $i$ during charge session $r$.        &$\mathbb{R}_+$            \\ \myendline
+  $J_{\text{multi-rate}}$ & The objective function over which we minimize to solve the multi-rate section of the bus charge problem. & $R_+$& &  &             \\[0.3in] 
+	\hline \\[-0.07in]
 	%
 \end{supertabular}
 \twocolumn

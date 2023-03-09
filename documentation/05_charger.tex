@@ -1,5 +1,5 @@
-\section{Charger Management}
-\par Limited numbers of chargers is another limitation that many transit authorities face.  Let the number of chargers be denoted $n_{\text{charger}}$. We desire to maintain the average cumulative power for each time step at a level that is serviceable given $n_{\text{charger}}$. We define a slack variable $p_c(j)$ which represents the total average power consumed by all buses at time $j$.  The variable $p_c(j)$ is computed as the sum of average bus powers so that
+\subsection{Cumulative Load Management}
+\par While this solution does not directly account for the number of available chargers, we do account for the cumulative load capacities of all chargers.  Let the number of chargers be denoted $n_{\text{charger}}$. We desire to maintain the average cumulative power for each time step at a level that is serviceable given $n_{\text{charger}}$. We define a slack variable $p_c(j)$ which represents the total average power consumed by all buses at time $j$.  The variable $p_c(j)$ is computed as the sum of average bus powers so that
 \begin{equation*}
 	p_c(j) = \sum_ib_{p(i,j)}
 \end{equation*}
@@ -11,22 +11,22 @@ p_c(j) - \sum_ib_{p(i,j)}  = 0\ \forall j.
 \begin{equation}
 	J_{\text{thrash}} = \sum_{i,j > 1} \lvert b_{p(i,j)} - b_{p(i,j-1)}\rvert.
 \end{equation}
-To minimize $J_{\text{thrash}}$, we define a slack variable $g_{i,j}$ so that 
+To minimize $J_{\text{thrash}}$, we define a slack variable $g(i,j)$ so that 
 \begin{equation*}
-g_{i,j} = \lvert b_{p(i,j)} - b_{p(i,j-1)} \rvert.
+g(i,j) = \lvert b_{p(i,j)} - b_{p(i,j-1)} \rvert.
 \end{equation*}
 which can be enforced by the linear constraints 
 \begin{equation*}\begin{aligned}
-	-g_{i,j} &\le b_{p(i,j)} - b_{p(i,j-1)} \\
-	g_{i,j} &\ge b_{p(i,j)} - b_{p(i,j-1)}.
+	-g(i,j) &\le b_{p(i,j)} - b_{p(i,j-1)} \\
+	g(i,j) &\ge b_{p(i,j)} - b_{p(i,j-1)}.
 \end{aligned}\end{equation*}
 Suppose $b_{p(i,j)} - b_{p(i,j-1)} = -5$, then we have 
 \begin{equation*}
 	-g \le -5 \le g
 \end{equation*}
-which minimizes $g$ when $g = 5$. A similar expression is minimized when $g$ is positive. The expression for $g_{i,j}$ can alternatively be expressed in standard form as
+which minimizes $g$ when $g = 5$. A similar expression is minimized when $g$ is positive. The expression for $g(i,j)$ can alternatively be expressed in standard form as
 \begin{equation}\begin{aligned}
--g_{i,j} - b_{p(i,j)} + b_{p(i,j-1)} \le 0 \\
--g_{i,j} + b_{p(i,j)} - b_{p(i,j-1)} \le 0.
+-g(i,j) - b_{p(i,j)} + b_{p(i,j-1)} \le 0 \\
+-g(i,j) + b_{p(i,j)} - b_{p(i,j-1)} \le 0.
 \end{aligned}\end{equation}
 
