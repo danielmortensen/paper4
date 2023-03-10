@@ -1,7 +1,7 @@
 nBus = 80; nCharger = 80; dt = 1*60; % one minute intervals
 useGurobi = true; makePlots = false; computePrimary = true; computeSecondary = true;
-useQuadraticLoss = true; nGroup = 1;
-lossType = "fiscal"; %"fiscal", "baseline", "consumption"
+useQuadraticLoss = false; nGroup = 1;
+lossType = "baseline"; %"fiscal", "baseline", "consumption"
 tic; 
 if computePrimary
     clear('model');
@@ -46,7 +46,8 @@ if computePrimary
         Q = con.getObjBaseline(Sim1, Var1);
         model.Q = Q;
     elseif strcmp(lossType,"consumption")
-
+        obj = con.getObjConsumption(Sim1, Var1);
+        model.obj = obj;
     else
         error("invalid loss type");
     end
@@ -82,6 +83,20 @@ if computePrimary
 
 end
 
+% begin debug section
+%     final = Sims2{1}.tFinal;
+%     start = Sims2{1}.tStart;
+%     diffStart = zeros(size(final));
+%     diffFinal = zeros(size(final));
+%     for iBus = Sims2{1}.nBus
+%         for iRoute = Sims2{1}.nRoute(iBus)
+%             diffStart(iBus,iRoute) = abs(start(iBus,iRoute) - Sols2{1}.x(Vars2{1}.b(iBus,iRoute)));
+%             diffFinal(iBus,iRoute) = abs(final(iBus,iRoute) - Sols2{1}.x(Vars2{1}.f(iBus,iRoute)));
+%         end
+%     end
+
+% end debug section
+
 if computeSecondary
     clear('model');
     Sims2 = util2.getAllSimParam(Sim1,Var1,Sol1.x, groups);
@@ -95,11 +110,12 @@ if computeSecondary
         [A2, b2, nCon2, descr2, eq2] = con2.getCon2(Sim2,Var2);
         [A3, b3, nCon3, descr3, eq3] = con2.getCon3(Sim2,Var2);
         [A4, b4, nCon4, descr4, eq4] = con2.getCon4(Sim2,Var2);
+        [A5, b5, nCon5, descr5, eq5] = con2.getCon5(Sim2,Var2);
 
-        A = [A1; A2; A3; A4];
-        b = [b1; b2; b3; b4];
-        eq = [eq1; eq2; eq3; eq4];
-        vtype = [Var2.bType; Var2.fType; Var2.lType; Var2.sigmaType];
+        A = [A1; A2; A3; A4; A5];
+        b = [b1; b2; b3; b4; b5];
+        eq = [eq1; eq2; eq3; eq4; eq5];
+        vtype = [Var2.bType; Var2.fType; Var2.lType; Var2.sigmaType; Var2.maxtype];
         model.A = A;
         model.rhs = b;
         model.sense = eq;
@@ -113,7 +129,7 @@ if computeSecondary
             model.obj = obj;
         end
         fprintf('beginning sub-problem %i of %i\n',iSim,numel(Sims2));
-        Sols2{iSim} = gurobi(model,struct('MIPGap',0.02,'OutputFlag',0,'DualReductions',0)); ...,'DualReductions',0));
+        Sols2{iSim} = gurobi(model,struct('MIPGap',4e-4,'OutputFlag',0,'DualReductions',0)); ...,'DualReductions',0));
         Vars2{iSim} = Var2;
         if Sols2{iSim}.status == "INFEASIBLE"
             fprintf("MODEL WAS INFEASIBLE, DO NOT PASS GO, DO NOT COLLECT 200 DOLLARS\n");

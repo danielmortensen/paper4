@@ -76,6 +76,12 @@ end
 Param.sigmaType = repmat('B',[nAllRoute*nCharger,1]);
 sVar = fVar + 1;
 
+% variables for max diff between all start and stop times
+Param.max = sVar;
+Param.maxtype = repmat('C',[1,1]);
+Param.nMax = 1;
+fVar = fVar + 1;
+
 % assign total number of variables
 Param.nVar = fVar;
 
