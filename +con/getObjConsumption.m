@@ -4,8 +4,7 @@ obj = zeros([Var.nVar,1]);
             if Sim.S(iTime)
                 obj(Var.pt) = Sim.muEOn;
             else
-                obj(Var.)
+                obj(Var.pt) = Sim.muEOff;
             end
        end
-fprintf('temp\n');
 end

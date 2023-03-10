@@ -1,7 +1,7 @@
 nBus = 80; nCharger = 80; dt = 1*60; % one minute intervals
 useGurobi = true; makePlots = false; computePrimary = true; computeSecondary = true;
 useQuadraticLoss = false; nGroup = 1;
-lossType = "baseline"; %"fiscal", "baseline", "consumption"
+lossType = "consumption"; %"fiscal", "baseline", "consumption"
 tic; 
 if computePrimary
     clear('model');
