@@ -5,6 +5,7 @@ iDepart = floor(Sim.tDepart/Sim.deltaTSec);
 tStart = nan([Sim.nBus,max(Sim.nRoute)]);
 tFinal = nan([Sim.nBus,max(Sim.nRoute)]);
 mWidth = nan([Sim.nBus,max(Sim.nRoute)]);
+energyPerBus = nan([Sim.nBus,1]);
 for iBus = 1:Sim.nBus
     counter = 1;    
     busId = Sim.busId(iBus);
@@ -15,12 +16,19 @@ for iBus = 1:Sim.nBus
         iFinal = find(iCharge, 1, 'last') + iArrive(iBus,iRoute);
         if ~isempty(iStart)
             energy = sum(charge)*Sim.deltaTSec/3600;
-            tStart(iBus,counter) = (iStart - 1)*Sim.deltaTSec;
-            tFinal(iBus,counter) = (iFinal - 1)*Sim.deltaTSec;
-            mWidth(iBus,counter) = energy/Sim.pMaxKW*3600;
-            iArrive(iBus,counter) = iArrive(iBus,iRoute);
-            iDepart(iBus,counter) = iDepart(iBus,iRoute);
-            counter = counter + 1;
+            routeTStart = (iStart - 1)*Sim.deltaTSec;
+            routeTFinal = (iFinal - 1)*Sim.deltaTSec;
+            energyPerBus = energyPerBus + energy;
+            if routeTFinal - routeTStart >= 10*60
+                tStart(iBus,counter) = routeTStart;
+                tFinal(iBus,counter) = routeTFinal;
+                mWidth(iBus,counter) = energy/Sim.pMaxKW*3600;
+                iArrive(iBus,counter) = iArrive(iBus,iRoute);
+                iDepart(iBus,counter) = iDepart(iBus,iRoute);
+                counter = counter + 1;
+            else
+                fprintf("skipped a route with %f seconds of time and %f KWH of energy.\n",routeTFinal - routeTStart, energy);
+            end
         end
     end
     Sim.nRoute(iBus) = counter - 1;
@@ -71,5 +79,7 @@ Param.nRoute = Sim.nRoute;
 Param.mayConflict = mayConflict;
 Param.nMayConflict = sum(mayConflict(:),'omitnan')/2;
 Param.nBus = Sim.nBus;
+Param.minBusChargeTime = energyPerBus/Sim.pMaxKW*3600;
+Param.energyPerBus = energyPerBus;
 end
 

@@ -1,7 +1,11 @@
-nBus = 80; nCharger = 80; dt = 1*60; % one minute intervals
+nBus = 60; nCharger = 4; dt = 1*60; % one minute intervals
+maxChargerPerBus = 16;
+MIPGap = nBus/(nCharger*maxChargerPerBus);
 useGurobi = true; makePlots = false; computePrimary = true; computeSecondary = true;
-useQuadraticLoss = false; nGroup = 1;
-lossType = "consumption"; %"fiscal", "baseline", "consumption"
+useQuadraticLoss = false;
+
+nGroup = 2;
+lossType = "baseline"; %"fiscal", "baseline", "consumption"
 tic; 
 if computePrimary
     clear('model');
@@ -60,7 +64,7 @@ if computePrimary
 
     % solve model
     Sol1 = gurobi(model, struct('OutputFlag',0));...,struct('DualReductions',0,'iisRequest',1));
-        fprintf("Finished first problem\n");
+        fprintf("Finished global uncontrained solution\n");
 
     if makePlots
         % extract charge schedules
@@ -78,24 +82,10 @@ if computePrimary
         yline(Sol1.x(Var1.demand),'red'); yline(Sol1.x(Var1.facilities),'green');
         legend('total power','uncontrolled','charger','demand','facilities');
     end
-    groups = computeGroups(Sim1, Var1, Sol1.x, nGroup);
+    groups = computeGroups(Sim1, Var1, Sol1.x, nGroup, MIPGap);
     fprintf("Finished group separation problem\n");
 
 end
-
-% begin debug section
-%     final = Sims2{1}.tFinal;
-%     start = Sims2{1}.tStart;
-%     diffStart = zeros(size(final));
-%     diffFinal = zeros(size(final));
-%     for iBus = Sims2{1}.nBus
-%         for iRoute = Sims2{1}.nRoute(iBus)
-%             diffStart(iBus,iRoute) = abs(start(iBus,iRoute) - Sols2{1}.x(Vars2{1}.b(iBus,iRoute)));
-%             diffFinal(iBus,iRoute) = abs(final(iBus,iRoute) - Sols2{1}.x(Vars2{1}.f(iBus,iRoute)));
-%         end
-%     end
-
-% end debug section
 
 if computeSecondary
     clear('model');
@@ -129,7 +119,7 @@ if computeSecondary
             model.obj = obj;
         end
         fprintf('beginning sub-problem %i of %i\n',iSim,numel(Sims2));
-        Sols2{iSim} = gurobi(model,struct('MIPGap',4e-4,'OutputFlag',0,'DualReductions',0)); ...,'DualReductions',0));
+        Sols2{iSim} = gurobi(model,struct('MIPGap',MIPGap,'OutputFlag',0,'DualReductions',0)); ...,'DualReductions',0));
         Vars2{iSim} = Var2;
         if Sols2{iSim}.status == "INFEASIBLE"
             fprintf("MODEL WAS INFEASIBLE, DO NOT PASS GO, DO NOT COLLECT 200 DOLLARS\n");
@@ -176,24 +166,6 @@ fprintf("Time: %0.2f, plan cost: %0.2f, opt cost: %0.2f, percent increase: %0.2f
 figure; plot(plan.avgPower); hold on; plot(opt.avgPower); legend('plan','optimal');
 xline(15*3600/Sim1.deltaTSec);
 xline(22*3500/Sim1.deltaTSec);
-
-% compute power for all buses with uncontrolled loads
-% allBusPower = zeros([1,Sim1.nTime]);
-% for iSol = 1:numel(Sols2)
-%     p = computeBusPower(Sims2{iSol},Vars2{iSol}, Sols2{iSol}.x, Sim1);
-%     allBusPower = allBusPower + sum(p,1);
-% end
-% allPower = allBusPower + Sim1.u;
-% 
-% % resample to 15-minute average power
-% nPerWindow = (60*15)/Sim1.deltaTSec;
-% avgPower = conv(allPower, ones([1,nPerWindow])/nPerWindow,'same');
-% facilitiesMax = max(avgPower);
-% demandMax = max(avgPower(Sim1.S));
-% offPeakEnergy = sum(allPower(~Sim1.S))*Sim1.deltaTSec/3600;
-% onPeakEnergy = sum(allPower(Sim1.S))*Sim1.deltaTSec/3600;
-% cost = facilitiesMax*Sim1.muPAll + demandMax*Sim1.muPOn + 30*(offPeakEnergy*Sim1.muEOff + onPeakEnergy*Sim1.muEOn);
-% percentIncrease = (cost - optimalCost)/optimalCost*100;
 
 function plan = computeResults(plan, Sim)
 
@@ -266,7 +238,7 @@ for iBus =1:Sim.nBus
     end
 end
 end
-function groups = computeGroups(Sim, Var, x, nGroup)
+function groups = computeGroups(Sim, Var, x, nGroup, MIPGap)
 
 fprintf("building constraints for group separation...\n");
 % compute simulation params/variable indices
@@ -298,7 +270,7 @@ model.obj = obj;
 
 % solve problem
 fprintf("solving group separation problem\n");
-sol = gurobi(model,struct('OutputFlag',0,'MIPGap',0.55)); ...struct('MIPGap',0.3));
+sol = gurobi(model,struct('OutputFlag',0,'MIPGap',MIPGap)); ...struct('MIPGap',0.3));
 fprintf("finished group separation problem\n");
 % % create feasiable solution
 % feasSol = zeros([Var2.nVar,1]);
@@ -339,4 +311,5 @@ groups.nCharger = nCharger;
 groups.groupId = groupIdx;
 groups.nGroup = nGroup;
 groups.schedule = Sim2.schedule;
+groups.sol = sol;
 end

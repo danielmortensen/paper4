@@ -58,7 +58,7 @@ However, this constraint {\it only} needs to hold when sessions $i,r$ and $i',r'
 	f(i,r) - b(i',r') & \le M(3 - \sigma(i,r,k) - \sigma(i',r',k) - l(i,r,i',r')) \\
 	f(i',r') - b(i,r) & \le M(2 - \sigma(i,r,k) - \sigma(i',r',k) + l(i,r,i',r'))
 \end{aligned}\end{equation}
-\par Finally, we desire the power profile to closly match the profile given in the first linear program, which would occure if each charge session matched the durations given in the first solution.  We considered linear formulation such as minimimzing the absolute value of errors, or maximizing the width of the charge sessions. The problem with linear objectives is that there is nothing to balance differences between charge session. For example, one route may have a very small charge window so that the next may be very large. These small charge windows lead to high power use and are undesireable. We solve this problem by developing a quadratic loss which minimizes the squared error between the desired and given start and stop times. This leads to
+\par Finally, we desire the power profile to closly match the profile given in the first linear program, which would occure if each charge session matched the durations given in the first solution. We formulated an objective function which minimized the largest difference between 
 \begin{equation*}
 	\underset{f,b}{\text{min}} \sum_{i,r}\lVert b(i,r) - a(i,r)\rVert_2^2 + \lVert f(i,r) - d(i,r) \rVert_2^2
 \end{equation*}

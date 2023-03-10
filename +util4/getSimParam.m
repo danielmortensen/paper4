@@ -31,11 +31,14 @@ for iSim = 1:nGroup
             tStart = Sol(Var.b(iBus,iRoute));
             tFinal = Sol(Var.f(iBus,iRoute));
             iArrive = floor(tStart/deltaTSec) + 1;
-            iDepart = ceil(tFinal/deltaTSec);
+            iDepart = min(ceil(tFinal/deltaTSec),Sim1.nTime);
+            if iDepart > 1440
+                fprintf("temp\n");
+            end
             routeIdx(busIdx,iRoute,:) = 0;
             routeIdx(busIdx,iRoute,iArrive:iDepart) = 1;
             energy(busIdx, iRoute) = Sim.mWidth(iBus,iRoute)*pMaxKW/3600;
-            chargerIdx(busIdx,iRoute) = nPrevCharger + find(Sol(Var.sigma(iBus,iRoute,:)));
+            chargerIdx(busIdx,iRoute) = nPrevCharger + find(round(Sol(Var.sigma(iBus,iRoute,:))));
             
         end
         nRoute(busIdx) = nBusRoute;
