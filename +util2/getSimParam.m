@@ -12,7 +12,7 @@ for iBus = 1:Sim.nBus
         charge = x(Var.b(busId,iArrive(iBus,iRoute):iDepart(iBus,iRoute)));
         iCharge = charge ~= 0;
         iStart = find(iCharge, 1, 'first') + iArrive(iBus,iRoute) - 1;
-        iFinal = find(iCharge, 1, 'last') + iArrive(iBus,iRoute) - 1;
+        iFinal = find(iCharge, 1, 'last') + iArrive(iBus,iRoute);
         if ~isempty(iStart)
             energy = sum(charge)*Sim.deltaTSec/3600;
             tStart(iBus,counter) = (iStart - 1)*Sim.deltaTSec;
@@ -35,10 +35,10 @@ for iBus1 = 1:Sim.nBus
     for iBus2 = iBus1 + 1:Sim.nBus        
         for iRoute1 = 1:Sim.nRoute(iBus1)   
             for iRoute2 = 1:Sim.nRoute(iBus2)
-                iArrive1 = iArrive(iBus1,iRoute1);
-                iArrive2 = iArrive(iBus2,iRoute2);
-                iDepart1 = iDepart(iBus1,iRoute1);
-                iDepart2 = iDepart(iBus2,iRoute2);
+                iArrive1 = tStart(iBus1,iRoute1);
+                iArrive2 = tStart(iBus2,iRoute2);
+                iDepart1 = tFinal(iBus1,iRoute1);
+                iDepart2 = tFinal(iBus2,iRoute2);
                 if iArrive1 < iArrive2
                     if iArrive2 <= iDepart1
                         mayConflict(iBus1,iRoute1,iBus2,iRoute2) = true;
