@@ -30,6 +30,8 @@ for iSim = 1:nGroup
         for iRoute = 1:nBusRoute
             tStart = Sol(Var.b(iBus,iRoute));
             tFinal = Sol(Var.f(iBus,iRoute));
+            tStart = max(tStart,Sims2{iSim}.tStart(iBus,iRoute));
+            tFinal = min(tFinal,Sims2{iSim}.tFinal(iBus,iRoute));
             iArrive = floor(tStart/deltaTSec) + 1;
             iDepart = min(ceil(tFinal/deltaTSec),Sim1.nTime);
             if iDepart > 1440

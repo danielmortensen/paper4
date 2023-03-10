@@ -1,11 +1,11 @@
-nBus = 60; nCharger = 4; dt = 1*60; % one minute intervals
+nBus = 5; nCharger = 5; dt = 10; % in seconds
 maxChargerPerBus = 16;
-MIPGap = nBus/(nCharger*maxChargerPerBus);
+MIPGap = 1e-6;...nBus/(nCharger*maxChargerPerBus);
 useGurobi = true; makePlots = false; computePrimary = true; computeSecondary = true;
 useQuadraticLoss = false;
 
-nGroup = 2;
-lossType = "baseline"; %"fiscal", "baseline", "consumption"
+nGroup = 1;
+lossType = "fiscal"; %"fiscal", "baseline", "consumption"
 tic; 
 if computePrimary
     clear('model');
@@ -24,17 +24,18 @@ if computePrimary
     [A10, b10, nCon10, descr10, eq10] = con.getCon10(Sim1,Var1);
     [A11, b11, nCon11, descr11, eq11] = con.getCon11(Sim1,Var1);
     [A12, b12, nCon12, descr12, eq12] = con.getCon12(Sim1,Var1);
+    [A13, b13, nCon13, descr13, eq13] = con.getCon13(Sim1,Var1);
    
 
     % concatenate each constraint
-    Ain = [A1; A3; A7; A8; A10; A12];
-    bin = [b1; b3; b7; b8; b10; b12];
+    Ain = [A1; A3; A7; A8; A10; A12; A13];
+    bin = [b1; b3; b7; b8; b10; b12; b13];
     Aeq = [A2; A4; A5; A6; A9; A11];
     beq = [b2; b4; b5; b6; b9; b11];
     A = [Ain; Aeq];
     b = [bin; beq];
-    nCon = nCon1 + nCon2 + nCon3 + nCon4 + nCon5 + nCon6 + nCon7 + nCon8 + nCon9 + nCon10 + nCon11 + nCon12;
-    eq = [eq1; eq3; eq7; eq8; eq10; eq12; eq2; eq4; eq5; eq6; eq9; eq11];
+    nCon = nCon1 + nCon2 + nCon3 + nCon4 + nCon5 + nCon6 + nCon7 + nCon8 + nCon9 + nCon10 + nCon11 + nCon12 + nCon13;
+    eq = [eq1; eq3; eq7; eq8; eq10; eq12; eq13; eq2; eq4; eq5; eq6; eq9; eq11];
 
     % double check dimensions
     assert(size(A,1) == nCon);
@@ -44,26 +45,30 @@ if computePrimary
     if strcmp(lossType,"fiscal")
         obj1 = con.getObj1(Sim1, Var1);
         obj2 = con.getObj2(Sim1, Var1);
-        obj = obj1*5 + obj2;
+        obj = obj2;...obj1*5 + obj2;
         model.obj = obj;
     elseif strcmp(lossType,"baseline")
         Q = con.getObjBaseline(Sim1, Var1);
+        obj = con.getObj1(Sim1,Var1);
         model.Q = Q;
+        model.obj = obj*5;
     elseif strcmp(lossType,"consumption")
         obj = con.getObjConsumption(Sim1, Var1);
-        model.obj = obj;
+        obj1 = con.getObj1(Sim1,Var1);
+        model.obj = obj + obj1*5;
     else
         error("invalid loss type");
     end
 
     % form gurobi model
-    model.vtype = repmat('C',[Var1.nVar,1]);
+    vtype = [Var1.btype; Var1.hType; Var1.pcType; Var1.p15Type; Var1.gType; Var1.facilitiesType; Var1.demandType; Var1.eOffType; Var1.eOnType; Var1.ptType; Var1.sessionSelectType];
+    model.vtype = vtype;
     model.A = A;
     model.rhs = b;
     model.sense = eq;
 
     % solve model
-    Sol1 = gurobi(model, struct('OutputFlag',0));...,struct('DualReductions',0,'iisRequest',1));
+    Sol1 = gurobi(model, struct('OutputFlag',0,'MIPGap',0.02));...,struct('DualReductions',0,'iisRequest',1));
         fprintf("Finished global uncontrained solution\n");
 
     if makePlots
@@ -148,7 +153,7 @@ model.vtype = vtype;
 model.obj = obj3;
 model.Q = Q3;
 fprintf('begin variable charge problem\n');
-sol3 = gurobi(model,struct('MIPGap',0.02,'OutputFlag',0));...,'OutputFlag',0,'DualReductions',0)); 
+sol3 = gurobi(model,struct('MIPGap',0.0002,'OutputFlag',0));...,'OutputFlag',0,'DualReductions',0)); 
 fprintf('Finished variable charge problem\n');
 time = toc;
 
