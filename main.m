@@ -1,6 +1,7 @@
-nBus = 80; nCharger = 6; dt = 1*60; % one minute intervals
+nBus = 80; nCharger = 80; dt = 1*60; % one minute intervals
 useGurobi = true; makePlots = false; computePrimary = true; computeSecondary = true;
-useQuadraticLoss = true; nGroup = 2;
+useQuadraticLoss = true; nGroup = 1;
+lossType = "fiscal"; %"fiscal", "baseline", "consumption"
 tic; 
 if computePrimary
     clear('model');
@@ -19,8 +20,7 @@ if computePrimary
     [A10, b10, nCon10, descr10, eq10] = con.getCon10(Sim1,Var1);
     [A11, b11, nCon11, descr11, eq11] = con.getCon11(Sim1,Var1);
     [A12, b12, nCon12, descr12, eq12] = con.getCon12(Sim1,Var1);
-    obj1 = con.getObj1(Sim1, Var1);
-    obj2 = con.getObj2(Sim1, Var1);
+   
 
     % concatenate each constraint
     Ain = [A1; A3; A7; A8; A10; A12];
@@ -36,26 +36,31 @@ if computePrimary
     assert(size(A,1) == nCon);
     assert(numel(b) == nCon);
     assert(size(A,2) == Var1.nVar);
-    obj = obj1*5 + obj2;
 
-    if useGurobi
-        % form gurobi model
-        model.vtype = repmat('C',[Var1.nVar,1]);
-        model.A = A;
-        model.rhs = b;
-        model.sense = eq;
+    if strcmp(lossType,"fiscal")
+        obj1 = con.getObj1(Sim1, Var1);
+        obj2 = con.getObj2(Sim1, Var1);
+        obj = obj1*5 + obj2;
         model.obj = obj;
+    elseif strcmp(lossType,"baseline")
+        Q = con.getObjBaseline(Sim1, Var1);
+        model.Q = Q;
+    elseif strcmp(lossType,"consumption")
 
-        % solve model
-        Sol1 = gurobi(model, struct('OutputFlag',0));...,struct('DualReductions',0,'iisRequest',1));
-        fprintf("Finished first problem\n");
     else
-        Sol1 = struct();
-        tic;
-        Sol1.x = linprog(obj,Ain,bin,Aeq,beq);
-        t = toc
+        error("invalid loss type");
     end
-    optimalCost = Sol1.x'*obj2;
+
+    % form gurobi model
+    model.vtype = repmat('C',[Var1.nVar,1]);
+    model.A = A;
+    model.rhs = b;
+    model.sense = eq;
+
+    % solve model
+    Sol1 = gurobi(model, struct('OutputFlag',0));...,struct('DualReductions',0,'iisRequest',1));
+        fprintf("Finished first problem\n");
+
     if makePlots
         % extract charge schedules
         schedule = reshape(Sol1.x(Var1.b),[Sim1.nBus,Sim1.nTime]);
