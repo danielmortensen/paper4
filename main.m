@@ -1,11 +1,11 @@
-nBus = 60; nCharger = 4; dt = 1*60; % one minute intervals
+nBus = 80; nCharger = 80; dt = 1*20; % one minute intervals
 maxChargerPerBus = 16;
-MIPGap = nBus/(nCharger*maxChargerPerBus);
-useGurobi = true; makePlots = false; computePrimary = true; computeSecondary = true;
+MIPGap = 0.99; ...nBus/(nCharger*maxChargerPerBus);
+useGurobi = true; makePlots = false; computePrimary = false; computeSecondary = true;
 useQuadraticLoss = false;
 
 nGroup = 2;
-lossType = "baseline"; %"fiscal", "baseline", "consumption"
+lossType = "fiscal"; %"fiscal", "baseline", "consumption"
 tic; 
 if computePrimary
     clear('model');
@@ -44,7 +44,7 @@ if computePrimary
     if strcmp(lossType,"fiscal")
         obj1 = con.getObj1(Sim1, Var1);
         obj2 = con.getObj2(Sim1, Var1);
-        obj = obj1*5 + obj2;
+        obj = obj2;
         model.obj = obj;
     elseif strcmp(lossType,"baseline")
         Q = con.getObjBaseline(Sim1, Var1);
@@ -86,6 +86,48 @@ if computePrimary
     fprintf("Finished group separation problem\n");
 
 end
+
+Sims2 = util5.getAllSimParam(Sim1, Var1, Sol1.x, groups);
+Sols2 = cell([numel(Sims2),1]);
+Vars2 = cell([numel(Sims2),1]);
+for iSim = 1:numel(Sims2)
+    Sim2 = Sims2{iSim};
+    Var2 = util5.getVarParam(Sim2);
+    [A1, b1, nCon1, descr1, eq1] = con5.getCon1(Sim2,Var2);
+    [A2, b2, nCon2, descr2, eq2] = con5.getCon2(Sim2,Var2);
+    [A3, b3, nCon3, descr3, eq3] = con5.getCon3(Sim2,Var2);
+    [A4, b4, nCon4, descr4, eq4] = con5.getCon4(Sim2,Var2);
+    [A5, b5, nCon5, descr5, eq5] = con5.getCon5(Sim2,Var2);
+    [A6, b6, nCon6, descr6, eq6] = con5.getCon6(Sim2,Var2);
+    [A7, b7, nCon7, descr7, eq7] = con5.getCon7(Sim2,Var2);
+    [A8, b8, nCon8, descr8, eq8] = con5.getCon8(Sim2,Var2);
+    obj = con5.getObj(Sim2,Var2);
+    
+
+    vtype = [Var2.bType; ...
+             Var2.isUsedAndFragmentedType; ...
+             Var2.ptType; ...
+             Var2.p15Type; ...
+             Var2.routeEnergyType; ...
+             Var2.demandType; ...
+             Var2.facilitiesType; ...
+             Var2.eOnType; ...
+             Var2.eOffType;];    
+    A = [A1; A2; A3; A4; A5; A6; A7; A8];
+    b = [b1; b2; b3; b4; b5; b6; b7; b8];
+    eq = [eq1; eq2; eq3; eq4; eq5; eq6; eq7; eq8];
+    model.vtype = vtype;
+    model.obj = obj;
+    model.A = A;
+    model.rhs = b;
+    model.sense = eq;
+    Sols2{iSim} = gurobi(model,struct('DualReductions',0));
+    if Sols2{iSim}.status == "INFEASIBLE"
+        error("Model infeasible: Line 126");
+    end
+end
+
+
 
 if computeSecondary
     clear('model');
