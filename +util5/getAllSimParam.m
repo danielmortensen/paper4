@@ -71,5 +71,6 @@ for iGroup = 1:groups.nGroup
     Sims{iGroup}.pMax = Sim1.pMaxKW;
     Sims{iGroup}.pMaxDelta = Sim1.pMaxDelta;
     Sims{iGroup}.S = Sim1.S;
+    Sims{iGroup}.nCharger = groups.nCharger(iGroup);
 end
 end
