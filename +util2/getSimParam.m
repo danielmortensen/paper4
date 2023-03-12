@@ -1,34 +1,24 @@
 function Param = getSimParam(Sim, Var, x)
 % need arrival and departure times for each session (in seconds)
-iArrive = ceil(Sim.tArrive/Sim.deltaTSec) + 1;
-iDepart = floor(Sim.tDepart/Sim.deltaTSec);
+iArrive = Sim.iArrive;
+iDepart = Sim.iDepart;
+tArrive = (iArrive - 1)*Sim.deltaTSec;
+tDepart = iDepart*Sim.deltaTSec;
 tStart = nan([Sim.nBus,max(Sim.nRoute)]);
 tFinal = nan([Sim.nBus,max(Sim.nRoute)]);
 mWidth = nan([Sim.nBus,max(Sim.nRoute)]);
-energyPerBus = nan([Sim.nBus,1]);
 for iBus = 1:Sim.nBus
-    counter = 1;    
-    busId = Sim.busId(iBus);
+    counter = 1;
     for iRoute = 1:Sim.nRoute(iBus)
-        charge = x(Var.b(busId,iArrive(iBus,iRoute):iDepart(iBus,iRoute)));
-        iCharge = charge ~= 0;
-        iStart = find(iCharge, 1, 'first') + iArrive(iBus,iRoute) - 1;
-        iFinal = find(iCharge, 1, 'last') + iArrive(iBus,iRoute);
-        if ~isempty(iStart)
+        charge = sum(x(Var.b(iBus,iArrive(iBus,iRoute):iDepart(iBus,iRoute))),'all');
+        if ~(charge == 0)
             energy = sum(charge)*Sim.deltaTSec/3600;
-            routeTStart = (iStart - 1)*Sim.deltaTSec;
-            routeTFinal = (iFinal - 1)*Sim.deltaTSec;
-            energyPerBus = energyPerBus + energy;
-            if routeTFinal - routeTStart >= 10*60
-                tStart(iBus,counter) = routeTStart;
-                tFinal(iBus,counter) = routeTFinal;
-                mWidth(iBus,counter) = energy/Sim.pMaxKW*3600;
-                iArrive(iBus,counter) = iArrive(iBus,iRoute);
-                iDepart(iBus,counter) = iDepart(iBus,iRoute);
-                counter = counter + 1;
-            else
-                fprintf("skipped a route with %f seconds of time and %f KWH of energy.\n",routeTFinal - routeTStart, energy);
-            end
+            tStart(iBus,counter) = tArrive(iBus,iRoute);
+            tFinal(iBus,counter) = tDepart(iBus,iRoute);
+            mWidth(iBus,counter) = energy/Sim.pMax*3600;
+            iArrive(iBus,counter) = iArrive(iBus,iRoute);
+            iDepart(iBus,counter) = iDepart(iBus,iRoute);
+            counter = counter + 1;
         end
     end
     Sim.nRoute(iBus) = counter - 1;
@@ -79,7 +69,8 @@ Param.nRoute = Sim.nRoute;
 Param.mayConflict = mayConflict;
 Param.nMayConflict = sum(mayConflict(:),'omitnan')/2;
 Param.nBus = Sim.nBus;
-Param.minBusChargeTime = energyPerBus/Sim.pMaxKW*3600;
-Param.energyPerBus = energyPerBus;
+Param.minBusChargeTime = Sim.minEnergyPerSess/Sim.pMax*3600;
+Param.busId = Sim.busId;
+Param.nTime = Sim.nTime;
 end
 

@@ -1,6 +1,7 @@
-nBus = 5; nCharger = 5; dt = 10; % in seconds
+
+nBus = 80; nCharger = 80; dt = 1*20; % one minute intervals
 maxChargerPerBus = 16;
-MIPGap = 1e-6;...nBus/(nCharger*maxChargerPerBus);
+MIPGap = 0.99; ...nBus/(nCharger*maxChargerPerBus);
 useGurobi = true; makePlots = false; computePrimary = true; computeSecondary = true;
 useQuadraticLoss = false;
 
@@ -43,9 +44,7 @@ if computePrimary
     assert(size(A,2) == Var1.nVar);
 
     if strcmp(lossType,"fiscal")
-        obj1 = con.getObj1(Sim1, Var1);
-        obj2 = con.getObj2(Sim1, Var1);
-        obj = obj2;...obj1*5 + obj2;
+        obj = con.getObj2(Sim1, Var1);
         model.obj = obj;
     elseif strcmp(lossType,"baseline")
         Q = con.getObjBaseline(Sim1, Var1);
@@ -92,73 +91,125 @@ if computePrimary
 
 end
 
-if computeSecondary
+nSim = groups.nGroup;
+Sims2 = util5.getAllSimParam(Sim1, Var1, Sol1.x, groups);
+Sols2 = cell([nSim,1]);
+Vars2 = cell([nSim,1]);
+Sims3 = cell([nSim,1]);
+Sols3 = cell([nSim,1]);
+Vars3 = cell([nSim,1]);
+u = Sim1.u;
+for iSim = 1:numel(Sims2)
     clear('model');
-    Sims2 = util2.getAllSimParam(Sim1,Var1,Sol1.x, groups);
-    Sols2 = cell([numel(Sims2),1]);
-    Vars2 = cell([numel(Sims2),1]);
-    for iSim = 1:numel(Sims2)
-        Sim2 = Sims2{iSim};
-        Var2 = util2.getVarParam(Sim2);
+    Sim2 = Sims2{iSim};
+    Var2 = util5.getVarParam(Sim2);
+    Sim2.u = u;
 
-        [A1, b1, nCon1, descr1, eq1] = con2.getCon1(Sim2,Var2);
-        [A2, b2, nCon2, descr2, eq2] = con2.getCon2(Sim2,Var2);
-        [A3, b3, nCon3, descr3, eq3] = con2.getCon3(Sim2,Var2);
-        [A4, b4, nCon4, descr4, eq4] = con2.getCon4(Sim2,Var2);
-        [A5, b5, nCon5, descr5, eq5] = con2.getCon5(Sim2,Var2);
+    [A1, b1, nCon1, descr1, eq1] = con5.getCon1(Sim2,Var2);
+    [A2, b2, nCon2, descr2, eq2] = con5.getCon2(Sim2,Var2);
+    [A3, b3, nCon3, descr3, eq3] = con5.getCon3(Sim2,Var2);
+    [A4, b4, nCon4, descr4, eq4] = con5.getCon4(Sim2,Var2);
+    [A5, b5, nCon5, descr5, eq5] = con5.getCon5(Sim2,Var2);
+    [A6, b6, nCon6, descr6, eq6] = con5.getCon6(Sim2,Var2);
+    [A7, b7, nCon7, descr7, eq7] = con5.getCon7(Sim2,Var2);
+    [A8, b8, nCon8, descr8, eq8] = con5.getCon8(Sim2,Var2);
+    obj = con5.getObj(Sim2,Var2);
 
-        A = [A1; A2; A3; A4; A5];
-        b = [b1; b2; b3; b4; b5];
-        eq = [eq1; eq2; eq3; eq4; eq5];
-        vtype = [Var2.bType; Var2.fType; Var2.lType; Var2.sigmaType; Var2.maxtype];
-        model.A = A;
-        model.rhs = b;
-        model.sense = eq;
-        model.vtype = vtype;
-        if useQuadraticLoss
-            [Q, obj] = con2.getObj(Sim2,Var2);
-            model.obj = obj;
-            model.Q = Q;
-        else
-            obj = con2.getObj2(Sim2,Var2);
-            model.obj = obj;
-        end
-        fprintf('beginning sub-problem %i of %i\n',iSim,numel(Sims2));
-        Sols2{iSim} = gurobi(model,struct('MIPGap',MIPGap,'OutputFlag',0,'DualReductions',0)); ...,'DualReductions',0));
-        Vars2{iSim} = Var2;
-        if Sols2{iSim}.status == "INFEASIBLE"
-            fprintf("MODEL WAS INFEASIBLE, DO NOT PASS GO, DO NOT COLLECT 200 DOLLARS\n");
-            return;
-        end
-        fprintf("completed sub-problem %i of %i\n",iSim,numel(Sims2));
+
+    vtype = [Var2.bType; ...
+        Var2.isUsedAndFragmentedType; ...
+        Var2.ptType; ...
+        Var2.p15Type; ...
+        Var2.routeEnergyType; ...
+        Var2.demandType; ...
+        Var2.facilitiesType; ...
+        Var2.eOnType; ...
+        Var2.eOffType;];
+    A = [A1; A2; A3; A4; A5; A6; A7; A8];
+    b = [b1; b2; b3; b4; b5; b6; b7; b8];
+    eq = [eq1; eq2; eq3; eq4; eq5; eq6; eq7; eq8];
+    model.vtype = vtype;
+    model.obj = obj;
+    model.A = A;
+    model.rhs = b;
+    model.sense = eq;
+    fprintf("starting: de-fragmenting sub-problem %i of %i\n",iSim,nSim);
+    Sols2{iSim} = gurobi(model,struct('OutputFlag',0));
+    Vars2{iSim} = Var2;
+    fprintf("finished: de-fragmenting sub-problem %i of %i\n",iSim,nSim);
+
+    if Sols2{iSim}.status == "INFEASIBLE"
+        error("Model infeasible: Line 126");
     end
+
+    % update uncontrolled loads to reflect new solution
+    u = u + Sols2{iSim}.x(Var2.pt);
+
+    % assign buses to chargers
+    clear('model');
+
+    Sim3 = util2.getSimParam(Sims2{iSim}, Vars2{iSim}, Sols2{iSim}.x);
+    Sims3{iSim} = Sim3;
+    Var3 = util2.getVarParam(Sim3);
+    Vars3{iSim} = Var3;
+
+    [A1, b1, nCon1, descr1, eq1] = con2.getCon1(Sim3,Var3);
+    [A2, b2, nCon2, descr2, eq2] = con2.getCon2(Sim3,Var3);
+    [A3, b3, nCon3, descr3, eq3] = con2.getCon3(Sim3,Var3);
+    [A4, b4, nCon4, descr4, eq4] = con2.getCon4(Sim3,Var3);
+    [A5, b5, nCon5, descr5, eq5] = con2.getCon5(Sim3,Var3);
+
+    A = [A1; A2; A3; A4; A5];
+    b = [b1; b2; b3; b4; b5];
+    eq = [eq1; eq2; eq3; eq4; eq5];
+    vtype = [Var3.bType; Var3.fType; Var3.lType; Var3.sigmaType; Var3.maxtype];
+    model.A = A;
+    model.rhs = b;
+    model.sense = eq;
+    model.vtype = vtype;
+    if useQuadraticLoss
+        [Q, obj] = con2.getObj(Sim3,Var3);
+        model.obj = obj;
+        model.Q = Q;
+    else
+        obj = con2.getObj2(Sim3,Var3);
+        model.obj = obj;
+    end
+    fprintf('started: scheduling routes for sub-set %i of %i\n',iSim,numel(Sims2));
+    Sols3{iSim} = gurobi(model,struct('MIPGap',MIPGap,'OutputFlag',0,'DualReductions',0)); ...,'DualReductions',0));
+        Vars2{iSim} = Var2;
+    if Sols3{iSim}.status == "INFEASIBLE"
+        fprintf("MODEL WAS INFEASIBLE, DO NOT PASS GO, DO NOT COLLECT 200 DOLLARS\n");
+        return;
+    end
+    fprintf("finished: scheduling routes for sub-set %i of %i\n",iSim,numel(Sims2));
 end
 
 
-Sim3 = util4.getSimParam(Sim1,Var1,Sol1, Sims2,Vars2,Sols2,groups);
-Var3 = util4.getVarParam(Sim3);
-[A1, b1, nConst1, descr1, eq1] = con4.getCon1(Sim3, Var3);
-[A2, b2, nConst2, descr2, eq2] = con4.getCon2(Sim3, Var3);
-[A3, b3, nConst3, descr3, eq3] = con4.getCon3(Sim3, Var3);
-[Q3, obj3] = con4.getObj(Sim3, Var3);
+Sim4 = util4.getSimParam(Sim1,Var1,Sol1, Sims3,Vars3,Sols3,groups);
+Var4 = util4.getVarParam(Sim3);
+[A1, b1, nConst1, descr1, eq1] = con4.getCon1(Sim4, Var4);
+[A2, b2, nConst2, descr2, eq2] = con4.getCon2(Sim4, Var4);
+[A3, b3, nConst3, descr3, eq3] = con4.getCon3(Sim4, Var4);
+[Q4, obj4] = con4.getObj(Sim4, Var4);
 
 A = [A1;A2;A3;];
 b = [b1;b2;b3;];
 eq = [eq1;eq2;eq3;];
-vtype = [Var3.scheduletype; Var3.allpowertype];
+vtype = [Var4.scheduletype; Var4.allpowertype];
 model.A = A;
 model.rhs = b;
 model.sense = eq;
 model.vtype = vtype;
-model.obj = obj3;
-model.Q = Q3;
+model.obj = obj4;
+model.Q = Q4;
 fprintf('begin variable charge problem\n');
-sol3 = gurobi(model,struct('MIPGap',0.0002,'OutputFlag',0));...,'OutputFlag',0,'DualReductions',0)); 
+sol4 = gurobi(model,struct('MIPGap',0.02,'OutputFlag',0));...,'OutputFlag',0,'DualReductions',0)); 
 fprintf('Finished variable charge problem\n');
 time = toc;
 
 % compute results
-plan.schedule = reshape(sol3.x(Var3.schedule),[Sim3.nBus,Sim3.nTime]);
+plan.schedule = reshape(sol4.x(Var4.schedule),[Sim4.nBus,Sim4.nTime]);
 plan.uncontrolled = Sim1.u;
 opt.schedule = reshape(Sol1.x(Var1.b),[Sim1.nBus,Sim1.nTime]);
 opt.uncontrolled = Sim1.u;
@@ -168,9 +219,10 @@ percentIncrease = (plan.cost - opt.cost)/opt.cost*100;
 fprintf("Time: %0.2f, plan cost: %0.2f, opt cost: %0.2f, percent increase: %0.2f\n",time,plan.cost,opt.cost,percentIncrease);
 
 % make plots
-figure; plot(plan.avgPower); hold on; plot(opt.avgPower); legend('plan','optimal');
-xline(15*3600/Sim1.deltaTSec);
-xline(22*3500/Sim1.deltaTSec);
+time = (0:Sim1.nTime - 1)/Sim1.nTime*24;
+figure; plot(time,plan.avgPower); hold on; plot(time,opt.avgPower); legend('plan','optimal');
+% xline(15*3600/Sim1.deltaTSec);
+% xline(22*3500/Sim1.deltaTSec);
 
 function plan = computeResults(plan, Sim)
 
@@ -179,8 +231,8 @@ busPower = squeeze(sum(plan.schedule,1));
 power = busPower + Sim.u;
 
 % compute on and off-peak energy
-eOn = sum(power(Sim.S))*Sim.deltaTSec/3600;
-eOff = sum(power(~Sim.S))*Sim.deltaTSec/3600;
+eOn = sum(power(Sim.S)*Sim.deltaTSec/3600);
+eOff = sum(power(~Sim.S)*Sim.deltaTSec/3600);
 
 % compute 15-minute average
 nPerWindow = (60*15)/Sim.deltaTSec;
