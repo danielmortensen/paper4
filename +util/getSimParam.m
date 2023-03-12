@@ -14,8 +14,6 @@ Param.pMaxDelta = 20; % always leave a little room :)
 
 % maximum battery capacity in kWh
 Param.hMaxKWH = 450; 
-Param.minSessionLength = 10*60;
-Param.minEnergyPerSession = 20;
 
 % change in time (seconds) between time indices
 Param.deltaTSec = dt;
@@ -27,7 +25,7 @@ Param.eta = ones([1,nBus])*0.8*Param.hMaxKWH;
 Param.hMin = ones([1,nBus])*0.2*Param.hMaxKWH;
 
 % discharge over routes
-[Param.delta, Param.alpha, Param.tArrive, Param.tDepart, Param.nRoute, Param.canCharge] = ...
+[Param.delta, Param.alpha, Param.tArrive, Param.tDepart, Param.nRoute] = ...
     getRoutes(nBus, Param.nTime, Param.deltaTSec);
 
 % On-Peak Energy Rate in dollars/kWh
@@ -64,7 +62,7 @@ function uncontrolled = getUncontrolledLoad(dt)
     assert(numel(uncontrolled) == nDesired);
 end
 
-function [discharge, alpha, tArrive, tDepart, nRoute, canCharge] = getRoutes(nBus, nTime, deltaT)
+function [discharge, alpha, tArrive, tDepart, nRoute] = getRoutes(nBus, nTime, deltaT)
 dirRoutes = "\\wsl.localhost\Ubuntu\home\dmortensen\paper4\data\routesTable.csv";
 routes = readtable(dirRoutes);
 routes = sortrows(routes,'nRoute','descend');
@@ -80,7 +78,7 @@ tDepart = simRoutes(:,2:3:end);
 dSoc = -simRoutes(:,3:3:end);
 
 % convert arrival times to indices + remainders
-iArrival = max(1,ceil(tArrive/deltaT));
+iArrival = ceil(tArrive/deltaT);
 
 % convert departure times to indices + remainders
 iDepart = floor(tDepart/deltaT);
@@ -106,15 +104,4 @@ for iBus = 1:nBus
         discharge(iBus,di:ai) = disPerIndex;
     end
 end
-
-% create variables that say when a bus will be charging for each route
-canCharge = zeros([nBus,max(nRoute),nTime]);
-for iBus = 1:nBus
-    for iRoute = 1:nRoute(iBus)
-        ai = iArrival(iBus,iRoute);
-        di = iDepart(iBus,iRoute);
-        canCharge(iBus,iRoute,ai:di) = 1;
-    end
-end
-    
 end
