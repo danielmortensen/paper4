@@ -72,5 +72,8 @@ for iGroup = 1:groups.nGroup
     Sims{iGroup}.pMaxDelta = Sim1.pMaxDelta;
     Sims{iGroup}.S = Sim1.S;
     Sims{iGroup}.nCharger = groups.nCharger(iGroup);
+    Sims{iGroup}.delta = Sim1.delta(busIds,:);
+    Sims{iGroup}.hMin = Sim1.hMin;
+    Sims{iGroup}.h0 = Sim1.eta;
 end
 end

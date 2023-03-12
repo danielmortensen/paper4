@@ -2,7 +2,7 @@
 nBus = 80; nCharger = 80; dt = 1*20; % one minute intervals
 maxChargerPerBus = 16;
 MIPGap = 0.99; ...nBus/(nCharger*maxChargerPerBus);
-useGurobi = true; makePlots = false; computePrimary = true; computeSecondary = true;
+useGurobi = true; makePlots = false; computePrimary = false; computeSecondary = true;
 useQuadraticLoss = false;
 
 nGroup = 1;
@@ -109,8 +109,9 @@ for iSim = 1:numel(Sims2)
     [A6, b6, nCon6, descr6, eq6] = con5.getCon6(Sim2,Var2);
     [A7, b7, nCon7, descr7, eq7] = con5.getCon7(Sim2,Var2);
     [A8, b8, nCon8, descr8, eq8] = con5.getCon8(Sim2,Var2);
+    [A9, b9, nCon9, descr9, eq9] = con5.getCon9(Sim2,Var2);
+    [A10, b10, nCon10, descr10, eq10] = con5.getCon10(Sim2,Var2);
     obj = con5.getObj(Sim2,Var2);
-
 
     vtype = [Var2.bType; ...
         Var2.isUsedAndFragmentedType; ...
@@ -120,10 +121,11 @@ for iSim = 1:numel(Sims2)
         Var2.demandType; ...
         Var2.facilitiesType; ...
         Var2.eOnType; ...
-        Var2.eOffType;];
-    A = [A1; A2; A3; A4; A5; A6; A7; A8];
-    b = [b1; b2; b3; b4; b5; b6; b7; b8];
-    eq = [eq1; eq2; eq3; eq4; eq5; eq6; eq7; eq8];
+        Var2.eOffType; ...
+        Var2.hType;];
+    A = [A1; A2; A3; A4; A5; A6; A7; A8; A9; A10];
+    b = [b1; b2; b3; b4; b5; b6; b7; b8; b9; b10];
+    eq = [eq1; eq2; eq3; eq4; eq5; eq6; eq7; eq8; eq9; eq10];
     model.vtype = vtype;
     model.obj = obj;
     model.A = A;
@@ -215,10 +217,9 @@ percentIncrease = (plan.cost - opt.cost)/opt.cost*100;
 fprintf("Time: %0.2f, plan cost: %0.2f, opt cost: %0.2f, percent increase: %0.2f\n",time,plan.cost,opt.cost,percentIncrease);
 
 % make plots
-time = (0:Sim1.nTime - 1)/Sim1.nTime*24;
-figure; plot(time,plan.avgPower); hold on; plot(time,opt.avgPower); legend('plan','optimal');
-% xline(15*3600/Sim1.deltaTSec);
-% xline(22*3500/Sim1.deltaTSec);
+figure; plot(plan.avgPower); hold on; plot(opt.avgPower); legend('plan','optimal');
+xline(15*3600/Sim1.deltaTSec);
+xline(22*3500/Sim1.deltaTSec);
 
 function plan = computeResults(plan, Sim)
 
@@ -232,8 +233,13 @@ eOff = sum(power(~Sim.S)*Sim.deltaTSec/3600);
 
 % compute 15-minute average
 nPerWindow = (60*15)/Sim.deltaTSec;
-window = ones([1,nPerWindow])/nPerWindow;
-avgPower = conv(power,window,'same');
+nTime = size(plan.schedule,2);
+avgPower = nan([nTime,1]);
+for iTime = 1:nTime
+    iStart = max(1,iTime - nPerWindow + 2);
+    iFinal = iTime;
+    avgPower(iTime) = mean(power(iStart:iFinal)); 
+end
 
 % compute demand and facilities charges
 mOn = max(avgPower(Sim.S));
@@ -325,27 +331,6 @@ model.obj = obj;
 fprintf("solving group separation problem\n");
 sol = gurobi(model,struct('OutputFlag',0,'MIPGap',MIPGap)); ...struct('MIPGap',0.3));
 fprintf("finished group separation problem\n");
-% % create feasiable solution
-% feasSol = zeros([Var2.nVar,1]);
-% 
-% % there are two groups
-% feasSol(Var2.group(1,:)) = sum(Sim2.schedule,1);
-% ...feasSol(Var2.group(2,:)) = 0;
-% feasSol(Var2.charger(1)) = 12;
-% ...feasSol(Var2.charger(2)) = 0;
-% feasSol(Var2.sigma(:,1)) = 1;
-
-
-% for iGroup = 1:nGroup
-%     
-% end
-% for iBus = 1:Sim2.nBus
-%     for iRoute = 1:Sim2.nRoute(iBus)
-%         feasSol(Var2.b(iBus,iRoute)) = Sim2.tStart(iBus,iRoute);
-%         feasSol(Var2.f(iBus,iRoute)) = Sim2.tFinal(iBus,iRoute);
-%         feasSol(Var2.sigma(iBus,iRoute,iBus)) = 1;
-%     end
-% end
 
 % compute group parameters
 groupIdx = nan([Sim.nBus,1]);

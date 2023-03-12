@@ -80,7 +80,14 @@ Var.eOffType = 'C';
 % update in case we need this later
 sVal = sVal + 4;
 
+% define state of charge variables
+fVal = sVal + (nTime + 1)*nBus - 1;
+Var.h = reshape(sVal:fVal,[nBus,nTime + 1]);
+Var.nH = (nTime + 1)*nBus;
+Var.hType = repmat('C',[Var.nH,1]);
+sVal = fVal + 1;
+
 % define number of total variables
-Var.nVar = Var.nB + Var.nIsUsedAndFragmented + Var.nPt + Var.nP15 + Var.nRouteEnergy + Var.nDemand + Var.nFacilities + Var.nEOn + Var.nEOff;
+Var.nVar = Var.nB + Var.nIsUsedAndFragmented + Var.nPt + Var.nP15 + Var.nRouteEnergy + Var.nDemand + Var.nFacilities + Var.nEOn + Var.nEOff + Var.nH;
 
 end
