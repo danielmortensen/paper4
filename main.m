@@ -4,87 +4,13 @@ maxChargerPerBus = 16;
 MIPGap = 0.99; ...nBus/(nCharger*maxChargerPerBus);
 useGurobi = true; makePlots = false; computePrimary = true; computeSecondary = true;
 useQuadraticLoss = false;
-
 nGroup = 2;
 lossType = "fiscal"; %"fiscal", "baseline", "consumption"
 tic; 
 if computePrimary
-    clear('model');
-    Sim1 = util.getSimParam(nBus, nCharger, dt);
-    Var1 = util.getVarParam(Sim1);
-    Sim1.u = Sim1.u*5;
-    [A1, b1, nCon1, descr1, eq1] = con.getCon1(Sim1,Var1);
-    [A2, b2, nCon2, descr2, eq2] = con.getCon2(Sim1,Var1);
-    [A3, b3, nCon3, descr3, eq3] = con.getCon3(Sim1,Var1);
-    [A4, b4, nCon4, descr4, eq4] = con.getCon4(Sim1,Var1);
-    [A5, b5, nCon5, descr5, eq5] = con.getCon5(Sim1,Var1);
-    [A6, b6, nCon6, descr6, eq6] = con.getCon6(Sim1,Var1);
-    [A7, b7, nCon7, descr7, eq7] = con.getCon7(Sim1,Var1);
-    [A8, b8, nCon8, descr8, eq8] = con.getCon8(Sim1,Var1);
-    [A9, b9, nCon9, descr9, eq9] = con.getCon9(Sim1,Var1);
-    [A10, b10, nCon10, descr10, eq10] = con.getCon10(Sim1,Var1);
-    [A11, b11, nCon11, descr11, eq11] = con.getCon11(Sim1,Var1);
-    [A12, b12, nCon12, descr12, eq12] = con.getCon12(Sim1,Var1);
-   
-
-    % concatenate each constraint
-    Ain = [A1; A3; A7; A8; A10; A12];
-    bin = [b1; b3; b7; b8; b10; b12];
-    Aeq = [A2; A4; A5; A6; A9; A11];
-    beq = [b2; b4; b5; b6; b9; b11];
-    A = [Ain; Aeq];
-    b = [bin; beq];
-    nCon = nCon1 + nCon2 + nCon3 + nCon4 + nCon5 + nCon6 + nCon7 + nCon8 + nCon9 + nCon10 + nCon11 + nCon12;
-    eq = [eq1; eq3; eq7; eq8; eq10; eq12; eq2; eq4; eq5; eq6; eq9; eq11];
-
-    % double check dimensions
-    assert(size(A,1) == nCon);
-    assert(numel(b) == nCon);
-    assert(size(A,2) == Var1.nVar);
-
-    if strcmp(lossType,"fiscal")
-        obj = con.getObj2(Sim1, Var1);
-        model.obj = obj;
-    elseif strcmp(lossType,"baseline")
-        Q = con.getObjBaseline(Sim1, Var1);
-        model.Q = Q;
-    elseif strcmp(lossType,"consumption")
-        obj = con.getObjConsumption(Sim1, Var1);
-        model.obj = obj;
-    else
-        error("invalid loss type");
-    end
-
-    % form gurobi model
-    vtype = repmat('C',[Var1.nVar,1]);
-    model.vtype = vtype;
-    model.A = A;
-    model.rhs = b;
-    model.sense = eq;
-
-    % solve model
-    Sol1 = gurobi(model, struct('OutputFlag',0,'MIPGap',0.02));...,struct('DualReductions',0,'iisRequest',1));
-        fprintf("Finished global uncontrained solution\n");
-
-    if makePlots
-        % extract charge schedules
-        schedule = reshape(Sol1.x(Var1.b),[Sim1.nBus,Sim1.nTime]);
-        figure; imagesc(schedule);
-
-        for iBus = 1:Sim1.nBus
-            subplot(Sim1.nBus,1,iBus); hold on;
-            plot(Sol1.x(Var1.h(iBus,:)));
-            plot(Sol1.x(Var1.b(iBus,:)));    legend('SOC','Power');
-        end
-
-        figure; plot(Sol1.x(Var1.p15)); hold on;
-        plot(Sim1.u); plot(Sol1.x(Var1.pc));
-        yline(Sol1.x(Var1.demand),'red'); yline(Sol1.x(Var1.facilities),'green');
-        legend('total power','uncontrolled','charger','demand','facilities');
-    end
-    groups = computeGroups(Sim1, Var1, Sol1.x, nGroup, MIPGap);
-    fprintf("Finished group separation problem\n");
-
+    [Sim1, Var1, Sol1] = computeIdeal(nBus,nCharger,dt, lossType);
+    [Sim2, Var2, Sol2] = computeSmooth(Sim1, Var1, Sol1);
+    groups = computeGroups(Sim2,Var2,Sol2.x,nGroup,MIPGap);   
 end
 
 nSim = groups.nGroup;
@@ -296,58 +222,4 @@ for iBus =1:Sim.nBus
         end       
     end
 end
-end
-function groups = computeGroups(Sim, Var, x, nGroup, MIPGap)
-
-fprintf("building constraints for group separation...\n");
-% compute simulation params/variable indices
-Sim2 = util3.getSimParam(Sim, Var, x, nGroup);
-Var2 = util3.getVarParam(Sim2);
-nGroup = Sim2.nGroup;
-
-% compute constraints
-[A1, b1, nCon1, descr1, eq1] = con3.getCon1(Sim2,Var2);
-[A2, b2, nCon2, descr2, eq2] = con3.getCon2(Sim2,Var2);
-[A3, b3, nCon3, descr3, eq3] = con3.getCon3(Sim2,Var2);
-[A4, b4, nCon4, descr4, eq4] = con3.getCon4(Sim2,Var2);
-[A5, b5, nCon5, descr5, eq5] = con3.getCon5(Sim2,Var2);
-[A6, b6, nCon6, descr6, eq6] = con3.getCon6(Sim2,Var2);
-[A7, b7, nCon7, descr7, eq7] = con3.getCon7(Sim2,Var2);
-obj = con3.getObj(Sim2,Var2);
-
-% formulate model
-A = [A1; A2; A3; A4; A5; A6; A7];
-b = [b1; b2; b3; b4; b5; b6; b7];
-eq = [eq1; eq2; eq3; eq4; eq5; eq6; eq7];
-vtype = [Var2.vtype; Var2.sigmatype; Var2.grouptype; Var2.chargertype];
-
-model.A = A;
-model.rhs = b;
-model.sense = eq;
-model.vtype = vtype;
-model.obj = obj;
-
-% solve problem
-fprintf("solving group separation problem\n");
-sol = gurobi(model,struct('OutputFlag',0,'MIPGap',MIPGap)); ...struct('MIPGap',0.3));
-fprintf("finished group separation problem\n");
-
-% compute group parameters
-groupIdx = nan([Sim.nBus,1]);
-for iBus = 1:Sim.nBus
-    groupIdx(iBus) = find(sol.x(Var2.sigma(iBus,:)));
-end
-for iGroup = 1:nGroup
-    Sim2.nBus(iGroup) = sum(groupIdx == iGroup);
-end
-nCharger = sol.x(Var2.charger);
-
-
-% package for use
-groups.nBus = Sim2.nBus;
-groups.nCharger = nCharger;
-groups.groupId = groupIdx;
-groups.nGroup = nGroup;
-groups.schedule = Sim2.schedule;
-groups.sol = sol;
 end
