@@ -1,8 +1,8 @@
 function [A, b, nConst, descr, eq] = getCon3(Sim, Var)
 % unpack relevent values
 nBus = Sim.nBus;
-canCharge = squeeze(sum(Sim.canCharge,2));
 nTime = Sim.nTime;
+canCharge = reshape(squeeze(sum(Sim.canCharge,2)),[nBus,nTime]);
 iSchedule = Var.b;
 pMax = Sim.pMax - Sim.pMaxDelta;
 

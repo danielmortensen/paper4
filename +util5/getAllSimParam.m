@@ -1,12 +1,12 @@
 function Sims = getAllSimParam(Sim1, Var1, x, groups)
     
 minEnergyPerSess = 30; %in kWh
-
+nTime = size(groups.schedule,2);
 idx = 1:Sim1.nBus;
 Sims = cell([groups.nGroup,1]);
 for iGroup = 1:groups.nGroup
     isInGroup = groups.groupId == iGroup;
-    schedule = x(Var1.b(isInGroup,:));
+    schedule = reshape(x(Var1.b(isInGroup,:)),[groups.nBus(iGroup), nTime]);
    
     busIds = idx(isInGroup);
     nMaxRoute = max(Sim1.nRoute(isInGroup));

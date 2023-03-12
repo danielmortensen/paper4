@@ -1,11 +1,11 @@
 
-nBus = 80; nCharger = 80; dt = 1*20; % one minute intervals
+nBus = 4; nCharger = 2; dt = 1*20; % one minute intervals
 maxChargerPerBus = 16;
 MIPGap = 0.99; ...nBus/(nCharger*maxChargerPerBus);
-useGurobi = true; makePlots = false; computePrimary = false; computeSecondary = true;
+useGurobi = true; makePlots = false; computePrimary = true; computeSecondary = true;
 useQuadraticLoss = false;
 
-nGroup = 1;
+nGroup = 2;
 lossType = "fiscal"; %"fiscal", "baseline", "consumption"
 tic; 
 if computePrimary
@@ -185,7 +185,7 @@ end
 
 
 Sim4 = util4.getSimParam(Sim1,Var1,Sol1, Sims3,Vars3,Sols3,groups);
-Var4 = util4.getVarParam(Sim3);
+Var4 = util4.getVarParam(Sim4);
 [A1, b1, nConst1, descr1, eq1] = con4.getCon1(Sim4, Var4);
 [A2, b2, nConst2, descr2, eq2] = con4.getCon2(Sim4, Var4);
 [A3, b3, nConst3, descr3, eq3] = con4.getCon3(Sim4, Var4);
