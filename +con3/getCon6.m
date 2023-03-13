@@ -3,11 +3,12 @@ function [A, b, nConst, descr, eq] = getCon6(Sim, Var)
 nTime = size(Sim.schedule,2);
 nGroup = Sim.nGroup;
 nConst = nTime*nGroup;
-nConstVal = nTime*nGroup*2;
+nConstVal = nTime*nGroup*3;
 b = nan([nConst,1]);
 A = nan([nConstVal,3]);
 iP = Var.group;
 iNCharger = Var.charger;
+iMaxDiff = Var.maxOverall;
 M = Sim.pMaxKW;
 
 % loop variables
@@ -17,9 +18,10 @@ for iGroup = 1:Sim.nGroup
     for iTime = 1:nTime
         A(iConstVal + 0,:) = [iConst + 0, iP(iGroup,iTime),   1];
         A(iConstVal + 1,:) = [iConst + 0, iNCharger(iGroup), -M];
+        A(iConstVal + 2,:) = [iConst + 0, iMaxDiff,          -1];
         b(iConst) = 0;
 
-        iConstVal = iConstVal + 2;
+        iConstVal = iConstVal + 3;
         iConst = iConst + 1;
     end
 end

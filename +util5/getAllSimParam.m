@@ -1,6 +1,6 @@
 function Sims = getAllSimParam(Sim1, Var1, x, groups)
     
-minEnergyPerSess = 30; %in kWh
+minEnergyPerSess = Sim1.minEnergyPerSess; %in kWh
 nTime = size(groups.schedule,2);
 idx = 1:Sim1.nBus;
 Sims = cell([groups.nGroup,1]);

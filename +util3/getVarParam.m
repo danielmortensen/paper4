@@ -45,7 +45,11 @@ Var.charger = start:final;
 Var.nCharger = nGroup;
 Var.chargertype = repmat('I',[nGroup,1]);
 
+% variable for max power in all groups
+Var.maxOverall = final + 1;
+Var.maxOverallType = 'C';
+Var.nMaxOverall = 1;
 
-Var.nVar = Var.nV + Var.nSigma + Var.nGroup + Var.nCharger;
+Var.nVar = Var.nV + Var.nSigma + Var.nGroup + Var.nCharger + Var.nMaxOverall;
 
 end

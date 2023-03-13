@@ -14,7 +14,7 @@ nGroup = Sim2.nGroup;
 [A5, b5, nCon5, descr5, eq5] = con3.getCon5(Sim2,Var2);
 [A6, b6, nCon6, descr6, eq6] = con3.getCon6(Sim2,Var2);
 [A7, b7, nCon7, descr7, eq7] = con3.getCon7(Sim2,Var2);
-obj = con3.getObj(Sim2,Var2);
+obj = con3.getObj2(Sim2,Var2);
 
 % formulate model
 A = [...
@@ -44,7 +44,7 @@ eq = [...
       eq6;...
       eq7;...
       ];
-vtype = [Var2.vtype; Var2.sigmatype; Var2.grouptype; Var2.chargertype];
+vtype = [Var2.vtype; Var2.sigmatype; Var2.grouptype; Var2.chargertype; Var2.maxOverallType];
 
 model.A = A;
 model.rhs = b;
@@ -63,7 +63,7 @@ fprintf("Finished: group separation\n");
 % compute group parameters
 groupIdx = nan([Sim.nBus,1]);
 for iBus = 1:Sim.nBus
-    groupIdx(iBus) = find(sol.x(Var2.sigma(iBus,:)));
+    groupIdx(iBus) = find(round(sol.x(Var2.sigma(iBus,:))));
 end
 for iGroup = 1:nGroup
     Sim2.nBus(iGroup) = sum(groupIdx == iGroup);
