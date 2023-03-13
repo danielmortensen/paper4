@@ -44,7 +44,11 @@ for iSim = 1:nGroup
     nPrevCharger = nPrevCharger + groups.nCharger(iSim);
 end
 
-Param.optSchedule = schedule;
+Param.isOnPeak = Sim1.S;
+Param.muEOn = Sim1.muEOn;
+Param.muEOff = Sim1.muEOff;
+Param.muPOn = Sim1.muPOn;
+Param.muPAll = Sim1.muPAll;
 Param.optProfile = sum(schedule,1);
 Param.chargerIdx = chargerIdx;
 Param.routeIdx = routeIdx;

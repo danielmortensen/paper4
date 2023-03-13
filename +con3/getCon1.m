@@ -48,9 +48,10 @@ end
 % double check that each constraint was set as expected
 assert(~any(isnan(A(:))));
 assert(~any(isnan(b)));  
-assert(max(A(:,1)) == nConst);
-assert(numel(b) == nConst);
-
+if nConst > 0
+    assert(max(A(:,1)) == nConst);
+    assert(numel(b) == nConst);
+end
 
 descr = "constrain loss variable 'v' ";
 eq = repmat('<',[nConst,1]);

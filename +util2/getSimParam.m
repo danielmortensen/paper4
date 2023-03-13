@@ -7,16 +7,17 @@ tDepart = iDepart*Sim.deltaTSec;
 tStart = nan([Sim.nBus,max(Sim.nRoute)]);
 tFinal = nan([Sim.nBus,max(Sim.nRoute)]);
 mWidth = nan([Sim.nBus,max(Sim.nRoute)]);
+energy = nan([Sim.nBus,max(Sim.nRoute)]);
 minTimePerSession = 60*5;
 for iBus = 1:Sim.nBus
     counter = 1;
     for iRoute = 1:Sim.nRoute(iBus)
         charge = sum(x(Var.b(iBus,iArrive(iBus,iRoute):iDepart(iBus,iRoute))),'all');
         if ~(charge == 0)
-            energy = sum(charge)*Sim.deltaTSec/3600;
+            energy(iBus,counter) = sum(charge)*Sim.deltaTSec/3600;
             tStart(iBus,counter) = tArrive(iBus,iRoute);
             tFinal(iBus,counter) = tDepart(iBus,iRoute);
-            mWidth(iBus,counter) = max(minTimePerSession,energy/Sim.pMax*3600);
+            mWidth(iBus,counter) = max(minTimePerSession,energy(iBus,counter)/Sim.pMax*3600);
             iArrive(iBus,counter) = iArrive(iBus,iRoute);
             iDepart(iBus,counter) = iDepart(iBus,iRoute);
             counter = counter + 1;
@@ -73,5 +74,7 @@ Param.nBus = Sim.nBus;
 Param.minBusChargeTime = Sim.minEnergyPerSess/Sim.pMax*3600;
 Param.busId = Sim.busId;
 Param.nTime = Sim.nTime;
+Param.energy = energy;
+Param.pMaxKW = Sim.pMax;
 end
 

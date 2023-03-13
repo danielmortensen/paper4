@@ -32,6 +32,9 @@ Vars3 = cell([nSim,1]);
 Sims4 = cell([nSim,1]);
 Sols4 = cell([nSim,1]);
 Vars4 = cell([nSim,1]);
+Sims5 = cell([nSim,1]);
+Sols5 = cell([nSim,1]);
+Vars5 = cell([nSim,1]);
 u = Sim1.u;
 for iSim = 1:numel(Sims3)
 
@@ -52,8 +55,14 @@ for iSim = 1:numel(Sims3)
     fprintf("finished: scheduling routes for sub-set %i of %i\n",iSim,numel(Sims3));
 
     % compute charge intervals
+    fprintf("Started: Optimizing sub-set schedule...\n");
     Sims5{iSim} = util7.getSimParam(Sims4{iSim}, Vars4{iSim}, Sols4{iSim});
     [Sols5{iSim}, Vars5{iSim}] = computeChargeIntervals(Sims5{iSim});
+    fprintf("Finished: Optimizing sub-set schedule")
+
+    % apply optimized start/stop times to schedule from solution 4
+    Sols4{iSim} = applyScheduleTimes(Sols4{iSim}, Vars4{iSim}, Sims4{iSim}, ...
+        Sols5{iSim}, Vars5{iSim}, Sims5{iSim});
 
 end
 
