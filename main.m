@@ -1,27 +1,40 @@
 
-nBus = 5; nCharger = 5; dt = 1*20; % one minute intervals
-maxChargerPerBus = 16;
+nBus = 120; nCharger = 5; dt = 1*20; % one minute intervals
 MIPGap = 0.99;
-useGurobi = true; makePlots = false; computePrimary = true; computeSecondary = true;
-useQuadraticLoss = false; useMaxLoss = false;
+useGurobi = true; makePlots = false; computePrimary = true; computeSecondary = true; computePresmoothing = true;
 nGroup = 1;
 lossType = "fiscal"; %"fiscal", "baseline", "consumption"
 tic; 
 if computePrimary
     % compute unconstrained solution
-    fprintf("Started: Unconstrained Solution\n");
+    fprintf("Starting: Unconstrained Solution\n");
     [Sim1, Var1, Sol1] = computeIdeal(nBus,nCharger,dt, lossType);
     fprintf("Finished: Unconstrained Solution\n");
-
-    % compute smoothed version of unconstrained solution
-    fprintf("Started: Smoothed Solution\n");
-    [Sim2, Var2, Sol2] = computeSmooth(Sim1, Var1, Sol1);
-    fprintf("Finished: Smoothed Solution\n");
+    
+    % smooth preliminary results
+    if computePresmoothing
+        % compute smoothed version of unconstrained solution
+        fprintf("Starting: Pre-Smoothing\n");
+        [Sim2, Var2, Sol2] = computeSmooth(Sim1, Var1, Sol1);
+        fprintf("Finished: Pre-Smoothing\n");
+    else
+        Sim2 = Sim1;
+        Var2 = Var1;
+        Sol2 = Sol1;
+    end
     
     % separate into groups
-    fprintf("Started: Group Separation\n");
-    groups = computeGroups(Sim2,Var2,Sol2.x,nGroup,MIPGap);  
-    fprintf("Finished: Group Separation\n");
+    if nGroup == 1
+        groups.groupId = ones([nBus,1]);
+        groups.nBus = nBus;
+        groups.nCharger = nCharger;
+        groups.nGroup = 1;
+        groups.schedule = Sol2.x(Var2.b);
+    else
+        fprintf("Started: Group Separation\n");
+        groups = computeGroups(Sim2,Var2,Sol2.x,nGroup,MIPGap);
+        fprintf("Finished: Group Separation\n");
+    end
 end
 
 % prepare loop variables
@@ -40,9 +53,9 @@ for iSim = 1:numel(Sims3)
 
     % Defragment charge schedule
     Sim3 = Sims3{iSim}; Sim3.u = u;
-    fprintf("starting: de-fragmenting sub-problem %i of %i\n",iSim,nSim);
+    fprintf("Starting: de-fragmenting sub-problem %i of %i\n",iSim,nSim);
     [Sols3{iSim}, Vars3{iSim}] = computeDefragmentedSolution(Sim3);
-    fprintf("finished: de-fragmenting sub-problem %i of %i\n",iSim,nSim);
+    fprintf("Finished: de-fragmenting sub-problem %i of %i\n",iSim,nSim);
 
     % update uncontrolled loads to reflect new solution
     u = u + sum(Sols3{iSim}.x(Vars3{iSim}.b),1);
@@ -50,50 +63,37 @@ for iSim = 1:numel(Sims3)
     % assign buses to chargers
     Sim4 = util2.getSimParam(Sims3{iSim}, Vars3{iSim}, Sols3{iSim}.x);
     Sims4{iSim} = Sim4;
-    fprintf("Started: scheduling routes for sub-set %i of %i\n",iSim,numel(Sims3));
-    [Sols4{iSim}, Vars4{iSim}] = computeBusAssignments(Sim4,'max',1e-8);
-    fprintf("finished: scheduling routes for sub-set %i of %i\n",iSim,numel(Sims3));
-%     for iBus = 1:Sim4.nBus
-%         for iRoute = 1:Sim4.nRoute(iBus)
-%             computed = Sols4{iSim}.x(Vars4{iSim}.f(iBus,iRoute));
-%             given = Sim4.tFinal(iBus,iRoute);
-%             fprintf('diff: %f\n',computed - given);
-%         end
-%     end
+    fprintf("Starting: Charger Scheduling for sub-set %i of %i\n",iSim,numel(Sims3));
+    [Sols4{iSim}, Vars4{iSim}] = computeBusAssignments(Sim4);
+    fprintf("Finished: Charger Scheduling for sub-set %i of %i\n",iSim,numel(Sims3));
 
     % compute charge intervals
-    fprintf("Started: Optimizing sub-set schedule...\n");
+    fprintf("Starting: Optimizing Schedule Window...\n");
     Sims5{iSim} = util7.getSimParam(Sims4{iSim}, Vars4{iSim}, Sols4{iSim});
     [Sols5{iSim}, Vars5{iSim}] = computeChargeIntervals(Sims5{iSim});
-    fprintf("Finished: Optimizing sub-set schedule")
+    fprintf("Finished: Optimizing Schedule Window\n")
 
   
 
     % apply optimized start/stop times to schedule from solution 4
     Sols4{iSim} = applyScheduleTimes(Sols4{iSim}, Vars4{iSim}, Sims4{iSim}, ...
         Sols5{iSim}, Vars5{iSim}, Sims5{iSim});
-%       for iBus = 1:Sim4.nBus
-%         for iRoute = 1:Sim4.nRoute(iBus)
-%             computed = Sols4{iSim}.x(Vars4{iSim}.f(iBus,iRoute));
-%             given = Sim4.tFinal(iBus,iRoute);
-%             fprintf('diff: %f\n',computed - given);
-%         end
-%     end
-
 end
 
 % fine tune step-by-step power use
-fprintf('begin variable charge problem\n');
+fprintf('Starting: Variable Charge Rates\n');
 Sim5 = util4.getSimParam(Sim2,Var2,Sol2, Sims4,Vars4,Sols4,groups);
 [Sol5, Var5] = computeReOptimizedSolution(Sim5);
+fprintf('Finished: Variable Charge Rates\n');
+
+% add smoothing for hardware ;)
+fprintf('Starting: Post-Smoothing\n');
 Sim6 = util8.getSimParam(Sim5, Var5, Sol5); 
 [Sol6, Var6] = computeSmoothReOptimization(Sim6);
-fprintf('Finished variable charge problem\n');
-
-
-time = toc;
+fprintf('Finished: Post-Smoothing.\n');
 
 % compute results
+time = toc;
 plan.schedule = reshape(Sol6.x(Var6.schedule),[Sim6.nBus,Sim6.nTime]);
 plan.uncontrolled = Sim2.u;
 opt.schedule = reshape(Sol2.x(Var2.b),[Sim2.nBus,Sim2.nTime]);
@@ -107,9 +107,8 @@ fprintf("Time: %0.2f, plan cost: %0.2f, opt cost: %0.2f, percent increase: %0.2f
 figure; plot(plan.avgPower); hold on; plot(opt.avgPower); legend('plan','optimal');
 xline(15*3600/Sim2.deltaTSec);
 xline(22*3500/Sim2.deltaTSec);
-
+figure; imagesc(opt.schedule); title('preliminary schedule');
 figure; imagesc(plan.schedule); title('planned schedule');
-figure; imagesc(opt.schedule); title('optimal schedule');
 
 function plan = computeResults(plan, Sim)
 
@@ -165,28 +164,3 @@ plan.charges.consumptionOff = consumptionOff;
 plan.cost = cost;
 end
 
-function busPower = computeBusPower(Sim, Var, x, Sim2)
-busPower = zeros([Sim.nBus,Sim2.nTime]);
-for iBus =1:Sim.nBus
-    for iRoute = 1:Sim.nRoute(iBus)
-        e = Sim.mWidth(iBus,iRoute)*Sim2.pMaxKW/3600;
-        e = (e > 0.2)*e;
-        tStart = x(Var.b(iBus,iRoute));
-        tFinal = x(Var.f(iBus,iRoute));
-        if tFinal - tStart > 30
-            p = e/((tFinal - tStart)/3600);
-            is = floor(tStart/Sim2.deltaTSec);
-            rs = (tStart - is*Sim2.deltaTSec)/Sim2.deltaTSec;
-            ifin = floor(tFinal/Sim2.deltaTSec);
-            rfin = (tFinal - ifin*Sim2.deltaTSec)/Sim2.deltaTSec;
-            if is == ifin
-                busPower(iBus,is + 1) = busPower(iBus,is + 1) + (rfin - rs)*p;
-            else
-                busPower(iBus,is + 1) = busPower(iBus,is + 1) + (1 - rs)*p;
-                busPower(iBus,ifin + 1) = busPower(iBus,ifin + 1) + rfin*p;
-                busPower(iBus,is + 2:ifin) = busPower(iBus,is + 2:ifin) + p;
-            end
-        end       
-    end
-end
-end
