@@ -1,0 +1,14 @@
+\section{De-Fragmentation}
+A minimum charge session length is another operational constraint that must be considered. We also consider constraints on minimum energy delivered per session. The intent of these constraints is to avoid charging for small durations or for small amounts of energy so that charge sessions are consolidated for convenience. 
+\par To solve this program, assume there exists a ``smoothed'' solution from the second program which has been appropriately placed in a group from program two. Next, let the preliminary solution be subdivided into charge sessions, each with a specific amount of energy, a minimum start time, and a maximum stop time. If the energy for any charge session is less than the allowed, then this session is marked as ``fragmented''.  The remaining sessions are either marked as ``used'' or ``unused'', where a used session delivers more power than specified in the ``fragmentation-threshold'', and an unused session delivers zero power. 
+\par The purpose of this program is to determine which sessions will be ``active'' in deployment while adhering to minimum charge thresholds. The sessions in question are the ``fragmented'' sessions.  Let $\theta_{i,r}$ be a binary variable which indicates if session $r$ from bus $i$ will be active. Because the only sessions in question are fragmented, we only need to define $\theta{i,r}$ for fragmented sessions. Limiting the binary variables in this fashion significantly reduces the computational complexity of this step.  The charge problem will be resolved using the same constraints and objective as the first program, but with two primary changes.
+\par The first change constrains the minimum power delivery for each ``active'' charge session to be {\it at least} as large as the original power delivery. Let $\rho_{i,r}$ be a vector which is $\Delta T$, in hours, during the times bus $i$ charges during session $r$ and zero otherwise so that  
+\begin{equation}\label{eqn:defragmentation:active}
+	\mathbf{b}(i,:)\rho_{i,r} \ge \psi_{i,j}
+\end{equation}
+where $\psi_{i,j}$ is the minimum energy for session $i,r$ and session $i,r$ is considered ``active''. For inactive sessions, the energy is constrained so that it is equal to zero. Finally, for fragmented sessions, the session energy must be greater than the minimum threshold, $\omega$ when active and zero otherwise which can be expressed as
+\begin{equation}\begin{aligned}
+	\mathbf{b}(i,:)\rho_{i,r} &\ge \omega - \omega(1 - \theta_{i,r}) \\
+	\mathbf{b}(i,:)\rho_{i,r} &\le 0 + \theta_{i,r}e_{\text{max}}
+\end{aligned}\end{equation}
+where $e_{\text{max}}$ is the maximum energy delivered in a session. 

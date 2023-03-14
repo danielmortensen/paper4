@@ -33,6 +33,10 @@ Where $a(i,r)$ and $d(i,r)$ are known from the previous optimization problem, an
 \begin{equation*}
 	w(i,r)_{\text{min}} = \frac{e(i,r)}{p_\text{max}}.
 \end{equation*}
+If we include constraints for a minimum time per session, then the previous expression becomes
+\begin{equation*}
+	w(i,r)_{\text{min}} = \text{max}\left ( w_{\text{min}}, \frac{e(i,r)}{p_\text{max}} \right )
+\end{equation*}
 \par Because this is the minimum time window, we must ensure that the difference between the start and stop times is at least this large so that
 \begin{equation*}
 	f(i,r) - b(i,r) \ge w(i,r) \ \forall i,r	
@@ -63,35 +67,27 @@ However, this constraint {\it only} needs to hold when sessions $i,r$ and $i',r'
 	\underset{f,b}{\text{min}} \sum_{i,r}\lVert b(i,r) - a(i,r)\rVert_2^2 + \lVert f(i,r) - d(i,r) \rVert_2^2
 \end{equation*}
 which has the effect of driving each variable to the desired value and more heavily penalizing values that are further from their optimal.
-\begin{comment}
-\par We desire to solve this second optimization method in a greedy fashion using a heuristic approach. Let $\mathcal{B}$ be the set of all charge sessions which are sorted according to their {\it latest} start time.  Begin by removing the first, or earliest, $n_{\text{charger}}$ sessions and placing them in separate queues for a charger. For the remainder of the charge sessions, we remove the next item from the list, determine which chargers are available to service this request by checking that the previous service can finish before the next will start, and then select the charger which yields the smallest amount of overlap in session availability.
-\begin{algorithm}[!ht]
-\DontPrintSemicolon
-\KwIn{Sorted List of Charge Sessions}
-\KwOut{Charge Schedule for Each Charger}
-\For{i = 1:$n_{\text{charger}}$}
-{
-	charger[i].append(inputList.pop())
-}
-\While{inputList not empty}
-{
-	item = inputList.pop()\;
-	\For{i = 1:$n_{\text{charger}}$}
-	{
-		bestOverlap = inf\;
-		bestCharger = -1\;
-		\If{charger $i$ is available}		
-		{
-			\If{overlap is less than bestOverlap}
-			{
-				bestOverlap = itemOverlap\;
-				bestCharger = i\;
-			}
-		}
-	}
-	charger[bestCharger].append(item)\;
-}
-\caption{Pseudocode that illustrates how charge sessions are assigned}
-\label{alg:chargeAssign}
-\end{algorithm}
-\end{comment}
+
+\section{Optimizing Charge Schedules}
+Many times it is not feasible to compute the optimal set of charge schedules given in the previous sections. As the number of buses and charge sessions becomes large, computing a small-MIPGap solution becomes untractable. Using a large MIPGap resolves issues related to computational complexity, but results in sub-optimal charge-time windows.
+\par We compute a more optimal set of charge windows by using the results from the previous program to infer charger assignment, and ordering for each charge session. We also know that the optimal solution will expand the charge windows to use any available time where a charger is unused, implying that the ``stop'' time for each session will either be equal to it's buse's departure time, or the start time of the next window which can be expressed as
+\begin{equation*}
+\begin{cases}
+	c(s)_{i,r+1} = c(f)_{i,r} & c(d)_{i,r} > c(a)_{i,r+1}\\[0.08in]
+	\begin{aligned}
+	c(s)_{i,r+1} &= c(a)_{i,r+1} \\
+	c(f)_{i,r} &= c(d)_{i,r}
+	\end{aligned} & c(d)_{i,r} <= c(a)_{i,r+1} \\
+\end{cases}
+\end{equation*}
+where $c(s)_{i,r}$ is the start time for charger $i$'s $r^{\text{th}}$ charge session, $c(f)_{i,r}$ is the stop time for charger $i$'s $r^{\text{th}}$ charge session, $c(d)_{i,r}$ is the departure time for the bus scheduled for charger $i$'s $r^{\text{th}}$ charge session, and $c(a)_{i,r}$ is the arrival time for the bus scheduled for charger $i$'s $r^{\text{th}}$ charge session. 
+The minimum charge length must also be used so that energy can be properly delivered, so that
+\begin{equation*}
+	c(f)_{i,r} - c(s)_{i,r} \ge w_{i,r}
+\end{equation*}
+where $w_{i,r}$ is the corresponding minimum charge time corresponding the session.
+\par The final step to optimizing the charge windows is to give preference to windows with larger power deliveries. Let the objective for the optimization program be 
+\begin{equation}
+	J_{\text{window}} = \frac{1}{n}\sum_{i,r} \left \lVert \frac{c(f)_{i,r} - c(s)_{i,r}}{e_{i,r}} \right \rVert^2_2.
+\end{equation}
+When the function $J$ contains windows with equal amounts of energy, the minimum will be found where each charge interval is the same width. As the amount of energy increases, the objective penalizes less for larger window sizes and thus gives preference to high energy sessions.

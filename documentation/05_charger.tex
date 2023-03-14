@@ -4,29 +4,7 @@
 	p_c(j) = \sum_ib_{p(i,j)}
 \end{equation*}
 or also as 
-\begin{equation}
+\begin{equation}\label{eqn:battery:busPower}
 p_c(j) - \sum_ib_{p(i,j)}  = 0\ \forall j.
 \end{equation}
-\par From a practical standpoint, we must also avoid multiple charging sessions in one visit to the station, or charger thrashing. We to this by minimising the difference in the average power values throughout the day.  When a bus uses the charger for longer periods of time, the average power remains the same for multiple time periods.  If a bus reconnects/disconnects multiple times, there will be larger difference in the power use from one time period to another. This can be expressed as
-\begin{equation}
-	J_{\text{thrash}} = \sum_{i,j > 1} \lvert b_{p(i,j)} - b_{p(i,j-1)}\rvert.
-\end{equation}
-To minimize $J_{\text{thrash}}$, we define a slack variable $g(i,j)$ so that 
-\begin{equation*}
-g(i,j) = \lvert b_{p(i,j)} - b_{p(i,j-1)} \rvert.
-\end{equation*}
-which can be enforced by the linear constraints 
-\begin{equation*}\begin{aligned}
-	-g(i,j) &\le b_{p(i,j)} - b_{p(i,j-1)} \\
-	g(i,j) &\ge b_{p(i,j)} - b_{p(i,j-1)}.
-\end{aligned}\end{equation*}
-Suppose $b_{p(i,j)} - b_{p(i,j-1)} = -5$, then we have 
-\begin{equation*}
-	-g \le -5 \le g
-\end{equation*}
-which minimizes $g$ when $g = 5$. A similar expression is minimized when $g$ is positive. The expression for $g(i,j)$ can alternatively be expressed in standard form as
-\begin{equation}\begin{aligned}
--g(i,j) - b_{p(i,j)} + b_{p(i,j-1)} \le 0 \\
--g(i,j) + b_{p(i,j)} - b_{p(i,j-1)} \le 0.
-\end{aligned}\end{equation}
 

@@ -1,8 +1,8 @@
 
-nBus = 120; nCharger = 5; dt = 1*20; % one minute intervals
+nBus = 120; nCharger = 4; dt = 1*20; % one minute intervals
 MIPGap = 0.99;
 useGurobi = true; makePlots = false; computePrimary = true; computeSecondary = true; computePresmoothing = true;
-nGroup = 1;
+nGroup = 2;
 lossType = "fiscal"; %"fiscal", "baseline", "consumption"
 tic; 
 if computePrimary

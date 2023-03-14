@@ -6,7 +6,7 @@
 \end{aligned}\end{equation}
 where $\eta_i$ is the initial state of charge for bus $i$ and $\Delta T$ is the difference in time between $t_{i,j}$ and $t_{i,j+1}$.
 Now that each value for the state of charge is defined, each value for $h$ must be constrained so that it is greater than a given threshold, $h_{\text{min}}$ but does not exceed the maximum battery capacity $h_{\text{max}}$. This yields
-\begin{equation} \begin{aligned}
+\begin{equation} \label{eqn:battery:soc}\begin{aligned}
 	-h(i,j) &\le -h_{\text{min}}\ \forall i,j \\
 	h(i,j) &\le h_{\text{max}} \ \forall i,j. 
 \end{aligned}\end{equation}
