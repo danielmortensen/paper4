@@ -6,7 +6,7 @@ Q = nan([sum(availability,'all')*4,3]);
 iVal = 1;
 for iBus = 1:nBus
     for iTime = 1:nTime - 1
-        if availability(iBus,iTime:iTime + 1) == 2
+        if sum(availability(iBus,iTime:iTime + 1)) == 2
             ai = Var.schedule(iBus,iTime);
             bi = Var.schedule(iBus,iTime + 1);
             Q(iVal + 0,:) = [ai, ai,  1];
