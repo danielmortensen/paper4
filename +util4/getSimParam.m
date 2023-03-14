@@ -30,13 +30,13 @@ for iSim = 1:nGroup
         for iRoute = 1:nBusRoute
             tStart = Sol(Var.b(iBus,iRoute));
             tFinal = Sol(Var.f(iBus,iRoute));
-            tStart = max(tStart,Sims2{iSim}.tStart(iBus,iRoute));
-            tFinal = min(tFinal,Sims2{iSim}.tFinal(iBus,iRoute));
+            tStart = max(tStart,Sim.tStart(iBus,iRoute));
+            tFinal = min(tFinal,Sim.tFinal(iBus,iRoute));
             iArrive = floor(tStart/deltaTSec) + 1;
             iDepart = min(ceil(tFinal/deltaTSec),Sim1.nTime);           
             routeIdx(busIdx,iRoute,:) = 0;
             routeIdx(busIdx,iRoute,iArrive:iDepart) = 1;
-            energy(busIdx, iRoute) = Sim.mWidth(iBus,iRoute)*pMaxKW/3600;
+            energy(busIdx, iRoute) = Sim.energy(iBus,iRoute);
             chargerIdx(busIdx,iRoute) = nPrevCharger + find(round(Sol(Var.sigma(iBus,iRoute,:))));            
         end
         nRoute(busIdx) = nBusRoute;

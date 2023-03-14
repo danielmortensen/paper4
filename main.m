@@ -51,8 +51,15 @@ for iSim = 1:numel(Sims3)
     Sim4 = util2.getSimParam(Sims3{iSim}, Vars3{iSim}, Sols3{iSim}.x);
     Sims4{iSim} = Sim4;
     fprintf("Started: scheduling routes for sub-set %i of %i\n",iSim,numel(Sims3));
-    [Sols4{iSim}, Vars4{iSim}] = computeBusAssignments(Sim4,'quadratic',1e-8);
+    [Sols4{iSim}, Vars4{iSim}] = computeBusAssignments(Sim4,'max',1e-8);
     fprintf("finished: scheduling routes for sub-set %i of %i\n",iSim,numel(Sims3));
+%     for iBus = 1:Sim4.nBus
+%         for iRoute = 1:Sim4.nRoute(iBus)
+%             computed = Sols4{iSim}.x(Vars4{iSim}.f(iBus,iRoute));
+%             given = Sim4.tFinal(iBus,iRoute);
+%             fprintf('diff: %f\n',computed - given);
+%         end
+%     end
 
     % compute charge intervals
     fprintf("Started: Optimizing sub-set schedule...\n");
@@ -60,9 +67,18 @@ for iSim = 1:numel(Sims3)
     [Sols5{iSim}, Vars5{iSim}] = computeChargeIntervals(Sims5{iSim});
     fprintf("Finished: Optimizing sub-set schedule")
 
+  
+
     % apply optimized start/stop times to schedule from solution 4
     Sols4{iSim} = applyScheduleTimes(Sols4{iSim}, Vars4{iSim}, Sims4{iSim}, ...
         Sols5{iSim}, Vars5{iSim}, Sims5{iSim});
+%       for iBus = 1:Sim4.nBus
+%         for iRoute = 1:Sim4.nRoute(iBus)
+%             computed = Sols4{iSim}.x(Vars4{iSim}.f(iBus,iRoute));
+%             given = Sim4.tFinal(iBus,iRoute);
+%             fprintf('diff: %f\n',computed - given);
+%         end
+%     end
 
 end
 

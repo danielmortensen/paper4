@@ -75,5 +75,6 @@ for iGroup = 1:groups.nGroup
     Sims{iGroup}.delta = Sim1.delta(busIds,:);
     Sims{iGroup}.hMin = Sim1.hMin;
     Sims{iGroup}.h0 = Sim1.eta;
+    Sims{iGroup}.minTimePerSession = Sim1.minTimePerSession;
 end
 end

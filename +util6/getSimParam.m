@@ -6,6 +6,7 @@ nCharger = Sim.nCharger;
 % number of time intervals, where dt is given in seconds
 Param.nTime = 3600*24/dt; 
 Param.minEnergyPerSess = Sim.minEnergyPerSess;
+Param.minTimePerSession = Sim.minTimePerSession;
 
 % number of buses
 Param.nBus = nBus;
