@@ -12,7 +12,7 @@ nMaxRoute = 0;
 nAllRoute = 0;
 for iSim = 1:nGroup
     nAllRoute = nAllRoute + sum(Sims2{iSim}.nRoute);
-    nMaxRoute = max(nMaxRoute,sum(Sims2{iSim}.nRoute));
+    nMaxRoute = max([nMaxRoute; Sims2{iSim}.nRoute(:)]);
 end
 
 routeIdx = nan([nBus,nMaxRoute,nTime]);
@@ -45,6 +45,7 @@ for iSim = 1:nGroup
 end
 
 Param.isOnPeak = Sim1.S;
+Param.deltaTSec = Sim1.deltaTSec;
 Param.muEOn = Sim1.muEOn;
 Param.muEOff = Sim1.muEOff;
 Param.muPOn = Sim1.muPOn;
@@ -58,4 +59,8 @@ Param.nTime = nTime;
 Param.nBus = nBus;
 Param.pMaxKW = pMaxKW;
 Param.deltaTSec = deltaTSec;
+Param.u = Sim1.u;
+Param.optSol = Sol1.x;
+Param.optVar = Var1;
+Param.optAvail = Sim1.alpha;
 end

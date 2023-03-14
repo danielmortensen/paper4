@@ -1,9 +1,7 @@
-function [Q, obj] = getObj(Sim, Var)
-Q = nan([Sim.nTime,3]);
-Q(:,1) = Var.allpower;
-Q(:,2) = Var.allpower;
-Q(:,3) = 1;
-Q = sparse(Q(:,1),Q(:,2),Q(:,3),Var.nVar,Var.nVar);
+function obj = getObj(Sim, Var)
 obj = zeros([Var.nVar,1]);
-obj(Var.allpower) = -2*Sim.optProfile;
+obj(Var.demand) = Sim.muPOn;
+obj(Var.facilities) = Sim.muPAll;
+obj(Var.onPeakEnergy) = Sim.muEOn;
+obj(Var.offPeakEnergy) = Sim.muEOff;
 end

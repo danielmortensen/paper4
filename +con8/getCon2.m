@@ -21,6 +21,7 @@ for  iBus = 1:nBus
         for iTime = 1:nTime   
             if isCharging(iBus,iSession,iTime)
                 A(iConstVal + 0,:) = [iConst + 0, iSchedule(iBus,iTime), deltaTHour];     
+                isCharging(iBus,iSession,iTime) = false;
                 iConstVal = iConstVal + 1;
             end            
         end

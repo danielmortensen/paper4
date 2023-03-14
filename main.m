@@ -51,7 +51,7 @@ for iSim = 1:numel(Sims3)
     Sim4 = util2.getSimParam(Sims3{iSim}, Vars3{iSim}, Sols3{iSim}.x);
     Sims4{iSim} = Sim4;
     fprintf("Started: scheduling routes for sub-set %i of %i\n",iSim,numel(Sims3));
-    [Sols4{iSim}, Vars4{iSim}] = computeBusAssignments(Sim4);
+    [Sols4{iSim}, Vars4{iSim}] = computeBusAssignments(Sim4,'quadratic',1e-8);
     fprintf("finished: scheduling routes for sub-set %i of %i\n",iSim,numel(Sims3));
 
     % compute charge intervals
@@ -70,13 +70,15 @@ end
 fprintf('begin variable charge problem\n');
 Sim5 = util4.getSimParam(Sim2,Var2,Sol2, Sims4,Vars4,Sols4,groups);
 [Sol5, Var5] = computeReOptimizedSolution(Sim5);
+Sim6 = util8.getSimParam(Sim5, Var5, Sol5); 
+[Sol6, Var6] = computeSmoothReOptimization(Sim6);
 fprintf('Finished variable charge problem\n');
 
 
 time = toc;
 
 % compute results
-plan.schedule = reshape(Sol5.x(Var5.schedule),[Sim5.nBus,Sim5.nTime]);
+plan.schedule = reshape(Sol6.x(Var6.schedule),[Sim6.nBus,Sim6.nTime]);
 plan.uncontrolled = Sim2.u;
 opt.schedule = reshape(Sol2.x(Var2.b),[Sim2.nBus,Sim2.nTime]);
 opt.uncontrolled = Sim2.u;
@@ -108,9 +110,12 @@ nPerWindow = (60*15)/Sim.deltaTSec;
 nTime = size(plan.schedule,2);
 avgPower = nan([nTime,1]);
 for iTime = 1:nTime
-    iStart = max(1,iTime - nPerWindow + 2);
-    iFinal = iTime;
-    avgPower(iTime) = mean(power(iStart:iFinal)); 
+    s = 0;
+    for iWindow = -nPerWindow + 1:0
+        idx = mod(iWindow + iTime, nTime) + 1;
+        s = s + power(idx);
+    end
+    avgPower(iTime) = s/nPerWindow;    
 end
 
 % compute demand and facilities charges

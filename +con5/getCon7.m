@@ -23,7 +23,7 @@ for iTime = 1:nTime
     iConst = iConst + 1;
     if isOnPeak(iTime)
         A(iConstVal + 0,:) = [iConst + 0, iDemand, -1];
-        A(iConstVal + 1,:) = [iConst + 1, iP15(iTime) 1];
+        A(iConstVal + 1,:) = [iConst + 0, iP15(iTime) 1];
         b(iConst) = 0;
         iConst = iConst + 1;
         iConstVal = iConstVal + 2;
