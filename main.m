@@ -71,9 +71,7 @@ for iSim = 1:numel(Sims3)
     fprintf("Starting: Optimizing Schedule Window...\n");
     Sims5{iSim} = util7.getSimParam(Sims4{iSim}, Vars4{iSim}, Sols4{iSim});
     [Sols5{iSim}, Vars5{iSim}] = computeChargeIntervals(Sims5{iSim});
-    fprintf("Finished: Optimizing Schedule Window\n")
-
-  
+    fprintf("Finished: Optimizing Schedule Window\n")  
 
     % apply optimized start/stop times to schedule from solution 4
     Sols4{iSim} = applyScheduleTimes(Sols4{iSim}, Vars4{iSim}, Sims4{iSim}, ...

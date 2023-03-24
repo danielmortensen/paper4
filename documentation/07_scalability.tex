@@ -1,6 +1,6 @@
 \section{Scalability}
-Before the bus charge problem can be solved, we need to address how the problem will scale. Historically, when buses are routed to chargers it requires a program which will evaluate all possible conflicts and selects a contention-free schedule, which tends to increase on the order of $0(n^2)$ and is NP-hard\textcolor{red}{==insert citation of knapsack problem==}. Before the bus problem can scale, we need a method to separate buses into groups to manage the problem's scope.
-\par The group-selection problem separates buses into $n_{\text{group}}$ groups, where group $m$ is allocated $n^m_{\text{charger}}$ chargers and $n^m_{\text{bus}}$ buses. Each group must have sufficient chargers to fill it's needs and prefers buses with dissimilar routes. 
+Before the bus charge problem can be solved, we need to address how the problem will scale. Historically, when buses are routed to chargers it requires a program which will evaluate all possible conflicts and selects a contention-free schedule, which tends to increase on the order of $0(n^2)$ and is NP-hard\textcolor{red}{==insert citation of knapsack problem==}. Before the bus problem can scale, we need a method to separate buses into groups to manage the problem's scope which will separate buses into groups and assign a specific number of chargers to each group.
+\par The group-selection problem separates buses into $n_{\text{group}}$ groups, where group $m$ is allocated $n^m_{\text{charger}}$ chargers and $n^m_{\text{bus}}$ buses. Each group must have sufficient chargers to fill it's needs and prefer buses with dissimilar schedules to better avoid contention. 
 \par We know that the number of cross-terms in future problems will be reduced when each group has the same number of buses. Therefore, let $n^m_{\text{bus}}$ be described as
 \begin{equation*}\begin{aligned}
 	n^m_{\text{bus}} &\ge \left \lfloor \frac{n_{\text{bus}}}{n_{\text{group}}} \right \rfloor \\
@@ -11,53 +11,61 @@ or alternatively as
 	-n^m_{\text{bus}} &\le -\left \lfloor \frac{n_{\text{bus}}}{n_{\text{group}}} \right \rfloor \\
 	n^m_{\text{bus}} &\le \left \lceil \frac{n_{\text{bus}}}{n_{\text{group}}} \right \rceil.
 \end{aligned}\end{equation}
-\par The next set of constraints ensures that there are sufficient charging resources in each group.  First, we define a slack variable which gives the total power used in group $m$ at time step $j$ as $p(j,m)$. Recall, we also know the expected power use for each bus as this is a result of the linear program described in sections \ref{sec:formulation} through \ref{sec:objective} as $b_{p(i,j)}$, which allows us to describe the total power for any one group as
+\par We must also ensure that the number of chargers assigned to each group is exactly equal to the number of available chargers so that
+\begin{equation}
+	n_{\text{charger}} = \sum_mn_{\text{charger}}^m
+\end{equation}
+where $n_{\text{charger}}^m$ is the number of chargers assinged to group $m$.
+\par The next set of constraints ensures that each bus is is part of a group exactly once. Let $\beta(i,m)$ be a binary variable which is one when bus $i$ is in group $m$. We constrain each bus to be a member of exactly one group by letting
 \begin{equation*}
- p(j,m) = \sum_m\beta(i,m)b_{p(i,j)}
+	\sum_m\beta(i,m) = 1 \ \forall i
+\end{equation*}
+\par We must also ensure that buses are assigned to groups where the power delivered to each bus can be achieved with the number of chargers assigned to that group. First, we define a slack variable which gives the total power used in group $m$ at time step $j$ as $p(m,j)$. Recall, we also know the expected power use for each bus as this is a result of the linear program described in sections \ref{sec:formulation} through \ref{sec:objective} as $b_{p(i,j)}$, which allows us to describe the total power for any one group as
+\begin{equation*}
+ p(m,j) = \sum_i\beta(i,m)b_{p(i,j)}
 \end{equation*}
 or alternatively as
 \begin{equation}
-	p(j,m) - \sum_m\beta(i,m)b_{p(i,j)} = 0 \ \forall i,j,m
-\end{equation}
-where $\beta(i,m)$ is a binary indicator variable that is one when bus $i$ is in group $m$ and serves as part of the solution to this problem. 
+	p(m,j) - \sum_i\beta(i,m)b_{p(i,j)} = 0 \ \forall m,j.
+\end{equation} 
 \par Next, we know that the total load of each group must be less than or equal to the collective capability of that group's chargers, which can be expressed as
 \begin{equation*}
-	n^m_{\text{charger}}\cdot p_{\text{max}} \le p(j,m) \ \forall j,m
+	n^m_{\text{charger}}\cdot p_{\text{max}} \ge p(m,j) \ \forall m,j
 \end{equation*}
 or in standard form as 
 \begin{equation}
-	n^m_{\text{charger}}\cdot p_{\text{max}} - p(j,m) \le 0\ \forall j,m
+	p(m,j) - n^m_{\text{charger}}\cdot p_{\text{max}} \le 0\ \forall m,j
 \end{equation}
 so that the number of chargers is sufficient to charge the collective load of the group. 
 \par We also desire to group buses together who's routes are most orthogonal. If two buses contain no overlap, they will be easiest to schedule and the inner product of their schedules from the first program will be equal to zero. Let 
 \begin{equation*}
 \phi(i,i') = \mathbf{b}(i,:)^T\mathbf{b}(j,:),
 \end{equation*}
-where $\mathbf{b}(i,:)$ is the charge schedule for bus $i$ as computed in the first program. We desire to minimize the total cross terms $\phi(i,i')$ for all buses in the same group.  Define a slack variable $v(i,i',g)$ which is equal to $\phi(i,i')$ if buses $i$ and $i'$ are in the same group, and zero otherwise so that
+where $\mathbf{b}(i,:)$ is the charge schedule for bus $i$ as computed in the first program. We desire to minimize the total cross terms $\phi(i,i')$ for all buses in the same group.  Define a slack variable $v(i,i',m)$ which is equal to $\phi(i,i')$ if buses $i$ and $i'$ are both in group $m$ and zero otherwise so that
 \begin{equation*}
 	\begin{cases}
-		v(i,i',g) = \phi(i,i') & \beta(i,m) = 1, \beta(i',m) = 1 \\
-		v(i,i',g) = 0 & \text{otherwise}
+		v(i,i',m) = \phi(i,i') & \beta(i,m) = 1, \beta(i',m) = 1 \\
+		v(i,i',m) = 0 & \text{otherwise}
 	\end{cases}
 \end{equation*}
 which can also be expressed by letting
 \begin{equation*}\begin{aligned}
-	v(i,i',g) &\le \phi(i,i') \\
-	v(i,i',g) &\ge \phi(i,i') - M\left (2 - \beta(i,m) - \beta(i',m)\right ) \\
-	v(i,i',g) &\le 0 + M\beta(i,m) \\
-	v(i,i',g) &\le 0 + M\beta(i',m) \\
-	v(i,i',g) &\ge 0  
+	v(i,i',m) &\le \phi(i,i') \\
+	v(i,i',m) &\ge \phi(i,i') - M\left (2 - \beta(i,m) - \beta(i',m)\right ) \\
+	v(i,i',m) &\le 0 + M\beta(i,m) \\
+	v(i,i',m) &\le 0 + M\beta(i',m) \\
+	v(i,i',m) &\ge 0  
 \end{aligned}\end{equation*}
 or alternatively as
 \begin{equation}\begin{aligned}
-	v(i,i',g) &\le \phi(i,i') \\
-	-v(i,i',g) + M\beta(i,m) + M\beta(i',m)&\le -\phi(i,i') + 2M \\
-	v(i,i',g) - M\beta(i,m)  &\le 0 \\
-	v(i,i',g) - M\beta(i',m) &\le 0\\
-	-v(i,i',g) &\le 0.
+	v(i,i',m) &\le \phi(i,i') \\
+	-v(i,i',m) + M\beta(i,m) + M\beta(i',m)&\le -\phi(i,i') + 2M \\
+	v(i,i',m) - M\beta(i,m)  &\le 0 \\
+	v(i,i',m) - M\beta(i',m) &\le 0\\
+	-v(i,i',m) &\le 0.
 \end{aligned}\end{equation}
 The final objective can then be expressed as
 \begin{equation}
-	J_{\text{select}} = \sum_{i,i',g} v(i,i',g).
+	J_{\text{select}} = \sum_{i,i',m} v(i,i',m).
 \end{equation}
 Because this objective is more of a preference then a requirement for the bus charging problem, it is not always necessary to solve completely.  Experimental results have shown that increasing the MIP Gap to upwards of 50\% can be sufficient for this problem and helps reduce the computational complexity of this step.
