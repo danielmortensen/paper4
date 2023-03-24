@@ -13,11 +13,11 @@ b = nan([nCon,1]);
 iCon = 1;
 iConVar = 1;
 for iTime = 1:nTime
-    nLow = min(iTime - 1,n15 - 1);
     A(iConVar,:) = [iCon, iP15(iTime), 1];
     iConVar = iConVar + 1;
-    for iLow = 0:nLow
-        A(iConVar,:) = [iCon, iPt(iTime - iLow), -1/(nLow + 1)];
+    for iLow = -n15 + 1:0
+        idx = mod(iTime + iLow,nTime) + 1;
+        A(iConVar,:) = [iCon, iPt(idx), -1/n15];
         iConVar = iConVar + 1;
     end
     b(iCon) = 0;
