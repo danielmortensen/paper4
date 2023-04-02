@@ -1,0 +1,44 @@
+\section{Results}
+-- describe pro-time vs pro-route scenarios
+-- describe battery capacities
+-- describe maximum charge rates
+-- describe how route scheduels, delta, and uncontrolled loads come from uta.
+-- describe the gaps used in the minimisation algorithms.
+\subsection{Comparison with Prior Work}
+In this section, we compare the proposed method with a baseline algorithm and a method developed be \textcolor{red}{insert reference to He. et al here}. The baseline method models how bus drivers charge their electric vehicles at the Utah Transit Authority in Salt Lake City, Utah. At UTA, when bus drivers arrive at the station, they refuel their electric buses whenever a charger is available so that the number of charge sessions is maximized. The method from \textcolor{red}{He et al.} works somewhat differently by minimising the cost of energy with respect to the time of use tarrifs $\mu_{e-on}$ and $\mu_{e-off}$.
+\par The comparison we observe is given for a 5-bus, 5-charger scenario with a pro-time preference and a single group. Each method was run, and the cost related to demand, facilities, and energy charges are given in Fig. \ref{fig:results:costComparison}. Note how the baseline algorithm suffers significantly from the demand charges associated with On-Peak Power, and \textcolor{red}{He et al.} incurres additional cost from the facilities charges, indicating that an emphasis on energy charges and habitual charging patterns can be improved.
+\par We observe where the differences in cost originate in Fig. \ref{fig:results:totalPower}. Observe how the baseline charge profile achieved the largest 15-minute average power between 19:12 adn 21:36 which is during on-peak hours and consequently yielded the large On-Peak Power charges given in Fig. \ref{fig:results:costComparison}. Additionally, note how the proposed method maintains a relatively flat power profile so that the load is balanced throughout the day which we investigate in Fig. \ref{fig:results:powerPlot}.
+\par We investigate how t 
+\input{media/11_results/costComparison} 
+\input{media/11_results/powerPlot}
+\input{media/11_results/totalPower}
+
+\subsection{Contention: Sub-Optimal Schedules}
+show comparison of schedules with large vs small gaps when finding charge schedules. Talk about how the computation time significantly increases as the gap decreases. Show that a smaller gap may be desireable as this lengthens charge times so that they are easier to implement in reality. Explain that we trade time for longer charge sessions better suited for operations.
+\input{media/11_results/disoptimalRoutes.tex}
+\input{media/11_results/optimalRoutes.tex}
+
+\subsection{Contested vs Uncontested}
+address that there is significantly more computations for the schedules that are operations-oriented, and use this to segway into groups
+\input{media/11_results/contestedVsUncontestedPrice}
+\input{media/11_results/contestedVsUncontestedTime}
+%\input{media/11_results/noContentionTime}
+%\input{media/11_results/contentionCostProTime}
+%\input{media/11_results/contentionTimeProTime}
+
+\subsection{Contention: The Importance of Groups}
+Show time difference between 1, 2, and 3 groups when optimizing for cost, talk about how this disparity significantly increases as the gap requirements decrease.
+\input{media/11_results/groupResults}
+\subsection{Effecrts of De-Fragmentation}
+display heat map of before and after for contested case.
+\input{media/11_results/defragmentedChargeLimit}
+\input{media/11_results/noFragmentationChargeLimit}
+
+describe how defragmentation affects runtime and cost in the case of time-oriented and operations-oriented approaches.
+\input{media/11_results/defragmentationCostProTime}
+\input{media/11_results/defragmentationTimeProTime}
+\input{media/11_results/defragmentationTimeProSchedule}
+\input{media/11_results/defragmentationCostProSchedule}
+
+	
+	

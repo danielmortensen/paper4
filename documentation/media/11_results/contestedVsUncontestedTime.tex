@@ -1,0 +1,26 @@
+\begin{figure}
+	\begin{tikzpicture}
+		\begin{axis}[ybar, bar width=14pt, xmin=10, xmax=70, xtick={20, 40, 60},ymajorgrids=true, ylabel={Runtime (Seconds)}, ymode=log, legend pos=north west]
+			\addplot[fill=blue!20, draw=blue] coordinates {
+				(20, 17.46)
+				(40, 26.09)
+				(60, 25.17)
+			};
+			\addplot[fill=green!20, draw=black!40!green] coordinates {
+				(20, 20.84)
+				(40, 32.47)
+				(60, 34.46)
+			};
+			\addplot[fill=red!20, draw=red] coordinates {
+				(20, 24.57)
+				(40, 32.70)
+				(60, 686.40)
+			};
+		\legend{Uncontested, Contested: Pro-Time, Contested: Pro-Session};
+		\end{axis}
+	\end{tikzpicture}
+	\caption{Comparison of Runtimes} 
+	\label{fig:results:contestedVsUncontestedTime}
+\end{figure}
+
+

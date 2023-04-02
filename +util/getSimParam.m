@@ -1,7 +1,7 @@
-function Param = getSimParam(nBus, nCharger, dt)
+function Param = getSimParam(nBus, nCharger, dt, minEnergyPerSess)
 % number of time intervals, where dt is given in seconds
 Param.nTime = 3600*24/dt; 
-Param.minEnergyPerSess = 0;
+Param.minEnergyPerSess = minEnergyPerSess;
 Param.minTimePerSession = 0;
 
 % number of buses

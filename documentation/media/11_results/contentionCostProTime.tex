@@ -1,0 +1,29 @@
+\begin{figure}
+	\begin{tikzpicture}
+		\begin{axis}[xlabel=Number of Buses, ylabel=Total Monthly Cost (Dollars), legend pos=north west, legend style={nodes={scale=0.7}}]
+			\addplot[blue] coordinates {
+				(10,  9145.28)
+				(20, 12150.65)
+				(30, 14554.62)
+				(40, 18745.58)
+				(50, 25059.45)
+				(60, 28166.09)
+				(70, 31468.65)
+				(80, 34452.85)}; 
+			\addplot[blue, only marks, mark size=3pt] coordinates {
+				(10,  9145.28)
+				(20, 12150.65)
+				(30, 14554.62)
+				(40, 18745.58)
+				(50, 25059.45)
+				(60, 28166.09)
+				(70, 31468.65)
+				(80, 34452.85)}; 
+			%\legend{Proposed, Baseline, He et al.}
+		\end{axis}
+	\end{tikzpicture}
+	\caption{Monthly Cost With Contention with emphasis on time}
+	\label{fig:scalabilityCostContentionProTime}
+\end{figure}
+
+

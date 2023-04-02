@@ -1,0 +1,28 @@
+\begin{figure}
+	\begin{tikzpicture}
+		\begin{axis}[xlabel=Number of Buses,  ylabel=Runtime (Seconds)]
+			\addplot[blue] coordinates {
+				(10, 17.54)
+				(20, 27.62)
+				(30, 29.60)
+				(40, 51.53)
+				(50, 56.58)
+				(60, 86.20)
+			  (70, 85.90 )
+			  (80, 134.69)};
+			\addplot[blue, only marks, mark size=3pt] coordinates {
+				(10, 17.54  )
+				(20, 27.62 )
+				(30, 29.60)
+				(40, 51.63)
+				(50, 56.58 )
+				(60, 86.20 )
+				(70, 85.90)
+			  (80, 134.69)}; 
+		\end{axis}
+	\end{tikzpicture}
+	\caption{Uncontested Runtime} 
+	\label{fig:uncontestedRuntime}
+\end{figure}
+
+

@@ -18,5 +18,5 @@ model.rhs = b;
 model.sense = eq;
 model.vtype = vtype;
 model.Q = Q;
-Sol5 = gurobi(model,struct('MIPGap',0.002,'OutputFlag',0));...,'OutputFlag',0,'DualReductions',0));    
+Sol5 = gurobi(model,struct('MIPGap',0.02,'OutputFlag',0));...,'OutputFlag',0,'DualReductions',0));    
 end

@@ -31,7 +31,7 @@ function [Sol3, Var3] = computeDefragmentedSolution(Sim3)
     model.A = A;
     model.rhs = b;
     model.sense = eq;
-    Sol3 = gurobi(model,struct('MIPGap',0.99,'OutputFlag',0));
+    Sol3 = gurobi(model,struct('MIPGap',0.02,'OutputFlag',0));
 
     if Sol3.status == "INFEASIBLE"
         error("Model infeasible: computeDefragmentedSolution");

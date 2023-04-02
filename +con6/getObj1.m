@@ -10,6 +10,8 @@ for iBus = 1:Sim.nBus
         if Sim.alpha(iBus,mod(iTime, nTime) + 1) == 1 || inStation
             if Sim.alpha(iBus,mod(iTime,nTime) + 1) == 0
                 inStation = false;
+            else
+                inStation = true;
             end
             b1 = iB(iBus,mod(iTime - 1,nTime) + 1);
             b2 = iB(iBus,mod(iTime - 0,nTime) + 1);
@@ -18,9 +20,6 @@ for iBus = 1:Sim.nBus
             A(iConstVal + 2,:) = [b2, b1, -1];
             A(iConstVal + 3,:) = [b2, b2,  1];
             iConstVal = iConstVal + 4;
-        else
-
-            inStation = true;
         end
     end
 end

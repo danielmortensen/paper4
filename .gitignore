@@ -16,3 +16,4 @@ documentation/writeup/build/
 *.blg
 *.run.xml
 *~
+results/*

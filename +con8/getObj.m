@@ -1,24 +1,31 @@
 function Q = getObj(Sim, Var)
 nBus = Sim.nBus;
 nTime = Sim.nTime;
+nWindow = 10;
 availability = squeeze(sum(Sim.routeIdx,2,'omitnan'));
-Q = nan([sum(availability,'all')*4,3]);
+nVal = (sum(Sim.nSession) + sum(availability,'all'))*4*nWindow*2;
+Q = nan([nVal,3]);
 iVal = 1;
 isOnBreak = false;
+nRoute = 0;
 for iBus = 1:nBus
     for iTime = 1:nTime + 1
         if availability(iBus,mod(iTime,nTime) + 1) == 1 || isOnBreak
-            isOnBreak = true;
-            if availability(iBus,mod(iTime,nTime) + 1) == 0
+            if availability(iBus,mod(iTime,nTime) + 1) == 1
+                isOnBreak = true;
+            else
                 isOnBreak = false;
+                nRoute = nRoute + 1;
             end
-            ai = Var.schedule(iBus,mod(iTime,nTime) + 1);
-            bi = Var.schedule(iBus,mod(iTime - 1,nTime) + 1);
-            Q(iVal + 0,:) = [ai, ai,  1];
-            Q(iVal + 1,:) = [bi, bi,  1];
-            Q(iVal + 2,:) = [ai, bi, -1];
-            Q(iVal + 3,:) = [bi, ai, -1];
-            iVal = iVal + 4;
+            for iWindow = -nWindow:-1
+                ai = Var.schedule(iBus,mod(iTime,nTime) + 1);
+                bi = Var.schedule(iBus,mod(iTime - iWindow,nTime) + 1);
+                Q(iVal + 0,:) = [ai, ai,  1];
+                Q(iVal + 1,:) = [bi, bi,  1];
+                Q(iVal + 2,:) = [ai, bi, -1];
+                Q(iVal + 3,:) = [bi, ai, -1];
+                iVal = iVal + 4;
+            end
         end
     end
 end

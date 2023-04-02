@@ -1,0 +1,12 @@
+\begin{figure}
+\begin{tikzpicture}
+	\begin{axis}[ybar, ymode=log, ymax=2000, xmin=0, xmax=3, xtick={1,2}, xlabel=Number of Groups, ylabel=Runtime (Seconds)]
+		\addplot[fill=red!20, bar width=0.8] coordinates {(1.4, 1072.6)};
+		\addplot[fill=blue!20, bar width=0.8]  coordinates {(1.6, 29.92)};
+	\end{axis}
+	\node at (2.2,5.2){1072.6};
+	\node at (4.57, 0.79){29.92};
+\end{tikzpicture}
+\caption{Runtimes for a 18 bus 12 charger scenario at a 0.13\% gap}
+\label{fig:results:groupResults}
+\end{figure}

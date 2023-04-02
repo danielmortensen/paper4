@@ -28,6 +28,15 @@ function [Sol4, Var4] = computeBusAssignments(Sim4, lossType, MIPGap)
             model.obj = obj;
         end
     end
+%     feasSol = zeros(size(vtype));
+%     for iBus = 1:Sim4.nBus        
+%         for iRoute = 1:Sim4.nRoute(iBus)
+%             feasSol(Var4.sigma(iBus,iRoute,iBus)) = 1;
+%             feasSol(Var4.b(iBus,iRoute)) = Sim4.tStart(iBus,iRoute);
+%             feasSol(Var4.f(iBus,iRoute)) = Sim4.tFinal(iBus,iRoute);      
+%         end
+%     end
+%     feasSol(Var4.max) = 24*3600;
     if nargin == 1
         Sol4 = gurobi(model,struct('OutputFlag',0));
     else

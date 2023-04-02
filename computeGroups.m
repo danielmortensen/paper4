@@ -1,4 +1,4 @@
-function groups = computeGroups(Sim, Var, x, nGroup, MIPGap)
+function [groups, Sim2, Var2, sol] = computeGroups(Sim, Var, x, nGroup, MIPGap)
 
 fprintf("building constraints for group separation...\n");
 % compute simulation params/variable indices

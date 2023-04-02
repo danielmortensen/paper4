@@ -1,0 +1,28 @@
+\begin{figure}
+	\begin{tikzpicture}
+		\begin{axis}[xlabel=Number of Buses,  ylabel=Runtime (Seconds)]
+			\addplot[blue] coordinates {
+				(10, 7.15)
+				(20, 21.64)
+				(30, 26.22)
+				(40, 33.78)
+				(50, 30.09)
+				(60, 35.88)
+			  (70, 55.46 )
+			  (80, 60.14)};
+			\addplot[blue, only marks, mark size=3pt] coordinates {
+				(10, 7.15)
+				(20, 21.64)
+				(30, 26.22)
+				(40, 33.78)
+				(50, 30.09)
+				(60, 35.88)
+			  (70, 55.46 )
+			  (80, 60.14)};
+		\end{axis}
+	\end{tikzpicture}
+	\caption{Runtime with contention with time prioritized} 
+	\label{fig:uncontestedRuntime}
+\end{figure}
+
+

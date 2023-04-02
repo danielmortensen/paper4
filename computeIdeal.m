@@ -1,6 +1,6 @@
-function [Sim1, Var1, Sol1] = computeIdeal(nBus, nCharger, dt, lossType)
+function [Sim1, Var1, Sol1] = computeIdeal(nBus, nCharger, dt, lossType, minEnergyPerSession)
 clear('model');
-Sim1 = util.getSimParam(nBus, nCharger, dt);
+Sim1 = util.getSimParam(nBus, nCharger, dt, minEnergyPerSession);
 Var1 = util.getVarParam(Sim1);
 Sim1.u = Sim1.u*5;
 [A1, b1, nCon1, descr1, eq1] = con.getCon1(Sim1,Var1);

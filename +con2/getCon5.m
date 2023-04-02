@@ -35,7 +35,7 @@ assert(max(A(:,1)) == nConst);
 assert(numel(b) == nConst);
 
 
-descr = "ordering for arrival, start, finish, and departure times";
+descr = "compute the max difference between the given and computed arrival or departure time";
 eq = repmat('<',[nConst,1]);
 A = sparse(A(:,1), A(:,2), A(:,3), nConst, Var.nVar);
 end
