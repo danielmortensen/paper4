@@ -19,14 +19,14 @@ for iCharger = 1:nCharger
         session = Sim.chargeSession(iCharger,iSession);
         session = session{1};
         A(iConstVal + 0,:) = [iConst + 0, iStart(iCharger, iSession), -1];
-        b(iConst + 0) = -session.tArrive;
+        b(iConst + 0) = -(session.tArrive - 1e-3);
 
         A(iConstVal + 1,:) = [iConst + 1, iStart(iCharger, iSession),  1];
         A(iConstVal + 2,:) = [iConst + 1, iFinal(iCharger, iSession), -1];
         b(iConst + 1) = 0;
 
         A(iConstVal + 3,:) = [iConst + 2, iFinal(iCharger, iSession),  1];
-        b(iConst + 2) = session.tDepart;
+        b(iConst + 2) = session.tDepart + 1e-3;
 
         iConstVal = iConstVal + 4;
         iConst = iConst + 3;

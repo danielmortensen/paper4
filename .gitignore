@@ -17,3 +17,4 @@ documentation/writeup/build/
 *.run.xml
 *~
 results/*
+*.swo

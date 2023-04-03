@@ -38,7 +38,7 @@ function [Sol4, Var4] = computeBusAssignments(Sim4, lossType, MIPGap)
 %     end
 %     feasSol(Var4.max) = 24*3600;
     if nargin == 1
-        Sol4 = gurobi(model,struct('OutputFlag',0));
+        Sol4 = gurobi(model,struct('OutputFlag',0,'TimeLimit',3600));
     else
         Sol4 = gurobi(model,struct('OutputFlag',0,'MIPGap',MIPGap)); ...,'DualReductions',0));
     end

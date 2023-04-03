@@ -3,8 +3,8 @@
 \pgfplotstableread[col sep=comma]{#1}\firstTable
 \pgfplotstableread[col sep=comma]{#2}\secondTable
 \begin{tikzpicture}
-	\begin{axis}[SmallTimeSeriesPlot, xlabel=Time (hr:min), ylabel=#3, ymin = -10, ymax=2000, legend style={nodes={scale=0.7}}]
-		\filldraw[fill=gray!40, opacity=0.3](625,0) rectangle (917,200);
+	\begin{axis}[SmallTimeSeriesPlot, xlabel=Time (hr:min), ylabel=#3, ymin = -10, ymax=2500, legend style={nodes={scale=0.6}}]
+		\filldraw[fill=gray!40, opacity=0.3](625,0) rectangle (917,300);
 
 		\addplot[blue, smooth] table [x = {time}, y = {facilitiesOut}]{\firstTable};
 		\addplot[red, smooth] table [x = {time}, y = {facilitiesOut}]{\secondTable};
@@ -27,7 +27,7 @@
 	\pgfplotstableread[col sep=comma]{#2}\secondTable
 	\centering
 	\begin{tikzpicture}
-		\begin{axis}[SmallTimeSeriesPlot, ymin=-10, ymax=2000, xlabel=Time (hr:min), ylabel=#3, legend style={nodes={scale=0.5}}]
+		\begin{axis}[SmallTimeSeriesPlot, ymin=-10, ymax=800, xlabel=Time (hr:min), ylabel=#3, legend style={nodes={scale=0.7}}]
 			\addplot[blue, smooth] table [x = {time}, y = {meanBusPower}]{\firstTable};
 			\addplot[red, smooth] table [x = {time}, y = {meanBusPower}]{\secondTable};
 			\addplot[brown, smooth] table [x = {time}, y = {loadPower}]{\firstTable};

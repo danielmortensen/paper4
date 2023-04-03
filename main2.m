@@ -1,11 +1,13 @@
 
 
-nBuses = [4];..., 20, 40, 60]; ... 18 18]; ...[20:20:80 9:18:80]; ...[10:10:80 10:10:80 10:10:80];...[120, 120, 10:10:80, 10:10:80, 9:9:81, ones([1,7])*12, 10:10:80];
-nChargers = [4]; ... [ones(1,24)*20];...[7, 7, repmat(12,[1,32]) 10:10:80];
+nBuses = [10]; ...ones([1,1])*8; ..., 20, 40, 60]; ... 18 18]; ...[20:20:80 9:18:80]; ...[10:10:80 10:10:80 10:10:80];...[120, 120, 10:10:80, 10:10:80, 9:9:81, ones([1,7])*12, 10:10:80];
+nChargers = [7];...[7 7 7 7 7 7 7 7 7 7 7]; ... [ones(1,24)*20];...[7, 7, repmat(12,[1,32]) 10:10:80];
 nGroups =  [ones(size(nBuses))]; ...[ones(1,4)*3, ones(1,8)*2, ones(1,8)*3]; ...1, 1, 1, 1, 1, 1, 1, 1];...[2, 3, ones([1,8])*1, ones([1,8])*2, ones([1,9])*3, ones([1,7]), ones([1,8])];
-minEnergyPerSessions = [0]; ...45:5:80 45:5:80 45:5:80 45:5:80 45:5:80 45:5:80]; ...zeros([1,24]); ...[0,0,0,0,0,0,0,0]; ...[0, 0, 0, zeros([1,25]), 5:5:35, zeros([1,8])];
+minEnergyPerSessions = [0 0 0 0 0 0 0 0 0 0 0]; ...45:5:80 45:5:80 45:5:80 45:5:80 45:5:80 45:5:80]; ...zeros([1,24]); ...[0,0,0,0,0,0,0,0]; ...[0, 0, 0, zeros([1,25]), 5:5:35, zeros([1,8])];
 nRun = numel(nBuses);
-tags = ["proCost"];...repmat("proCost",[numel(nBuses)/2,1]) repmat("proTime",[numel(nBuses)/2,1])];...,"proTime","proTime"];
+tags = ["proCost","proCost","proCost","proCost","proCost","proCost","proCost","proCost","proCost","proCost","proCost"];...repmat("proCost",[numel(nBuses)/2,1]) repmat("proTime",[numel(nBuses)/2,1])];...,"proTime","proTime"];
+lossTypes = ["fiscal","fiscal","fiscal","fiscal","fiscal","fiscal","fiscal","fiscal","fiscal","fiscal","fiscal"];
+proCostGaps = [0.001]; ...repmat([0.0009]); , 0.0004 0.00035 0.0003 0.00025],[1,1]);
 for iRun = 1:nRun
     tag = tags(iRun);
     nBus = nBuses(iRun);
@@ -14,13 +16,14 @@ for iRun = 1:nRun
     minEnergyPerSession = minEnergyPerSessions(iRun);
     dt = 1*20; % in seconds
     MIPGap = 0.99;
+    proCostGap = proCostGaps(iRun);
     makePlots = false;
-    computePrimary = true;
+    computePrimary = false;
     computeSecondary = true;
     computePresmoothing = true;
     exportData = false;
     saveResults = true;
-    lossType = "fiscal"; %"fiscal", "baseline", "consumption"
+    lossType = lossTypes(iRun); ..."baseline"; %"fiscal", "baseline", "consumption"
     tic;
     if computePrimary
         % compute unconstrained solution
@@ -88,7 +91,7 @@ for iRun = 1:nRun
             
             fprintf("Starting: Charger Scheduling for sub-set %i of %i\n",iSim,numel(Sims3));
             if strcmp(tag,"proCost")
-                [Sols4{iSim}, Vars4{iSim}] = computeBusAssignments(Sim4,'quadratic',0.000001);
+                [Sols4{iSim}, Vars4{iSim}] = computeBusAssignments(Sim4,'quadratic',proCostGap);
             else
                 [Sols4{iSim}, Vars4{iSim}] = computeBusAssignments(Sim4);
             end
@@ -162,12 +165,13 @@ for iRun = 1:nRun
     dem = plan.charges.demand;
     fac = plan.charges.facilities;
     enr = plan.charges.consumptionOff + plan.charges.consumptionOn;
-    fprintf("Time: %0.2f, plan cost: %0.2f, opt cost: %0.2f, percent increase: %0.2f plan demand: %0.2f plan facilities: %0.2f plan energy: %0.2f time uncontested: %0.2f\n",time,plan.cost,opt.cost,percentIncrease,dem,fac,enr, timeUncontested);
+    gap = Sols4{1}.mipgap;
+    fprintf("Time: %0.2f, plan cost: %0.2f, opt cost: %0.2f, percent increase: %0.2f plan demand: %0.2f plan facilities: %0.2f plan energy: %0.2f time uncontested: %0.2f sol4 gap: %0.2f\n",time,plan.cost,opt.cost,percentIncrease,dem,fac,enr, timeUncontested, gap*100);
 
     %% export for plots
 
     if exportData
-        nResample = 96;
+        nResample = 96*2;
         decimateBy = Sim1.nTime/nResample;
         secInDay = 3600*24;
 
@@ -183,8 +187,8 @@ for iRun = 1:nRun
         sFinal = seconds(22*3600);
         isOnPeak = (offset >= sStart) & (offset <= sFinal);
         allPower = plan.avgPower(1:decimateBy:end)';
-        allBus = plan.busPower(1:decimateBy:end)';
-        load = plan.uncontrolled(1:decimateBy:end)';
+        allBus = plan.avgBusPower(1:decimateBy:end)';
+        load = plan.avgLoadPower(1:decimateBy:end)';
         allOnPeak = allPower.*isOnPeak;
         [maxAllVal, maxAllIdx] = max(allPower);
         [onPeakVal, onPeakIdx] = max(allOnPeak);
@@ -229,7 +233,7 @@ for iRun = 1:nRun
 
     if saveResults
         saveDir = '\\wsl.localhost\ubuntu\home\dmortensen\paper4\results';
-        name = sprintf("LossType_%s_nBus_%i_nCharger_%i_nGroup_%i_dt_%i_minEnergy_%0.2f_%s.mat",lossType,nBus,nCharger, nGroup, dt,minEnergyPerSession,tag);
+        name = sprintf("LossType_%s_nBus_%i_nCharger_%i_nGroup_%i_dt_%i_minEnergy_%0.2f_%s_proCostGap_%f.mat",lossType,nBus,nCharger, nGroup, dt,minEnergyPerSession,tag,proCostGap);
         saveLoc = fullfile(saveDir,name);
         save(saveLoc,"Sim1","Var1","Sol1",...
             "Sim2","Var2","Sol2","groups","Simg","Varg","Solg",...
@@ -265,13 +269,21 @@ eOff = sum(power(~Sim.S)*Sim.deltaTSec/3600);
 nPerWindow = (60*15)/Sim.deltaTSec;
 nTime = size(plan.schedule,2);
 avgPower = nan([nTime,1]);
+avgBusPower = nan([nTime,1]);
+avgLoadPower =nan([nTime,1]);
 for iTime = 1:nTime
     s = 0;
+    b = 0;
+    l = 0;
     for iWindow = -nPerWindow + 1:0
         idx = mod(iWindow + iTime, nTime) + 1;
         s = s + power(idx);
+        b = b + busPower(idx);
+        l = l + Sim.u(idx);
     end
-    avgPower(iTime) = s/nPerWindow;    
+    avgPower(iTime) = s/nPerWindow;  
+    avgBusPower(iTime) = b/nPerWindow;
+    avgLoadPower(iTime) = l/nPerWindow;
 end
 
 % compute demand and facilities charges
@@ -303,6 +315,8 @@ plan.charges.facilities = facilities;
 plan.charges.consumptionOn = consumptionOn;
 plan.charges.consumptionOff = consumptionOff;
 plan.cost = cost;
+plan.avgBusPower = avgBusPower;
+plan.avgLoadPower = avgLoadPower;
 end
 
 

@@ -20,7 +20,7 @@ for iCharger = 1:nCharger
         session = session{1};
         A(iConstVal + 0,:) = [iConst + 0, iStart(iCharger, iSession),  1];
         A(iConstVal + 1,:) = [iConst + 0, iFinal(iCharger, iSession), -1];
-        b(iConst) = -session.mWidth;       
+        b(iConst) = -(session.mWidth - 1e-3);       
 
         iConstVal = iConstVal + 2;
         iConst = iConst + 1;

@@ -1,17 +1,19 @@
 
 
-nBuses = [60 60 60];..., 20, 40, 60]; ... 18 18]; ...[20:20:80 9:18:80]; ...[10:10:80 10:10:80 10:10:80];...[120, 120, 10:10:80, 10:10:80, 9:9:81, ones([1,7])*12, 10:10:80];
-nChargers = [7*ones(size(nBuses))]; ... [ones(1,24)*20];...[7, 7, repmat(12,[1,32]) 10:10:80];
-nGroups =  [ones(size(nBuses))]; ...[ones(1,4)*3, ones(1,8)*2, ones(1,8)*3]; ...1, 1, 1, 1, 1, 1, 1, 1];...[2, 3, ones([1,8])*1, ones([1,8])*2, ones([1,9])*3, ones([1,7]), ones([1,8])];
-minEnergyPerSessions = [70 75 80]; ...zeros([1,24]); ...[0,0,0,0,0,0,0,0]; ...[0, 0, 0, zeros([1,25]), 5:5:35, zeros([1,8])];
+nBuses = [120]; ...[ones([1,7])*8]; ...60 60 60];..., 20, 40, 60]; ... 18 18]; ...[20:20:80 9:18:80]; ...[10:10:80 10:10:80 10:10:80];...[120, 120, 10:10:80, 10:10:80, 9:9:81, ones([1,7])*12, 10:10:80];
+nChargers = ones([1,numel(nBuses)])*8; ...[7*ones(size(nBuses))]; ... [ones(1,24)*20];...[7, 7, repmat(12,[1,32]) 10:10:80];
+nGroups =  ones([1,numel(nBuses)]); ...[ones(size(nBuses))]; ...[ones(1,4)*3, ones(1,8)*2, ones(1,8)*3]; ...1, 1, 1, 1, 1, 1, 1, 1];...[2, 3, ones([1,8])*1, ones([1,8])*2, ones([1,9])*3, ones([1,7]), ones([1,8])];
+minEnergyPerSessions = 20*ones([1,numel(nBuses)]); ...zeros(size(nBuses)); ...zeros([1,24]); ...[0,0,0,0,0,0,0,0]; ...[0, 0, 0, zeros([1,25]), 5:5:35, zeros([1,8])];
 nRun = numel(nBuses);
-tags = [repmat("proCost",[numel(nBuses),1])];... repmat("proTime",[numel(nBuses)/2,1])];...,"proTime","proTime"];
+proCostGaps = repmat([0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001, 00005, 00001, 000005, 000001],[1,3]);
+tags = repmat("proTime",[numel(nBuses),1]);... repmat("proCost",[numel(nBuses)/2,1])];... repmat("proTime",[numel(nBuses)/2,1])];...,"proTime","proTime"];
 for iRun = 1:nRun
     tag = tags(iRun);
     nBus = nBuses(iRun);
     nCharger = nChargers(iRun);
     nGroup = nGroups(iRun);
     minEnergyPerSession = minEnergyPerSessions(iRun);
+    proCostGap = proCostGaps(iRun);
     dt = 1*20; % in seconds
     MIPGap = 0.99;
     makePlots = false;
@@ -84,10 +86,10 @@ for iRun = 1:nRun
             % assign buses to chargers
             Sim4 = util2.getSimParam(Sims3{iSim}, Vars3{iSim}, Sols3{iSim}.x);
             Sims4{iSim} = Sim4;
-            
+            Sim4.mWidth = Sim4.mWidth + 1e-3;
             fprintf("Starting: Charger Scheduling for sub-set %i of %i\n",iSim,numel(Sims3));
             if strcmp(tag,"proCost")
-                [Sols4{iSim}, Vars4{iSim}] = computeBusAssignments(Sim4,'quadratic',0.02);
+                [Sols4{iSim}, Vars4{iSim}] = computeBusAssignments(Sim4,'quadratic',proCostGap);
             else
                 [Sols4{iSim}, Vars4{iSim}] = computeBusAssignments(Sim4);
             end
@@ -95,7 +97,7 @@ for iRun = 1:nRun
 
             % compute charge intervals
             fprintf("Starting: Optimizing Schedule Window...\n");
-            Sims5{iSim} = util7.getSimParam(Sims4{iSim}, Vars4{iSim}, Sols4{iSim});
+            Sims5{iSim} = util7.getSimParam(Sims4{iSim}, Vars4{iSim}, Sols4{iSim});            
             [Sols5{iSim}, Vars5{iSim}] = computeChargeIntervals(Sims5{iSim});
             fprintf("Finished: Optimizing Schedule Window\n")
 
@@ -195,7 +197,7 @@ for iRun = 1:nRun
 
     if saveResults
         saveDir = '\\wsl.localhost\ubuntu\home\dmortensen\paper4\results';
-        name = sprintf("LossType_%s_nBus_%i_nCharger_%i_nGroup_%i_dt_%i_minEnergy_%0.2f_%s.mat",lossType,nBus,nCharger, nGroup, dt,minEnergyPerSession,tag);
+        name = sprintf("LossType_%s_nBus_%i_nCharger_%i_nGroup_%i_dt_%i_minEnergy_%0.2f_%s_proCostGap_%f.mat",lossType,nBus,nCharger, nGroup, dt,minEnergyPerSession,tag,proCostGap);
         saveLoc = fullfile(saveDir,name);
         save(saveLoc,"Sim1","Var1","Sol1",...
             "Sim2","Var2","Sol2","groups","Simg","Varg","Solg",...

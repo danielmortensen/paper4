@@ -18,12 +18,14 @@ eq = [...
      eq1;...
      eq2;...
      eq3;...
-     ];
+     ]; 
+
 vtype = repmat('C',[Var.nVar,1]);
 model.vtype = vtype;
 model.Q = Q;
 model.A = A;
 model.rhs = b;
 model.sense = eq;
-Sol = gurobi(model,struct('OutputFlag',0));
+Sol = gurobi(model,struct('OutputFlag',0,'DualReductions',0));
+
 end

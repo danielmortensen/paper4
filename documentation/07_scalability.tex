@@ -1,4 +1,4 @@
-\section{Scalability}
+\section{Scalability\label{sec:scalability}}
 Before the bus charge problem can be solved, we need to address how the problem will scale. Historically, when buses are routed to chargers it requires a program which will evaluate all possible conflicts and selects a contention-free schedule, which tends to increase on the order of $0(n^2)$ and is NP-hard\textcolor{red}{==insert citation of knapsack problem==}. Before the bus problem can scale, we need a method to separate buses into groups to manage the problem's scope which will separate buses into groups and assign a specific number of chargers to each group.
 \par The group-selection problem separates buses into $n_{\text{group}}$ groups, where group $m$ is allocated $n^m_{\text{charger}}$ chargers and $n^m_{\text{bus}}$ buses. Each group must have sufficient chargers to fill it's needs and prefer buses with dissimilar schedules to better avoid contention. 
 \par We know that the number of cross-terms in future problems will be reduced when each group has the same number of buses. Therefore, let $n^m_{\text{bus}}$ be described as

@@ -6,39 +6,37 @@
 -- describe the gaps used in the minimisation algorithms.
 \subsection{Comparison with Prior Work}
 In this section, we compare the proposed method with a baseline algorithm and a method developed be \textcolor{red}{insert reference to He. et al here}. The baseline method models how bus drivers charge their electric vehicles at the Utah Transit Authority in Salt Lake City, Utah. At UTA, when bus drivers arrive at the station, they refuel their electric buses whenever a charger is available so that the number of charge sessions is maximized. The method from \textcolor{red}{He et al.} works somewhat differently by minimising the cost of energy with respect to the time of use tarrifs $\mu_{e-on}$ and $\mu_{e-off}$.
-\par The comparison we observe is given for a 5-bus, 5-charger scenario with a pro-time preference and a single group. Each method was run, and the cost related to demand, facilities, and energy charges are given in Fig. \ref{fig:results:costComparison}. Note how the baseline algorithm suffers significantly from the demand charges associated with On-Peak Power, and \textcolor{red}{He et al.} incurres additional cost from the facilities charges, indicating that an emphasis on energy charges and habitual charging patterns can be improved.
+\par The comparison we observe is given for a 10-bus, 10-charger scenario with a pro-route preference and a single group. Each method was used to compute a charage schedule and the costs from demand, facilities, and energy charges are given in Fig. \ref{fig:results:costComparison}. Note how the baseline algorithm suffers significantly from the demand charges associated with On-Peak Power, and \textcolor{red}{He et al.} incurres additional cost from the facilities charges, indicating that an emphasis on energy charges and habitual charging patterns can be improved.
 \par We observe where the differences in cost originate in Fig. \ref{fig:results:totalPower}. Observe how the baseline charge profile achieved the largest 15-minute average power between 19:12 adn 21:36 which is during on-peak hours and consequently yielded the large On-Peak Power charges given in Fig. \ref{fig:results:costComparison}. Additionally, note how the proposed method maintains a relatively flat power profile so that the load is balanced throughout the day which we investigate in Fig. \ref{fig:results:powerPlot}.
-\par We investigate how t 
+\par In Fig. \ref{fig:results:powerPlot}, note how the proposed method produces a bus load that mirrors the uncontrolled load, yielding the flat load profile from Fig. \ref{fig:results:totalPower} which is especially prevalent from 7:12 to 14:24.
 \input{media/11_results/costComparison} 
 \input{media/11_results/powerPlot}
 \input{media/11_results/totalPower}
-
+\subsection{Scalability of an Optimal Solution}
+In the previous section, we discussed performance of the proposed method when each program is solved to an optimal solution. In general, the most computationally demanding solution addressed bus-to-charger placement and generally requries a gap of $1\times10^{-5}$ for optimality. This work also seeks to address how to compute a solution in a scalable manner and so this section reviews computational time as the number of buses increases. Fig. \ref{fig:results:scalabilityTimeVsGap} shows how the computational time scales with the gap from the the program which solves the bus-to-charger assignment problem. Note how the computational time significantly increases as the gap decreases, a phenomena which is exacerbated as the bus-to-charger ratio increases. However, note that even the larger gap values are relatively low, usually around 0.6\%, indicating that we may be able to manage the computational time by significantly increasing the threshold for gaps. 
+\input{media/11_results/scalabilityTimeVsGap}
 \subsection{Contention: Sub-Optimal Schedules}
-show comparison of schedules with large vs small gaps when finding charge schedules. Talk about how the computation time significantly increases as the gap decreases. Show that a smaller gap may be desireable as this lengthens charge times so that they are easier to implement in reality. Explain that we trade time for longer charge sessions better suited for operations.
+In the previous section we observed that a scalable solution the bus charge problem will require that we must either maintain loose gap requirements for the bus-to-charger placement problem, or decrease the computational complexity. In this section, we show that even though a gap may be small for the bus-to-charger problem, the resulting solution may still be undesireable. 
+\par Compare the two charge schedules in Fig. \ref{fig:results:disoptimalRoutes} and Fig. \ref{fig:results:optimalRoutes} where Fig. \ref{fig:results:disoptimalRoutes} represents a charge schedule for an arbitrary gap and Fig. \ref{fig:results:optimalRoutes} represents a solution for a gap of $1\times10^{-6}$. In each figure, the color for the i,j location represents the charge rate for bus $i$ at time $j$. Note how the charge sessions in Fig. \ref{fig:results:optimalRoutes} are spread over larger time intervals and contain lower charge rates, which is advantagous because larger time intervals are less challenging from an operational perspective, and the corresponding decrease in immediate power is easier for charging hardware to execute. Therefore, if high performance is necessary, then the effective computational complexity of the bus-to-charger placement problem must be managed.
 \input{media/11_results/disoptimalRoutes.tex}
-\input{media/11_results/optimalRoutes.tex}
+\input{media/11_results/optimalRoutes.tex} 
 
-\subsection{Contested vs Uncontested}
-address that there is significantly more computations for the schedules that are operations-oriented, and use this to segway into groups
-\input{media/11_results/contestedVsUncontestedPrice}
-\input{media/11_results/contestedVsUncontestedTime}
-%\input{media/11_results/noContentionTime}
-%\input{media/11_results/contentionCostProTime}
-%\input{media/11_results/contentionTimeProTime}
-
-\subsection{Contention: The Importance of Groups}
-Show time difference between 1, 2, and 3 groups when optimizing for cost, talk about how this disparity significantly increases as the gap requirements decrease.
-\input{media/11_results/groupResults}
-\subsection{Effecrts of De-Fragmentation}
-display heat map of before and after for contested case.
+\subsection{The Importance of Groups}
+For scenarios where ideal schedules are necessary, we show that the effective computational time can be decreased by separating buses and chargers into groups and solving each sub-problem separately. In this section, we consider a 18 bus, 12 charger scenario with a 0.13\% gap in the bus-to-charger assignment problem where a solution for each scenario is computed using one and two gaps as described in Section \ref{sec:scalability}. Note how the computational time significantly decreases with the addition of a single group, demonstrating how a small number of groups can decrease the runtime for a more optimal solution.
+\input{media/11_results/groupResults} 
+\subsection{Effects of De-Fragmentation}
+This paper also addresses the operational preference of smaller numbers of charge sessions when possible. This section demonstrates the effectiveness the defragmentation method given in Section \ref{sec:defragmentation}, and the overall change in monthly cost. In section \ref{sec:defragmentation}, the threshold for defragmentation is given by the minimum energy allowed per charge session. In this section we consider a scenario with a minimum energy of 0 kWh as shown in Fig. \ref{fig:results:noFragmentationChargeLimit}, and a second at 30 kWh as shown in Fig. \ref{fig:results:defragmentedChargeLimit}. Observe how the many charge sessions are condensed so that each bus must only charge a small number of times. 
+\par In Fig. \ref{fig:results:defragmentationCostProTime}, we show the cost remains relatively consistent over a large window of minimum energy thresholds. Computation time also behaves as expected, where larger threshold values result in larger runtimes. However, these runtimes can be managed in the same way as the runtimes for the bus-to-charger placement problem by dividing the buses into groups. Because defragmentation reduces the number of charge sessions, the number of binary variables in the bus-to-charger assignment problem is also reduced so that smaller gaps can be achieved in reduced runtimes.
+display heat map of before and after for contested case. 
 \input{media/11_results/defragmentedChargeLimit}
-\input{media/11_results/noFragmentationChargeLimit}
-
-describe how defragmentation affects runtime and cost in the case of time-oriented and operations-oriented approaches.
+\input{media/11_results/noFragmentationChargeLimit} 
 \input{media/11_results/defragmentationCostProTime}
 \input{media/11_results/defragmentationTimeProTime}
-\input{media/11_results/defragmentationTimeProSchedule}
-\input{media/11_results/defragmentationCostProSchedule}
-
+\subsection{Scalability}
+In this section, we consolidate what we have learned in the previous sections to demonstrate how the proposed framework can be used to compute a scalable and cost effective solution for large numbers of buses. This section focuses on a scenario with a minimum energy per session of 20 kWh, an arbitrary gap for the bus-to-charger assignment solution, and a single group.
+\par The results given in Fig. \ref{fig:results:scalabilityRuntimes} show a a runtime that generally increases by one second per bus.  One would expect the runtime to increase at least on the order of $O(n^2)$ for a globally optimal solution because of the coupling between bus variables. The fact that the proposed method appears linear on the given range indicates a scalable solution. 
+\par Generally, one would also expect such savings to come with significant increases to the monthly cost. The results in Fig. \ref{fig:results:scalabilityCosts} however demonstrate how the proposed solution yields a quasi-linear increase of \$404.10 dollars per bus per month. 
+\input{media/11_results/scalabilityRuntimes}
+\input{media/11_results/scalabilityCosts}
 	
 	
