@@ -3,7 +3,7 @@
 \input{media/7_charger/secondSolutionExample}
 \input{media/7_charger/refactorExample}
 \input{media/7_charger/secondProgramVars}
-\section{Charge Schedules}
+\section{Charger Assignment\label{sec:chargerAssignment}}
 The results from the Linear Program defined in the previous section give us a general estimate of how much and when buses should charge, however we must still address two primary issues. The first is defining concrete start and stop times for each charge session. The second is limiting the charge sessions to a finite number of chargers. After solving the first program, we take the results and derive {\it preliminary} intervals and average power consumptions for each charge session.  
 \par For example, consider a solution to a three bus, two charger scenario given in Fig. \ref{fig:solutionExample}.
 Note that there appears to be three buses charging at the same time from $t_5$ to $t_6$ even though there are only two chargers.  We can reformulate this solution in terms of continuous start and stop variables and a variable charge rate so that the {\it duration} of each charge session may be relaxed. The objective is to store the given energy in the corresponding bus within the given charge interval.  

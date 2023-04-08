@@ -34,7 +34,7 @@ where $\tilde{g}$ is the complement of $g$. We can now compute the total monthly
 J_{\text{cost}} = \begin{bmatrix}e_{\text{on}} \\ e_{\text{off}} \\ p_{\text{facilities}} \\ p_{\text{demand}} \end{bmatrix}^T \begin{bmatrix} \mu_{\text{e-on}} \\ \mu_{\text{e-off}} \\ \mu_{\text{p-all}} \\ \mu_{\text{p-on}} \end{bmatrix} 
 \end{equation}
 
-\subsection{Pre-Smoothing}
+\section{Unconstrained Smooth Schedule \label{sec:unconstrainedSmoothSchedule}}
 Because the optimizer tends to work along boundaries to find optimal solutions, the schedule produced by the previous formulation will tend to either contain values equal to the maximum charge rate, or zero. This results in many instances of off-to-on and on-to-off scenarios which is not well tolerated by hardware.  For example, if the chargers have a maximum charge rate of 350 kW, then going from zero to 350 several times a minute may decrease the life of the hardware and be difficult to achieve in practice.
 \par It is therefore necessary to implement a smoothing criteria so that the 'on-off' patterns from the first solution are softened. This is done by first solving the un-constrained charge problem as given. Next, the same problem is solved again but with two primary differences. The first is that the demand, facilities, on-peak energy, and off-peak energy are constrained so that they are equal to the values obtained in the previous problem, resulting in an equivalent solution. Next, we define an alternative objective which incentivizes ``smooth'' transitions between time steps. 
 \par This objective is defined as

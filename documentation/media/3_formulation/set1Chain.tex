@@ -6,5 +6,7 @@
 	\node[rectangle, draw=red!20, fill=red!5, text=black!50, minimum width=1.7in, minimum height=0.5in, rounded corners](problem4) at (8.2,0){\begin{tabular}{c}Session Time and \\ Charger Placement\end{tabular}};
 	\draw (problem3.east) -- (outline.east);
 	\draw[->, draw=black!50, dotted] (outline.east) -- (problem4.west);
+	\draw[->, draw=black] (problem1.east) -- (problem2.west);
+	\draw[->, draw=black] (problem2.east) -- (problem3.west);
 \end{tikzpicture}\caption{Processing chain for the energy allocation and group assignment problems} \label{fig:set1Chain}\end{figure*}
 

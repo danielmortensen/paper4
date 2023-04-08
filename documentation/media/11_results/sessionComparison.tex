@@ -1,0 +1,13 @@
+\begin{figure}
+\begin{tikzpicture}
+	\pgfplotstableread[col sep=comma]{media/11_results/avgPowerVsDurationOpt.csv}\tableOpt
+	\pgfplotstableread[col sep=comma]{media/11_results/avgPowerVsDurationDis.csv}\tableDis
+	\begin{axis}[ylabel=Duration (Seconds), xlabel=Average Power (kWh), ymode=log]
+		\addplot[blue!20, draw=blue, only marks,mark size=1pt] table[x=avgPower, y=duration] {\tableOpt};
+		\addplot[red!20, draw=red, only marks,mark size=1pt] table[x=avgPower, y=duration] {\tableDis};
+		\legend{Optimal Solution, Relaxed Optimality Gap}
+	\end{axis}
+\end{tikzpicture}
+\caption{Comparison of charge session duration vs average charge rate}
+\label{fig:results:sessionComparison}
+\end{figure}
