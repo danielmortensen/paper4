@@ -53,8 +53,8 @@ methods(Access=public)
                     if ~isempty(idx)
                         problem.solverParams{idx + 1} = value2;
                     else
-                        problem.solverParams{end} = value1;
-                        problem.solverParams{end} = value2;
+                        problem.solverParams{end + 1} = value1;
+                        problem.solverParams{end + 1} = value2;
                     end
                 end
 

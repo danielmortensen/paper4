@@ -3,7 +3,6 @@ import scheduler.util6.*
 import scheduler.con6.*
 Sim1 = getSimParam(Sim,Var,Sol);
 Var1 = getVarParam(Sim1);
-Sim1.u = Sim1.u*5;
 [A1, b1, nCon1, descr1, eq1] = getCon1(Sim1,Var1);
 [A2, b2, nCon2, descr2, eq2] = getCon2(Sim1,Var1);
 [A3, b3, nCon3, descr3, eq3] = getCon3(Sim1,Var1);

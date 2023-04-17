@@ -24,8 +24,9 @@ set(S, 'problem1','MIPGap',0.02);
 set(S, 'problem1','OutputFlag',0);
 
 % define variables for second problem (smooth schedule)
-set(S, 'problem2','MIPGap',0.02);
-set(S, 'problem2','OutputFlag',0);
+set(S, 'problem2', 'MIPGap',0.02);
+set(S, 'problem2', 'OutputFlag',0);
+set(S, 'problem2', 'DualReductions', 0);
 
 % define variables for third problem (group separation)
 set(S, 'problem3', 'nGroup',2); % must evenly divide number of buses and chargers
