@@ -1,4 +1,4 @@
-function Param = getSimParam(nBus, nCharger, dt, chargerCapacity, batteryCapacity, initialBatteryEnergy, minBatteryEnergy)
+function Param = getSimParam(nBus, nCharger, dt, chargerCapacity, batteryCapacity, initialBatteryEnergy, minBatteryEnergy, muEOn, muEOff, muPOn, muPAll)
 % number of time intervals, where dt is given in seconds
 Param.nTime = 3600*24/dt; 
 
@@ -41,16 +41,16 @@ end
     getRoutes(nBus, Param.nTime, Param.deltaTSec);
 
 % On-Peak Energy Rate in dollars/kWh
-Param.muEOn = 0.058282;
+Param.muEOn = muEOn;
 
 % Off-Peak Energy Rate in dollars/kWh
-Param.muEOff = 0.029624;
+Param.muEOff = muEOff;
 
 % On-Peak demand rate in dollars/kW
-Param.muPOn = 15.73;
+Param.muPOn = muPOn;
 
 % Total facilities rate in dollars/kW
-Param.muPAll = 4.81;
+Param.muPAll = muPAll;
 
 % On-Peak time indices: 3pm - 10pm
 Param.S = false([1,Param.nTime]);

@@ -14,6 +14,10 @@ set(S, 'nSecondPerStep',20); % must evenly divide 15*60 (15-minutes)
 set(S, 'batteryCapacity',450);
 set(S, 'chargerCapacity',350);
 set(S, 'minBatteryEnergy',90);
+set(S, 'onPeakEnergyCost',0.058282);
+set(S, 'offPeakEnergyCost',0.029624);
+set(S, 'onPeakPowerCost',15.73);
+set(S, 'overallPeakPowerCost',4.81);
 
 % define variables for first problem (first schedule)
 set(S, 'problem1','MIPGap',0.02);
