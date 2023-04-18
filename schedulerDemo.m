@@ -6,8 +6,8 @@ set(S, 'objective','fiscal'); % 'fiscal','consumption','baseline'
 set(S, 'nBus', 10);
 set(S, 'nCharger', 10);
 set(S, 'verbose', true);
-set(S, 'routeinfo', 'data/routesTable.csv');
-set(S, 'uncontrolled', 'data/TPSS_Cov15.mat');
+set(S, 'routeinfo', 'data/routesTable.csv'); % see example routesTable.csv for details
+set(S, 'uncontrolled', 'data/TPSS_Cov15.mat'); % contains matlab .mat with a 'mu' field. 
 set(S, 'uncontrolledMultiplyFactor',5.0);
 set(S, 'nSecondPerStep',20); % must evenly divide 15*60 (15-minutes)
 set(S, 'batteryCapacity',450);
