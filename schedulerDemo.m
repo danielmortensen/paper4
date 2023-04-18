@@ -17,6 +17,7 @@ set(S, 'onPeakEnergyCost',0.058282);
 set(S, 'offPeakEnergyCost',0.029624);
 set(S, 'onPeakPowerCost',15.73);
 set(S, 'overallPeakPowerCost',4.81);
+set(S, 'onPeakInterval',[15*3600, 22*3600]); % demo 3 PM - 10 PM a second row would give another interval.
 
 % define variables for first problem (first schedule)
 set(S, 'problem1','MIPGap',0.02);

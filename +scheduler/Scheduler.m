@@ -25,6 +25,7 @@ properties(Access=private)
     onPeakPowerCost double {} = 15.73;
     overallPeakPowerCost double {} = 4.81;
     runtime double {} = nan;
+    onPeakInterval double {} = [15*3600,22*3600];
     optimalResults struct {} = struct()
     plannedResults struct {} = struct()
 end
@@ -109,7 +110,8 @@ methods(Access=public)
                                           obj.onPeakEnergyCost,           ...
                                           obj.offPeakEnergyCost,          ...
                                           obj.onPeakPowerCost,            ...
-                                          obj.overallPeakPowerCost);
+                                          obj.overallPeakPowerCost,       ...
+                                          obj.onPeakInterval);
 
         % package metadata
         if isfield(Sol1,'mipgap')
@@ -461,7 +463,7 @@ problemvar("all") = [problems, "exportPath","objective","startPoint",...
     "nSecondPerStep","batteryCapacity","chargerCapacity", ...
     "initialBatteryEnergy","uncontrolledMultiplyFactor","minBatteryEnergy", ...
     "onPeakEnergyCost", "offPeakEnergyCost", "onPeakPowerCost", ...
-    "overallPeakPowerCost"];
+    "overallPeakPowerCost","onPeakInterval"];
 problemvar("problem1") = "";
 problemvar("problem2") = "";
 problemvar("problem3") = ["nGroup"];

@@ -1,4 +1,4 @@
-function Param = getSimParam(nBus, nCharger, dt, chargerCapacity, batteryCapacity, initialBatteryEnergy, minBatteryEnergy, muEOn, muEOff, muPOn, muPAll)
+function Param = getSimParam(nBus, nCharger, dt, chargerCapacity, batteryCapacity, initialBatteryEnergy, minBatteryEnergy, muEOn, muEOff, muPOn, muPAll, onPeakInterval)
 % number of time intervals, where dt is given in seconds
 Param.nTime = 3600*24/dt; 
 
@@ -54,9 +54,12 @@ Param.muPAll = muPAll;
 
 % On-Peak time indices: 3pm - 10pm
 Param.S = false([1,Param.nTime]);
-iStart = floor(15*3600/dt);
-iFinal = ceil(22*3600/dt) - 1;
+nInterval = size(onPeakInterval,1);
+for iInterval = 1:nInterval
+iStart = floor(onPeakInterval(iInterval,1)/dt);
+iFinal = ceil(onPeakInterval(iInterval, 2)/dt) - 1;
 Param.S(iStart:iFinal) = true;
+end
 
 % Average power for uncontrolled loads
 Param.u = getUncontrolledLoad(dt);

@@ -1,7 +1,7 @@
-function [Sim1, Var1, Sol1] = computeIdeal(nBus, nCharger, dt, lossType,  chargerCapacity, batteryCapacity, initialBatteryEnergy, loadMultiplyFactor, minBatteryEnergy, solveparams, muEOn, muEOff, muPOn, muPAll)
+function [Sim1, Var1, Sol1] = computeIdeal(nBus, nCharger, dt, lossType,  chargerCapacity, batteryCapacity, initialBatteryEnergy, loadMultiplyFactor, minBatteryEnergy, solveparams, muEOn, muEOff, muPOn, muPAll, onPeakInterval)
 import scheduler.util.*;
 import scheduler.con.*;
-Sim1 = getSimParam(nBus, nCharger, dt, chargerCapacity, batteryCapacity, initialBatteryEnergy, minBatteryEnergy, muEOn, muEOff, muPOn, muPAll);
+Sim1 = getSimParam(nBus, nCharger, dt, chargerCapacity, batteryCapacity, initialBatteryEnergy, minBatteryEnergy, muEOn, muEOff, muPOn, muPAll, onPeakInterval);
 Var1 = getVarParam(Sim1);
 Sim1.u = Sim1.u*loadMultiplyFactor;
 [A1, b1, nCon1, descr1, eq1] = getCon1(Sim1,Var1);
