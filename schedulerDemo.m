@@ -2,10 +2,9 @@ import scheduler.*
 
 % define simulation level variables
 S = Scheduler();
-set(S, 'objective','fiscal');
+set(S, 'objective','fiscal'); % 'fiscal','consumption','baseline'
 set(S, 'nBus', 10);
 set(S, 'nCharger', 10);
-set(S, 'exportPath','results');
 set(S, 'verbose', true);
 set(S, 'routeinfo', 'data/routesTable.csv');
 set(S, 'uncontrolled', 'data/TPSS_Cov15.mat');
@@ -57,6 +56,7 @@ set(S, 'problem8', 'OutputFlag',0);
 
 % compute charge plan
 routes = S.makeplan();
+S.exportResults('.');
 
 
 
