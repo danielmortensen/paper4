@@ -1,17 +1,12 @@
 \section{Group Assignment\label{sec:groupAssignment}}
 Before the bus charge problem can be solved, we need to address how the problem will scale. Historically, when buses are routed to chargers it requires a program which will evaluate all possible combinations to select an optimal, contention-free schedule. 
-\par Because contention increases on the order of $O(n^2)$ with the number of charge sessions and requires that each combination be evaluated to find an optimal solution, the placement problem is NP-hard\textcolor{red}{==insert citation of knapsack problem==}. Before we can formulate a scalable solution to the bus problem, we need a method to separate buses into groups to reduce the coupling between charge sessions.
+\par Because contention increases on the order of $O(n^2)$ with the number of charge sessions and requires that each combination be evaluated to find an optimal solution, the placement problem is NP-hard \cite{kolesar_branch_1967}. Before we can formulate a scalable solution to the bus problem, we need a method to separate buses into groups to reduce the coupling between charge sessions.
 \par The group assignment problem separates buses into $n_{\text{group}}$ groups, where group $m$ is allocated $n^m_{\text{charger}}$ chargers and $n^m_{\text{bus}}$ buses. Each group must have sufficient chargers to fill it's needs and prefer buses with dissimilar schedules to better avoid contention. 
 \par We know that the number of cross-terms in future problems will be reduced when each group has the same number of buses. Therefore, let $n^m_{\text{bus}}$ be described as
 \begin{equation*}\begin{aligned}
 	n^m_{\text{bus}} &\ge \left \lfloor \frac{n_{\text{bus}}}{n_{\text{group}}} \right \rfloor \\
 	n^m_{\text{bus}} &\le \left \lceil \frac{n_{\text{bus}}}{n_{\text{group}}} \right \rceil
 \end{aligned}\end{equation*}
-or alternatively as 
-\begin{equation}\begin{aligned}
-	-n^m_{\text{bus}} &\le -\left \lfloor \frac{n_{\text{bus}}}{n_{\text{group}}} \right \rfloor \\
-	n^m_{\text{bus}} &\le \left \lceil \frac{n_{\text{bus}}}{n_{\text{group}}} \right \rceil.
-\end{aligned}\end{equation}
 \par We must also ensure that the number of chargers assigned to each group is exactly equal to the number of available chargers so that
 \begin{equation}
 	n_{\text{charger}} = \sum_mn_{\text{charger}}^m
@@ -25,18 +20,10 @@ where $n_{\text{charger}}^m$ is the number of chargers assinged to group $m$.
 \begin{equation*}
  p(m,j) = \sum_i\beta(i,m)b_{p(i,j)}
 \end{equation*}
-or alternatively as
-\begin{equation}
-	p(m,j) - \sum_i\beta(i,m)b_{p(i,j)} = 0 \ \forall m,j.
-\end{equation} 
 \par Next, we know that the total load of each group must be less than or equal to the collective capability of that group's chargers, which can be expressed as
 \begin{equation*}
 	n^m_{\text{charger}}\cdot p_{\text{max}} \ge p(m,j) \ \forall m,j
 \end{equation*}
-or in standard form as 
-\begin{equation}
-	p(m,j) - n^m_{\text{charger}}\cdot p_{\text{max}} \le 0\ \forall m,j
-\end{equation}
 so that the number of chargers is sufficient to charge the collective load of the group. 
 \par We also desire to group buses together who's routes are most orthogonal. If two buses contain no overlap, they will be easiest to schedule and the inner product of their schedules from the first program will be equal to zero. Let 
 \begin{equation*}
@@ -55,16 +42,8 @@ which can also be expressed by letting
 	v(i,i',m) &\ge \phi(i,i') - M\left (2 - \beta(i,m) - \beta(i',m)\right ) \\
 	v(i,i',m) &\le 0 + M\beta(i,m) \\
 	v(i,i',m) &\le 0 + M\beta(i',m) \\
-	v(i,i',m) &\ge 0  
+	v(i,i',m) &\ge 0.
 \end{aligned}\end{equation*}
-or alternatively as
-\begin{equation}\begin{aligned}
-	v(i,i',m) &\le \phi(i,i') \\
-	-v(i,i',m) + M\beta(i,m) + M\beta(i',m)&\le -\phi(i,i') + 2M \\
-	v(i,i',m) - M\beta(i,m)  &\le 0 \\
-	v(i,i',m) - M\beta(i',m) &\le 0\\
-	-v(i,i',m) &\le 0.
-\end{aligned}\end{equation}
 The final objective can then be expressed as
 \begin{equation}
 	J_{\text{select}} = \sum_{i,i',m} v(i,i',m).

@@ -1,11 +1,7 @@
 \subsection{Objective\label{sec:objective}}
 \par Now that the relevent constraints have been addressed, we must work towards computing the total objective function. We do so by first computing the total average power for the complete system. This total power is comprised of power used by the buses, and power used by external sources such as lights, ice melt, electric trains, etc which we refer to as ``uncontrolled loads'', where the average power for the uncontrolled loads at time step $j$ is denoted $u(j)$. We compute the total power as the sum of power used by the buses, $p_c(j)$ and the power consumed by uncontrolled loads $u(j)$ so that the total power, denoted $p_t(j)$ is computed as 
-\begin{equation*}
-	p_t(j) = p_c(j) + u(j)
-\end{equation*}
-or 
 \begin{equation}\label{eqn:objective:pt}
-	p_t(j) - p_c(j) - u(j) = 0 \ \forall j.
+	p_t(j) = p_c(j) + u(j).
 \end{equation}
 \par The next step is to compute the fifteen minute average power use for each time step, denoted $p_{\text{15}}$. We do this by letting 
 \begin{equation}\label{eqn:objective:p15}
@@ -13,23 +9,19 @@ p_{\text{15}}(j) = \frac{1}{n}\sum_{l \in \{j_{15}\}}p_t(l)
 \end{equation}
 where $\{j_{15}\}$ is the set of all indices 15 minutes prior to $j$ and $n$ is the cardinality of $\{j_{15}\}$.
 Next, note that the rate schedule requires both the maximum overall average power, denoted $p_{\text{facilities}}$, and the maximum average power during on-peak hours, or $p_{\text{demand}}$. Let $\mathcal{S}_{\text{on}}$ be the set of time indices belonging to on-peak hours, and recall that the max over all average power values is greater than or equal to $p_{15}(j)$ for all $j$. We can express this constraint is
-\begin{equation*}
-	p_{\text{facilities}} \ge p_{15}(j) \ \forall j
-\end{equation*}
-or alternatively as
 \begin{equation}\label{eqn:objective:pFac}
-	p_{15}(j) - p_{\text{facilities}} \le 0 \ \forall j
+	p_{\text{facilities}} \ge p_{15}(j) \ \forall j.
 \end{equation}
 Because $p_{\text{facilities}}$ will be used in the objective function, the value for $p_{\text{facilities}}$ will be minimised until it is equal to the largest value in $p_{15}$. Following a similar logic, we also define a set of constraints for the maximum average on-peak power, $p_{\text{demand}}$ so that
 \begin{equation}\label{eqn:objective:pDem}
-	p_{15}(i) - p_{\text{demand}} \le 0 \ \forall i \in \mathcal{S}_{\text{on}}
+	p_{15}(i) - p_{\text{demand}} \le 0 \ \forall i \in \mathcal{S}_{\text{on}}.
 \end{equation}
 The next step in computing the objective function is to compute the total {\it energy} consumed during on and off-peak hours respectively.  Let $e_{\text{on}}$ be the total energy consumed during on-peak hours and $e_{\text{off}}$ be the energy consumed during off-peak hours. We can compute energy as the product of average power and time.  In our case, we compute this as 
 \begin{equation}\label{eqn:objective:energy}\begin{aligned}
-	e_{\text{on}} &= \Delta T\cdot \sum_{i \in g}p_t(i) \\ 
-	e_{\text{off}} &= \Delta T\cdot \sum_{i \in \tilde{g}}p_t(i) \\ 
+	e_{\text{on}} &= \Delta T\cdot \sum_{i \in \mathcal{S}_{\text{on}}}p_t(i) \\ 
+	e_{\text{off}} &= \Delta T\cdot \sum_{i \notin \mathcal{S}_{\text{on}}}p_t(i).  
 \end{aligned}\end{equation}
-where $\tilde{g}$ is the complement of $g$. We can now compute the total monthly charge as
+We can now compute the total monthly cost in dollars as
 \begin{equation}
 J_{\text{cost}} = \begin{bmatrix}e_{\text{on}} \\ e_{\text{off}} \\ p_{\text{facilities}} \\ p_{\text{demand}} \end{bmatrix}^T \begin{bmatrix} \mu_{\text{e-on}} \\ \mu_{\text{e-off}} \\ \mu_{\text{p-all}} \\ \mu_{\text{p-on}} \end{bmatrix} 
 \end{equation}

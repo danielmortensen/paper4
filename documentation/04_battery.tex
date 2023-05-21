@@ -11,11 +11,7 @@ Now that each value for the state of charge is defined, each value for $h$ must 
 	h(i,j) &\le h_{\text{max}} \ \forall i,j. 
 \end{aligned}\end{equation}
 \par The final battery related constraint has to do with how we are planning for the bus.  The expenses that come from power are computed monthly, but we desire to simulate the movements of the bus for only a day, and use this to extrapolate what the monthly cost may be.  Therefore, the state of charge for a bus at the end of the day must reflect its starting value.  This yields the following constraint:
-\begin{equation*}
-	h_{i,\text{end}} = h(i,1) \ \forall i
-\end{equation*}
-so that
-\begin{equation}
-	h_{i,\text{end}} - h(i,1)  = 0 \ \forall i
+\begin{equation}\label{eqn:battery:busPower}
+	h_{i,\text{end}} = h(i,1) \ \forall i.
 \end{equation}
 

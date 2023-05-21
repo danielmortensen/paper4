@@ -18,13 +18,7 @@ If we examin just the schedule for Bus 1, we note that there are four essential 
 	b(i,r) \le f(i,r) \\
 	f(i,r) \le d(i,r). 	
 \end{aligned}\end{equation*}
-or alternatively as
-\begin{equation} \begin{aligned}
-	-b(i,r) &\le -a(i,r) \\
-	b(i,r) - f(i,r) &\le 0 \\
-	f(i,r) &\le d(i,r)
-\end{aligned} \end{equation}
-Where $a(i,r)$ and $d(i,r)$ are known from the previous optimization problem, and $b(i,r)$ and $f(i,r)$ are optimization variables. 
+where $a(i,r)$ and $d(i,r)$ are known from the previous optimization problem, and $b(i,r)$ and $f(i,r)$ are optimization variables. 
 \par We must differentiate between chargers and so, define $\sigma(i,r,k)$ as a binary selector variable which is one if charger $k$ services bus $i$ for session $r$ and zero otherwise. We know that only one charger can charge each bus at a time. We also know that each charge session {\it must} be serviced, which implies that
 \begin{equation}
 	\sum_k \sigma(i,r,k) = 1  \ \forall i,r.
@@ -39,12 +33,8 @@ If we include constraints for a minimum time per session, then the previous expr
 \end{equation*}
 \par Because this is the minimum time window, we must ensure that the difference between the start and stop times is at least this large so that
 \begin{equation*}
-	f(i,r) - b(i,r) \ge w(i,r) \ \forall i,r	
+	f(i,r) - b(i,r) \ge w(i,r) \ \forall i,r.
 \end{equation*}
-or alternatively,
-\begin{equation}
-	b(i,r) - f(i,r) \le -w(i,r) \ \forall i,r.
-\end{equation}
 \par The final set of constraints deals with contention so that no charger can be scheduled for two sessions that overlap. let $\mathcal{L} = \{(i,r)\times (i',r') \}$ where charge sessions $i,r$ and $i',r'$ have the potential to overlap. Before we can prevent overlap, we must define a binary variable $l(i,r,i',r')$ which is equal to one when session $i,r$ is scheduled before session $i',r'$ and zero otherwise so that
 \begin{equation*}
 	\begin{cases}
