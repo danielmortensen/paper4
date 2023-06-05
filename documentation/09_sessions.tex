@@ -1,9 +1,9 @@
 % imports
 \input{media/7_charger/solutionExample}
-\input{media/7_charger/secondSolutionExample}
 \input{media/7_charger/refactorExample}
+\input{media/7_charger/secondSolutionExample}
 \input{media/7_charger/secondProgramVars}
-\section{Charger Assignment\label{sec:chargerAssignment}}
+\section{$p_5$: Charger Assignment\label{sec:chargerAssignment}}
 The results from the Linear Program defined in the previous section give us a general estimate of how much and when buses should charge, however we must still address two primary issues. The first is defining concrete start and stop times for each charge session. The second is limiting the charge sessions to a finite number of chargers. After solving the first program, we take the results and derive {\it preliminary} intervals and average power consumptions for each charge session.  
 \par For example, consider a solution to a three bus, two charger scenario given in Fig. \ref{fig:solutionExample}.
 Note that there appears to be three buses charging at the same time from $t_5$ to $t_6$ even though there are only two chargers.  We can reformulate this solution in terms of continuous start and stop variables and a variable charge rate so that the {\it duration} of each charge session may be relaxed. The objective is to store the given energy in the corresponding bus within the given charge interval.  
@@ -13,55 +13,63 @@ Note that there appears to be three buses charging at the same time from $t_5$ t
 If we examin just the schedule for Bus 1, we note that there are four essential variables for the corresponding charge session: $a(i,r)$, $b(i,r)$, $f(i,r)$ and $d(i,r)$ which represent the minimum start time, actual start time, actual end time, and maximum end time respectively. 
 \par The problem we must now solve is one of arranging these ``rectangles'' such that each one is larger than it's minimum width (or charge time).  We must also account for the number of chargers. It can be helpful to view the problem as a bin packing problem, where each session must fit within the ``swim lane'' of a charger.  For example, taking the charge sessions given in Fig. \ref{fig:refactorExample} and arranging them so that there is no overlap between sessions will yield a valid solution as shown in Fig. \ref{fig:secondSolutionExample}.
 \par From Fig. \ref{fig:secondProgramVars}, we know that $a(i,r), b(i,r),f(i,r)$ and $d(i,r)$ must be such that 
-\begin{equation*}\begin{aligned}
+\begin{equation}\label{eqn:assignment:eqn1}\begin{aligned}
 	a(i,r) \le b(i,r) \\
 	b(i,r) \le f(i,r) \\
 	f(i,r) \le d(i,r). 	
-\end{aligned}\end{equation*}
+\end{aligned}\end{equation}
 where $a(i,r)$ and $d(i,r)$ are known from the previous optimization problem, and $b(i,r)$ and $f(i,r)$ are optimization variables. 
 \par We must differentiate between chargers and so, define $\sigma(i,r,k)$ as a binary selector variable which is one if charger $k$ services bus $i$ for session $r$ and zero otherwise. We know that only one charger can charge each bus at a time. We also know that each charge session {\it must} be serviced, which implies that
-\begin{equation}
+\begin{equation}\label{eqn:assignment:eqn2}
 	\sum_k \sigma(i,r,k) = 1  \ \forall i,r.
 \end{equation}
 \par Next, we also know that during each session a certain amount of energy must be transfered from the charger to the battery.  The amount of energy that must be transfered to bus $i$ during session $r$ can be computed from the results of the first linear program and is denoted $e(i,r)$. We can compute a minimum time window from this value as 
-\begin{equation*}
+\begin{equation}\label{eqn:assignment:eqn3}
 	w(i,r)_{\text{min}} = \frac{e(i,r)}{p_\text{max}}.
-\end{equation*}
+\end{equation}
 If we include constraints for a minimum time per session, then the previous expression becomes
 \begin{equation*}
 	w(i,r)_{\text{min}} = \text{max}\left ( w_{\text{min}}, \frac{e(i,r)}{p_\text{max}} \right )
 \end{equation*}
 \par Because this is the minimum time window, we must ensure that the difference between the start and stop times is at least this large so that
-\begin{equation*}
+\begin{equation}\label{eqn:assignment:eqn4}
 	f(i,r) - b(i,r) \ge w(i,r) \ \forall i,r.
-\end{equation*}
+\end{equation}
 \par The final set of constraints deals with contention so that no charger can be scheduled for two sessions that overlap. let $\mathcal{L} = \{(i,r)\times (i',r') \}$ where charge sessions $i,r$ and $i',r'$ have the potential to overlap. Before we can prevent overlap, we must define a binary variable $l(i,r,i',r')$ which is equal to one when session $i,r$ is scheduled before session $i',r'$ and zero otherwise so that
-\begin{equation*}
+\begin{equation}
 	\begin{cases}
 		f(i,r) \le b(i',r') & l(i,r,i',r') = 1 \\
 		f(i',r') \le b(i',r') & l(i,r,i',r') = 0 
 	\end{cases}
-\end{equation*}
+\end{equation}
 Here we can expand this thought through use of the ``big-M'' technique.  Let $M$ be large. In this case, we can set it equal to the number of seconds in a day. We know what the top constraint must be trivially satisfied when $l(i,r,i',r') = 0$ and the bottom must also when $l(i,r,i',r') = 1$.  This leads to a reformulation so that
 \begin{equation*}\begin{aligned}
 		f(i,r) - b(i',r') & \le M(1 - l(i,r,i',r')\\
 		f(i',r') - b(i,r) & \le l(i,r,i',r')M  
 \end{aligned}\end{equation*}
 However, this constraint {\it only} needs to hold when sessions $i,r$ and $i',r'$ are scheduled to charge on the same charger or that $\sigma(i,r,k) = \sigma(i',r',k) = 1$. We can reformulate the above constraint to satisfy this condition by letting
-\begin{equation}\begin{aligned}
+\begin{equation}\label{eqn:assignment:eqn5}\begin{aligned}
 	f(i,r) - b(i',r') & \le M(3 - \sigma(i,r,k) - \sigma(i',r',k) - l(i,r,i',r')) \\
 	f(i',r') - b(i,r) & \le M(2 - \sigma(i,r,k) - \sigma(i',r',k) + l(i,r,i',r'))
 \end{aligned}\end{equation}
 \par Finally, we desire the power profile to closly match the profile given in the first linear program, which would occure if each charge session matched the durations given in the first solution. We formulated an objective function which minimized the largest difference between 
-\begin{equation*}
+\begin{equation}\label{eqn:assignment:eqn6}
 	\underset{f,b}{\text{min}} \sum_{i,r}\lVert b(i,r) - a(i,r)\rVert_2^2 + \lVert f(i,r) - d(i,r) \rVert_2^2
-\end{equation*}
+\end{equation}
 which has the effect of driving each variable to the desired value and more heavily penalizing values that are further from their optimal.
+\par Ideally, when $p_5$ is solved to optimality, the chargers are fully utilized. However, optimality for $p_5$ is computationally demanding and scalable solutions may require relaxations in the optimality gap so that time on the chargers is not fully utilized. The next section uses the ordering from $p_5$, but recomputes session start/stop times to better utilize the charger availability even when sub-optimal gaps are given for $p_5$.
+\\[0.1in] \begin{tikzpicture}
+	\node[rectangle, rounded corners, fill=gray!8, draw=gray!60, minimum width=\columnwidth, minimum height=0.7in] at (0,0)(box){};
+	\node at (0,0.2in)(title){\underline{Summary for $p_5$}};
+	\node at ($(box.south)!0.6!(title.south)$)(text){$
+	\underset{\mathbf{y}}{\text{Min}} \ \eqref{eqn:assignment:eqn6} \ \text{subject to} \ \eqref{eqn:assignment:eqn1} \ \text{--} \ \eqref{eqn:assignment:eqn5}.
+$};
+\end{tikzpicture} 
 
-\section{Optimizing Charge Schedules}
+\section{$p_6$: Optimizing Charge Schedules\label{sec:optimizingChargeSchedules}}
 Many times it is not feasible to compute the optimal set of charge schedules given in the previous sections. As the number of buses and charge sessions becomes large, computing a small-MIPGap solution becomes untractable. Using a large MIPGap resolves issues related to computational complexity, but results in sub-optimal charge-time windows.
 \par We compute a more optimal set of charge windows by using the results from the previous program to infer charger assignment, and ordering for each charge session. We also know that the optimal solution will expand the charge windows to use any available time where a charger is unused, implying that the ``stop'' time for each session will either be equal to it's buse's departure time, or the start time of the next window which can be expressed as
-\begin{equation*}
+\begin{equation}\label{eqn:optChargeSchedules:eqn1}
 \begin{cases}
 	c(s,i,r+1) = c(f,i,r) & c(d,i,r) > c(a,i,r+1)\\[0.08in]
 	\begin{aligned}
@@ -69,15 +77,25 @@ Many times it is not feasible to compute the optimal set of charge schedules giv
 	c(f,i,r) &= c(d,i,r)
 	\end{aligned} & c(d,i,r) <= c(a,i,r+1) \\
 \end{cases}
-\end{equation*}
+\end{equation}
 where $c(s,i,r)$ is the start time for charger $i$'s $r^{\text{th}}$ charge session, $c(f,i,r)$ is the stop time for charger $i$'s $r^{\text{th}}$ charge session, $c(d,i,r)$ is the departure time for the bus scheduled for charger $i$'s $r^{\text{th}}$ charge session, and $c(a,i,r)$ is the arrival time for the bus scheduled for charger $i$'s $r^{\text{th}}$ charge session. 
 The minimum charge length must also be used so that energy can be properly delivered, so that
-\begin{equation*}
+\begin{equation}\label{eqn:optChargeSchedules:eqn2}
 	c(f,i,r) - c(s,i,r) \ge w(i,r)
-\end{equation*}
+\end{equation}
 where $w(i,r)$ is the corresponding minimum charge time corresponding the session.
 \par The final step to optimizing the charge windows is to give preference to windows with larger power deliveries. Let the objective for the optimization program be 
-\begin{equation}
+\begin{equation}\label{eqn:optChargeSchedule:objective}
 	J_{\text{window}} = \frac{1}{n}\sum_{i,r} \left \lVert \frac{c(f,i,r) - c(s,i,r)}{e(i,r)} \right \rVert^2_2.
 \end{equation}
 When the function $J$ contains windows with equal amounts of energy, the minimum will be found where each charge interval is the same width. As the amount of energy increases, the objective penalizes less for larger window sizes and thus gives preference to high energy sessions.
+\par Now each charge session is assigned to a charger so that contention for limited chargers has been managed for each group. Furthermore, each session also specifies target energy requirements which manage the risks of depleting batteries but does not give instructions on how the energy is to be delivered. The energy delivery problem is addressed in $p_7$ and combined results for all groups so that the charge schedule begins to approach a more global solution.  
+\\[0.1in] \begin{tikzpicture}
+	\node[rectangle, rounded corners, fill=gray!8, draw=gray!60, minimum width=\columnwidth, minimum height=0.7in] at (0,0)(box){};
+	\node at (0,0.2in)(title){\underline{Summary for $p_5$}};
+	\node at ($(box.south)!0.6!(title.south)$)(text){$ 
+	\underset{\mathbf{y}}{\text{Min}} \ \eqref{eqn:optChargeSchedule:objective} \ \text{subject to} \ \eqref{eqn:optChargeSchedules:eqn1}, \ \eqref{eqn:optChargeSchedules:eqn2}
+$};
+\end{tikzpicture} 
+
+

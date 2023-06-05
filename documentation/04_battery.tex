@@ -1,6 +1,6 @@
 \subsection{Battery}
 \par Each bus must also maintain its state of charge above acceptable levels throughout the day.  When buses leave the station, each bus discharges some quantity of energy throughout the course of the route. Let $\delta(i,j)$ be the amount of charge lost by bus $i$ at time $j$ and let $h(i,j)$ be the state of charge of bus $i$ at time $j$. The state of charge for each bus can be defined as
-\begin{equation}\begin{aligned}
+\begin{equation}\label{eqn:battery:socPropagation}\begin{aligned}
 	h(i,j) &= h(i,j-1) + b_p(i,j - 1)\cdot \Delta T - \delta(i,j) \ \forall i,j>1 \\
 	h(i,1) &= \eta_i \ \forall i
 \end{aligned}\end{equation}

@@ -22,16 +22,40 @@ The next step in computing the objective function is to compute the total {\it e
 	e_{\text{off}} &= \Delta T\cdot \sum_{i \notin \mathcal{S}_{\text{on}}}p_t(i).  
 \end{aligned}\end{equation}
 We can now compute the total monthly cost in dollars as
-\begin{equation}
+\begin{equation}\label{sec:unconstrainedSchedule:objective}
 J_{\text{cost}} = \begin{bmatrix}e_{\text{on}} \\ e_{\text{off}} \\ p_{\text{facilities}} \\ p_{\text{demand}} \end{bmatrix}^T \begin{bmatrix} \mu_{\text{e-on}} \\ \mu_{\text{e-off}} \\ \mu_{\text{p-all}} \\ \mu_{\text{p-on}} \end{bmatrix} 
 \end{equation}
+\par In summary, the problem $p_1$ described in Section \ref{sec:unconstrainedSchedule} computes a charge schedule without constraints on the number of chargers. We have also observed that the resulting charge commands tend to be either $0$ or $p_{\text{max}}$ which is difficult to implement and imparts additional stress on charging hardware. Before additional steps can be taken, a smoothed version of the solution for $p_1$ must be computed.
+\\[0.1in] \begin{tikzpicture}
+	\node[rectangle, rounded corners, fill=gray!8, draw=gray!60, minimum width=\columnwidth, minimum height=0.7in] at (0,0)(box){};
+	\node at (0,0.2in)(title){\underline{Summary for $p_1$}};
+	\node at ($(box.south)!0.6!(title.south)$)(text){$ 
+	\underset{\mathbf{y}}{\text{Min}}  \ \eqref{sec:unconstrainedSchedule:objective} \  \text{subject to} \ \eqref{eqn:obj:power2} \ \text{--} \ \eqref{eqn:objective:energy}.% \ \eqref{eqn:battery:socPropagation}, \ \eqref{eqn:battery:soc}, \ \eqref{eqn:battery:busPower}, \ \eqref{eqn:cumulative:power}, \ \eqref{eqn:objective:pt}, \ \eqref{eqn:objective:p15}, \ \eqref{eqn:objective:pFac}, \ \eqref{eqn:objective:pDem}, \ \eqref{eqn:objective:energy}
+$};
+\end{tikzpicture} 
 
-\section{Unconstrained Smooth Schedule \label{sec:unconstrainedSmoothSchedule}}
-Because the optimizer tends to work along boundaries to find optimal solutions, the schedule produced by the previous formulation will tend to either contain values equal to the maximum charge rate, or zero. This results in many instances of off-to-on and on-to-off scenarios which is not well tolerated by hardware.  For example, if the chargers have a maximum charge rate of 350 kW, then going from zero to 350 several times a minute may decrease the life of the hardware and be difficult to achieve in practice.
-\par It is therefore necessary to implement a smoothing criteria so that the 'on-off' patterns from the first solution are softened. This is done by first solving the un-constrained charge problem as given. Next, the same problem is solved again but with two primary differences. The first is that the demand, facilities, on-peak energy, and off-peak energy are constrained so that they are equal to the values obtained in the previous problem, resulting in an equivalent solution. Next, we define an alternative objective which incentivizes ``smooth'' transitions between time steps. 
+
+
+\section{$p_2$: Unconstrained Smooth Schedule \label{sec:unconstrainedSmoothSchedule}} 
+\par This section implements a smoothing criteria so that the ``on-off'' patterns from the first solution are softened. This is done by first solving the un-constrained charge problem as given. Next, the same problem is solved again but with two primary differences. The first is that the demand, facilities, on-peak energy, and off-peak energy are constrained so that they are equal to the values obtained in $p_1$ so that
+\begin{equation}\label{eqn:unconstrainedSmooth:equivalence}\begin{aligned}
+	e_{\text{on}} &= \tilde{e}_{\text{on}} \\
+	e_{\text{off}} &= \tilde{e}_{\text{off}} \\
+	p_{\text{facilities}} &= \tilde{p}_{\text{facilities}} \\
+	p_{\text{demand}} &= \tilde{p}_{\text{demand}}
+\end{aligned}\end{equation}
+Next, we define an alternative objective which incentivizes ``smooth'' transitions between time steps. 
 \par This objective is defined as
 \begin{equation}\label{eqn:objective:smooth}
 	J_{\text{thrash}} = \frac{1}{n}\sum_{i,j, \in \mathcal{K}}\lVert b(i,j) - b(i,j-1) \rVert^2_2,
 \end{equation}
 where $\mathcal{K}$ is the set of all $i,j$ where bus $i$ may charge during time $j$ and $j - 1$.
+\par The smoothed schedule computed in $p_2$ minimises the cost of charging in a way that maintains smooth charge schedules but is undesireable because the charge sessions tend to be small so that many are requried. Additionally, the current schedule does not account for the number of chargers and contention. Unfortunatly, resolving these issues requires the use of binary variables and becomes untractable for large numbers of buses. Before the fragmentation and charger assignment problems can be addressed, we must first segment the buses into groups so that they can be processed separately which will better manage the computations for binary-centric problems.
+\\[0.1in] \begin{tikzpicture}
+	\node[rectangle, rounded corners, fill=gray!8, draw=gray!60, minimum width=\columnwidth, minimum height=0.7in] at (0,0)(box){};
+	\node at (0,0.2in)(title){\underline{Summary for $p_2$}};
+	\node at ($(box.south)!0.6!(title.south)$)(text){$ 
+	\underset{\mathbf{y}}{\text{Min}} \ \eqref{eqn:objective:smooth} \ \text{Subject to} \ \eqref{eqn:obj:power2} \ \text{--} \ \eqref{eqn:objective:energy}, \ \eqref{eqn:unconstrainedSmooth:equivalence}
+$};
+\end{tikzpicture} 
 
