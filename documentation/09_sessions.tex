@@ -4,8 +4,8 @@
 \input{media/7_charger/secondSolutionExample}
 \input{media/7_charger/secondProgramVars}
 \section{$p_5$: Charger Assignment\label{sec:chargerAssignment}}
-The results from the Linear Program defined in the previous section give us a general estimate of how much and when buses should charge, however we must still address two primary issues. The first is defining concrete start and stop times for each charge session. The second is limiting the charge sessions to a finite number of chargers. After solving the first program, we take the results and derive {\it preliminary} intervals and average power consumptions for each charge session.  
-\par For example, consider a solution to a three bus, two charger scenario given in Fig. \ref{fig:solutionExample}.
+The results from $p_4$ give a general estimate of how much and when buses should charge, however we must still address two primary issues. The first is defining concrete start and stop times for each charge session. The second is limiting the charge sessions to a finite number of chargers. 
+\par Consider a solution to a three bus, two charger scenario given in Fig. \ref{fig:solutionExample}.
 Note that there appears to be three buses charging at the same time from $t_5$ to $t_6$ even though there are only two chargers.  We can reformulate this solution in terms of continuous start and stop variables and a variable charge rate so that the {\it duration} of each charge session may be relaxed. The objective is to store the given energy in the corresponding bus within the given charge interval.  
 \par Note how few of the charge sessions utilize the chargers to full capacity. This implies that there exists a smaller charge window in which equivalent power can be delivered. This allow us to use the charge durations from the solution from Fig. \ref{fig:solutionExample} as bounds on {\it allowable} charge windows instead of absolute truth. 
 \par An example of how Fig. \ref{fig:solutionExample} may be reformulated is given in Fig. \ref{fig:refactorExample}. Note how the actual charge sessions don't necessarily need to take up all the time they were initially allocated in the first solution and that these times can fluctuate if the average charge rate is less than the maximum charger capacity. In this example, we assume a maximum charge capacity of 350kW.  
@@ -23,7 +23,7 @@ where $a(i,r)$ and $d(i,r)$ are known from the previous optimization problem, an
 \begin{equation}\label{eqn:assignment:eqn2}
 	\sum_k \sigma(i,r,k) = 1  \ \forall i,r.
 \end{equation}
-\par Next, we also know that during each session a certain amount of energy must be transfered from the charger to the battery.  The amount of energy that must be transfered to bus $i$ during session $r$ can be computed from the results of the first linear program and is denoted $e(i,r)$. We can compute a minimum time window from this value as 
+\par Next, we also know that during each session a certain amount of energy must be transfered from the charger to the battery.  The amount of energy that must be transfered to bus $i$ during session $r$ are given in the solution to $p_4$ and are denoted $e(i,r)$. We can compute a minimum time window from these values by letting 
 \begin{equation}\label{eqn:assignment:eqn3}
 	w(i,r)_{\text{min}} = \frac{e(i,r)}{p_\text{max}}.
 \end{equation}
@@ -52,7 +52,7 @@ However, this constraint {\it only} needs to hold when sessions $i,r$ and $i',r'
 	f(i,r) - b(i',r') & \le M(3 - \sigma(i,r,k) - \sigma(i',r',k) - l(i,r,i',r')) \\
 	f(i',r') - b(i,r) & \le M(2 - \sigma(i,r,k) - \sigma(i',r',k) + l(i,r,i',r'))
 \end{aligned}\end{equation}
-\par Finally, we desire the power profile to closly match the profile given in the first linear program, which would occure if each charge session matched the durations given in the first solution. We formulated an objective function which minimized the largest difference between 
+\par Finally, we desire the schedule to closly match the charge plan from $p_4$, which occures when each charge session matches the durations given in $p_4$ and so we formulated an objective function which minimizes the differences in the given plan and the results from $p_4$ by letting the objective be
 \begin{equation}\label{eqn:assignment:eqn6}
 	\underset{f,b}{\text{min}} \sum_{i,r}\lVert b(i,r) - a(i,r)\rVert_2^2 + \lVert f(i,r) - d(i,r) \rVert_2^2
 \end{equation}
@@ -68,7 +68,7 @@ $};
 
 \section{$p_6$: Optimizing Charge Schedules\label{sec:optimizingChargeSchedules}}
 Many times it is not feasible to compute the optimal set of charge schedules given in the previous sections. As the number of buses and charge sessions becomes large, computing a small-MIPGap solution becomes untractable. Using a large MIPGap resolves issues related to computational complexity, but results in sub-optimal charge-time windows.
-\par We compute a more optimal set of charge windows by using the results from the previous program to infer charger assignment, and ordering for each charge session. We also know that the optimal solution will expand the charge windows to use any available time where a charger is unused, implying that the ``stop'' time for each session will either be equal to it's buse's departure time, or the start time of the next window which can be expressed as
+\par We compute a more optimal set of charge windows by using the results from $p_5$ to infer charger assignment, and ordering for each charge session. We also know that the optimal solution will expand the charge windows to use any available time where a charger is unused, implying that the ``stop'' time for each session will either be equal to it's buse's departure time, or the start time of the next window which can be expressed as
 \begin{equation}\label{eqn:optChargeSchedules:eqn1}
 \begin{cases}
 	c(s,i,r+1) = c(f,i,r) & c(d,i,r) > c(a,i,r+1)\\[0.08in]

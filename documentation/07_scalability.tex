@@ -16,7 +16,7 @@ where $n_{\text{charger}}^m$ is the number of chargers assinged to group $m$.
 \begin{equation}\label{eqn:groups:groupId}
 	\sum_m\beta(i,m) = 1 \ \forall i
 \end{equation}
-\par We must also ensure that buses are assigned to groups where the power delivered to each bus can be achieved with the number of chargers assigned to that group. First, we define a slack variable which gives the total power used in group $m$ at time step $j$ as $p(m,j)$. Recall, we also know the expected power use for each bus as this is a result of the linear program described in sections \ref{sec:formulation} through \ref{sec:objective} as $b_{p(i,j)}$, which allows us to describe the total power for any one group as
+\par We must also ensure that buses are assigned to groups where the power delivered to each bus can be achieved with the number of chargers assigned to that group. First, we define a slack variable which gives the total power used in group $m$ at time step $j$ as $p(m,j)$. Recall, we also know the expected power use for each bus as this is a result of $p_1$ as $b_{p(i,j)}$, which allows us to describe the total power for any one group as
 \begin{equation}\label{eqn:groups:groupPower}
  p(m,j) = \sum_i\beta(i,m)b_{p(i,j)}
 \end{equation}
@@ -25,11 +25,11 @@ where $n_{\text{charger}}^m$ is the number of chargers assinged to group $m$.
 	n^m_{\text{charger}}\cdot p_{\text{max}} \ge p(m,j) \ \forall m,j
 \end{equation}
 so that the number of chargers is sufficient to charge the collective load of the group. 
-\par We also desire to group buses together who's routes are most orthogonal. If two buses contain no overlap, they will be easiest to schedule and the inner product of their schedules from the first program will be equal to zero. Let 
+\par We also desire to group buses together who's routes are most orthogonal. If two buses contain no overlap, they will be easiest to schedule and the inner product of their schedules from $p_1$ will be equal to zero. Let 
 \begin{equation*}
 \phi(i,i') = \mathbf{b}(i,:)^T\mathbf{b}(j,:),
 \end{equation*}
-where $\mathbf{b}(i,:)$ is the charge schedule for bus $i$ as computed in the first program. We desire to minimize the total cross terms $\phi(i,i')$ for all buses in the same group.  Define a slack variable $v(i,i',m)$ which is equal to $\phi(i,i')$ if buses $i$ and $i'$ are both in group $m$ and zero otherwise so that
+where $\mathbf{b}(i,:)$ is the charge schedule for bus $i$ as computed in the $p_1$. We desire to minimize the total cross terms $\phi(i,i')$ for all buses in the same group.  Define a slack variable $v(i,i',m)$ which is equal to $\phi(i,i')$ if buses $i$ and $i'$ are both in group $m$ and zero otherwise so that
 \begin{equation*}
 	\begin{cases}
 		v(i,i',m) = \phi(i,i') & \beta(i,m) = 1, \beta(i',m) = 1 \\

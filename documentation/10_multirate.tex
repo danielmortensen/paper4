@@ -13,7 +13,7 @@ where $\psi(i,r)$ is the required energy for bus $i$ during rest period $r$ as c
 $};
 \end{tikzpicture}
 \section{Constrained Smooth Schedule\label{sec:constrainedSmoothSchedule}}
- \par The results of the Charger-Constrained problem will contain the same on-off defects as the solution from the Unconstrained program which can be managed using a similar method as before where we re-run the same program as before but make two changes. The first change constrains the objective so that it achieves the optimal cost. The second minimises differences between charge rates at adjacent time steps using the smoothing objective from Eqn. \ref{eqn:objective:smooth}.
+ \par The charge schedule from $p_7$ will contain the same on-off defects as the solution to $p_1$ which can be managed as before by executing $p_7$ once again with two changes: The first constrains the objective so that it achieves the optimal cost. The second reduces the difference of adjacent charge rates with the smoothing objective from Eqn. \ref{eqn:objective:smooth}.
 \\[0.1in] \begin{tikzpicture}
 	\node[rectangle, rounded corners, fill=gray!8, draw=gray!60, minimum width=\columnwidth, minimum height=0.7in] at (0,0)(box){};
 	\node at (0,0.2in)(title){\underline{Summary for $p_8$}};
