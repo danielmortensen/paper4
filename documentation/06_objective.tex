@@ -1,5 +1,5 @@
 \subsection{Objective\label{sec:objective}}
-\par Now that the relevent constraints have been addressed, we must work towards computing the total objective function. We do so by first computing the total average power for the complete system. This total power is comprised of power used by the buses, and power used by external sources such as lights, ice melt, electric trains, etc which we refer to as ``uncontrolled loads'', where the average power for the uncontrolled loads at time step $j$ is denoted $u(j)$. We compute the total power as the sum of power used by the buses, $p_c(j)$ and the power consumed by uncontrolled loads $u(j)$ so that the total power, denoted $p_t(j)$ is computed as 
+\par Now that the relevent constraints have been addressed, we turn attention to the objective function. We start by computing the total average power for the complete system. This total power is comprised of power used by the buses, and power used by external sources such as lights, ice melt, electric trains, etc which we refer to as ``uncontrolled loads'', where the average power for the uncontrolled loads at time step $j$ is denoted $u(j)$. We compute the total power as the sum of power used by the buses, $p_c(j)$ and the power consumed by uncontrolled loads $u(j)$ so that the total power, denoted $p_t(j)$ is computed as 
 \begin{equation}\label{eqn:objective:pt}
 	p_t(j) = p_c(j) + u(j).
 \end{equation}
@@ -7,14 +7,14 @@
 \begin{equation}\label{eqn:objective:p15}
 p_{\text{15}}(j) = \frac{1}{n}\sum_{l \in \{j_{15}\}}p_t(l)
 \end{equation}
-where $\{j_{15}\}$ is the set of all indices 15 minutes prior to $j$ and $n$ is the cardinality of $\{j_{15}\}$.
-Next, note that the rate schedule requires both the maximum overall average power, denoted $p_{\text{facilities}}$, and the maximum average power during on-peak hours, or $p_{\text{demand}}$. Let $\mathcal{S}_{\text{on}}$ be the set of time indices belonging to on-peak hours, and recall that the max over all average power values is greater than or equal to $p_{15}(j)$ for all $j$. We can express this constraint is
+where $\{j_{15}\}$ is the set of all indices 15 minutes prior to time $t_j$ and $n$ is the cardinality of $\{j_{15}\}$.
+Next, note that the rate schedule requires both the maximum overall average power, denoted $p_{\text{facilities}}$, and the maximum average power during on-peak hours, or $p_{\text{demand}}$. Let $\mathcal{S}_{\text{on}}$ be the set of time indices belonging to on-peak hours, and recall that the max over all average power values is greater than or equal to $p_{15}(j)$ for all $j$. We can express this constraint as
 \begin{equation}\label{eqn:objective:pFac}
 	p_{\text{facilities}} \ge p_{15}(j) \ \forall j.
 \end{equation}
 Because $p_{\text{facilities}}$ will be used in the objective function, the value for $p_{\text{facilities}}$ will be minimised until it is equal to the largest value in $p_{15}$. Following a similar logic, we also define a set of constraints for the maximum average on-peak power, $p_{\text{demand}}$ so that
 \begin{equation}\label{eqn:objective:pDem}
-	p_{15}(i) - p_{\text{demand}} \le 0 \ \forall i \in \mathcal{S}_{\text{on}}.
+	p_{15}(i) \leq p_{\text{demand}} \ \forall i \in \mathcal{S}_{\text{on}}.
 \end{equation}
 The next step in computing the objective function is to compute the total {\it energy} consumed during on and off-peak hours respectively.  Let $e_{\text{on}}$ be the total energy consumed during on-peak hours and $e_{\text{off}}$ be the energy consumed during off-peak hours. We can compute energy as the product of average power and time.  In our case, we compute this as 
 \begin{equation}\label{eqn:objective:energy}\begin{aligned}
@@ -25,37 +25,35 @@ We can now compute the total monthly cost in dollars as
 \begin{equation}\label{sec:unconstrainedSchedule:objective}
 J_{\text{cost}} = \begin{bmatrix}e_{\text{on}} \\ e_{\text{off}} \\ p_{\text{facilities}} \\ p_{\text{demand}} \end{bmatrix}^T \begin{bmatrix} \mu_{\text{e-on}} \\ \mu_{\text{e-off}} \\ \mu_{\text{p-all}} \\ \mu_{\text{p-on}} \end{bmatrix} 
 \end{equation}
-\par In summary, the problem $p_1$ described in Section \ref{sec:unconstrainedSchedule} computes a charge schedule without constraints on the number of chargers. We have also observed that the resulting charge commands tend to be either $0$ or $p_{\text{max}}$ which is difficult to implement and imparts additional stress on charging hardware. Before additional steps can be taken, a smoothed version of the solution for $p_1$ must be computed.
-\\[0.1in] \begin{tikzpicture}
+\par The final optimization problem that computes a charge schedule without constraints on the number of chargers is descibed below.\\[0.1in]
+\begin{tikzpicture}
 	\node[rectangle, rounded corners, fill=gray!8, draw=gray!60, minimum width=\columnwidth, minimum height=0.7in] at (0,0)(box){};
-	\node at (0,0.2in)(title){\underline{Summary for $p_1$}};
+	\node at (0,0.2in)(title){\underline{Summary for $P_1$}};
 	\node at ($(box.south)!0.6!(title.south)$)(text){$ 
 	\underset{\mathbf{y}}{\text{Min}}  \ \eqref{sec:unconstrainedSchedule:objective} \  \text{subject to} \ \eqref{eqn:obj:power2} \ \text{--} \ \eqref{eqn:objective:energy}.% \ \eqref{eqn:battery:socPropagation}, \ \eqref{eqn:battery:soc}, \ \eqref{eqn:battery:busPower}, \ \eqref{eqn:cumulative:power}, \ \eqref{eqn:objective:pt}, \ \eqref{eqn:objective:p15}, \ \eqref{eqn:objective:pFac}, \ \eqref{eqn:objective:pDem}, \ \eqref{eqn:objective:energy}
 $};
-\end{tikzpicture} 
+\end{tikzpicture}
+\par We have observed that charge commands in solutions to $P_1$ tend to switch frequently between $0$ and $p_{\text{max}}$, which is difficult to implement in practice and imparts stress on charging hardware. Before additional steps can be taken, a smoother set of charge commands is computed, and this is the subject of the next section.
 
-
-
-\section{$p_2$: Unconstrained Smooth Schedule \label{sec:unconstrainedSmoothSchedule}} 
-\par This section implements a smoothing criteria so that the ``on-off'' patterns from the first solution are softened. This is done by first solving the un-constrained charge problem as given. Next, the same problem is solved again but with two primary differences. The first is that the demand, facilities, on-peak energy, and off-peak energy are constrained so that they are equal to the values obtained in $p_1$ so that
+\section{$P_2$: Unconstrained Smooth Schedule \label{sec:unconstrainedSmoothSchedule}} 
+\par This section implements a smoothing criteria so that the frequent ``on-off'' switching patterns from $P_1$ are reduced. This is done by modifying $P_1$ in two ways. The first is that the demand, facilities, on-peak energy, and off-peak energy are removed from the objective and constrained to equal their values obtained in the solution to $P_1$ so that
 \begin{equation}\label{eqn:unconstrainedSmooth:equivalence}\begin{aligned}
 	e_{\text{on}} &= \tilde{e}_{\text{on}} \\
 	e_{\text{off}} &= \tilde{e}_{\text{off}} \\
 	p_{\text{facilities}} &= \tilde{p}_{\text{facilities}} \\
-	p_{\text{demand}} &= \tilde{p}_{\text{demand}}
+	p_{\text{demand}} &= \tilde{p}_{\text{demand}},
 \end{aligned}\end{equation}
-Next, we define an alternative objective which incentivizes ``smooth'' transitions between time steps. 
-\par This objective is defined as
+where values on the right-hand side are constants extracted from the solution to $P_1$.
+Next, we define an alternative objective that incentivizes continuity of charging between time steps. This objective is defined as
 \begin{equation}\label{eqn:objective:smooth}
-	J_{\text{thrash}} = \frac{1}{n}\sum_{i,j, \in \mathcal{K}}\lVert b(i,j) - b(i,j-1) \rVert^2_2,
+	J_{\text{switch}} = \frac{1}{n}\sum_{i,j, \in \mathcal{K}}\lVert b(i,j) - b(i,j-1) \rVert^2_2,
 \end{equation}
-where $\mathcal{K}$ is the set of all $i,j$ where bus $i$ may charge during time $j$ and $j - 1$.
-\par The smoothed schedule computed in $p_2$ minimises the cost of charging in a way that maintains smooth charge schedules but is undesireable because the charge sessions tend to be small so that many are requried. Additionally, the current schedule does not account for the number of chargers and contention. Unfortunatly, resolving these issues requires the use of binary variables and becomes untractable for large numbers of buses. Before the fragmentation and charger assignment problems can be addressed, we must first segment the buses into groups so that they can be processed separately which will better manage the computations for binary-centric problems.
-\\[0.1in] \begin{tikzpicture}
+where $\mathcal{K}$ is the set of all $i,j$ where bus $i$ may charge during time $j$ and $j - 1$.  The final optimization problem that produces smooth charging schedules is given below.\\[0.1in]
+\begin{tikzpicture}
 	\node[rectangle, rounded corners, fill=gray!8, draw=gray!60, minimum width=\columnwidth, minimum height=0.7in] at (0,0)(box){};
-	\node at (0,0.2in)(title){\underline{Summary for $p_2$}};
+	\node at (0,0.2in)(title){\underline{Summary for $P_2$}};
 	\node at ($(box.south)!0.6!(title.south)$)(text){$ 
 	\underset{\mathbf{y}}{\text{Min}} \ \eqref{eqn:objective:smooth} \ \text{Subject to} \ \eqref{eqn:obj:power2} \ \text{--} \ \eqref{eqn:objective:energy}, \ \eqref{eqn:unconstrainedSmooth:equivalence}
 $};
 \end{tikzpicture} 
-
+\par The solution to $P_2$ smooth charge schedules without increasing costs but it presents the undesireable feature that the charge sessions tend to be fragmented into many short sessions. Additionally, the schedule does not account for the number of chargers or bus contention for charger use. Unfortunatly, addressing these problems requires the use of binary variables and optimization with binary variables becomes untractable for large numbers of buses and chargers. Before the fragmentation and charger assignment problems can be addressed, we first segment the buses into groups.  Successive processing can be done separately in groups which helps to manage the computational complexity for later problems that incorporate binary variables.
