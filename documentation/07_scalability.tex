@@ -1,35 +1,34 @@
-\section{$p_3$: Group Assignment\label{sec:groupAssignment}}
-Before the bus charge problem can be solved, we need to address how the problem will scale. Historically, when buses are routed to chargers it requires a program which will evaluate all possible combinations to select an optimal, contention-free schedule. 
-\par Because contention increases on the order of $O(n^2)$ with the number of charge sessions and requires that each combination be evaluated to find an optimal solution, the placement problem is NP-hard \cite{kolesar_branch_1967}. Before we can formulate a scalable solution to the bus problem, we need a method to separate buses into groups to reduce the coupling between charge sessions.
-\par The group assignment problem separates buses into $n_{\text{group}}$ groups, where group $m$ is allocated $n^m_{\text{charger}}$ chargers and $n^m_{\text{bus}}$ buses. Each group must have sufficient chargers to fill it's needs and prefer buses with dissimilar schedules to better avoid contention. 
-\par We know that the number of cross-terms in future problems will be reduced when each group has the same number of buses. Therefore, let $n^m_{\text{bus}}$ be described as
+\section{$P_3$: Group Assignment\label{sec:groupAssignment}}
+This section addresses the matter of problem size.  An optimization problem for scheduling must evaluate all possible combinations of bus-to-charger assignments to select an optimal, contention-free schedule. Because contention increases on the order of $O(n^2)$ with the number $n$ of charge sessions and requires that each combination be evaluated to find an optimal solution, the assignment problem is NP-hard \cite{kolesar_branch_1967}. {\textbf [I don't think $n^2$ is NP-hard.  It's just hard.]} Before we can formulate a scalable solution to the bus problem, we propose a method to separate buses into groups to reduce the coupling between charge sessions.
+\par The group assignment problem separates buses into $n_{\text{group}}$ groups, where group $m$ is allocated $n^m_{\text{charger}}$ chargers and $n^m_{\text{bus}}$ buses. Each group must have sufficient chargers to fill its needs and prefer buses with dissimilar schedules to better avoid contention. 
+We know that the number of cross-terms in future problems will be reduced when each group has the same number of buses. Therefore, let $n^m_{\text{bus}}$ be described as
 \begin{equation}\label{eqn:groups:nBusPerGroup}\begin{aligned}
 	n^m_{\text{bus}} &\ge \left \lfloor \frac{n_{\text{bus}}}{n_{\text{group}}} \right \rfloor \\
-	n^m_{\text{bus}} &\le \left \lceil \frac{n_{\text{bus}}}{n_{\text{group}}} \right \rceil
+	n^m_{\text{bus}} &\le \left \lceil \frac{n_{\text{bus}}}{n_{\text{group}}} \right \rceil,
 \end{aligned}\end{equation}
-\par We must also ensure that the number of chargers assigned to each group is exactly equal to the number of available chargers so that
+where the values $n_\text{bus}$ and $n_\text{group}$ are user parameters.
+\par The number of chargers assigned to each group must be exactly equal to the number of available chargers so that
 \begin{equation}\label{eqn:groups:nTotalCharger}
-	n_{\text{charger}} = \sum_mn_{\text{charger}}^m
+	n_{\text{charger}} = \sum_mn_{\text{charger}}^m.
 \end{equation}
-where $n_{\text{charger}}^m$ is the number of chargers assinged to group $m$.
-\par The next set of constraints ensures that each bus is is part of a group exactly once. Let $\beta(i,m)$ be a binary variable which is one when bus $i$ is in group $m$. We constrain each bus to be a member of exactly one group by letting
+\par The next set of constraints ensures that each bus is is part of a group exactly once. Let $\beta(i,m)$ be a binary variable which is one when bus $i$ is in group $m$. Each bus is constrained to be a member of exactly one group by letting
 \begin{equation}\label{eqn:groups:groupId}
-	\sum_m\beta(i,m) = 1 \ \forall i
+	\sum_m\beta(i,m) = 1 \ \forall i.
 \end{equation}
-\par We must also ensure that buses are assigned to groups where the power delivered to each bus can be achieved with the number of chargers assigned to that group. First, we define a slack variable which gives the total power used in group $m$ at time step $j$ as $p(m,j)$. Recall, we also know the expected power use for each bus as this is a result of $p_1$ as $b_{p(i,j)}$, which allows us to describe the total power for any one group as
+\par We must also ensure that buses are assigned to groups where the power delivered to each bus can be achieved with the number of chargers assigned to that group. Define a slack variable that gives the total power used in group $m$ at time step $j$ as $p(m,j)$. Recall, we also know the expected power use for each bus as this is a result of $P_1$ as $b_{p(i,j)}$, which allows us to describe the total power for any one group as
 \begin{equation}\label{eqn:groups:groupPower}
- p(m,j) = \sum_i\beta(i,m)b_{p(i,j)}
+ p(m,j) = \sum_i\beta(i,m)b_{p(i,j)}.
 \end{equation}
 \par Next, we know that the total load of each group must be less than or equal to the collective capability of that group's chargers, which can be expressed as
 \begin{equation}\label{eqn:groups:chargeLimit}
 	n^m_{\text{charger}}\cdot p_{\text{max}} \ge p(m,j) \ \forall m,j
 \end{equation}
 so that the number of chargers is sufficient to charge the collective load of the group. 
-\par We also desire to group buses together who's routes have the least overlap. If two buses contain no overlap, they will be easiest to schedule and the inner product of their schedules from $p_1$ will be equal to zero. Let 
+\par We also desire to group together buses whos routes have the least overlap. If two buses contain no overlap, they will be easiest to schedule on the same charger.  The overlap is measured using the inner product of their schedules from $P_1$.  If completely non-overlapping, the inner product will be equal to zero. Let
 \begin{equation*}
 \phi(i,i') = \mathbf{b}(i,:)^T\mathbf{b}(j,:),
 \end{equation*}
-where $\mathbf{b}(i,:)$ is the charge schedule for bus $i$ as computed in the $p_1$. We desire to minimize the total cross terms $\phi(i,i')$ for all buses in the same group.  Define a slack variable $v(i,i',m)$ which is equal to $\phi(i,i')$ if buses $i$ and $i'$ are both in group $m$ and zero otherwise so that
+where $\mathbf{b}(i,:)$ is the charge schedule for bus $i$ as computed in the $P_1$. We desire to minimize the total cross terms $\phi(i,i')$ for all buses in the same group.  Define a slack variable $v(i,i',m)$ which is equal to $\phi(i,i')$ if buses $i$ and $i'$ are both in group $m$ and zero otherwise so that
 \begin{equation*}
 	\begin{cases}
 		v(i,i',m) = \phi(i,i') & \beta(i,m) = 1, \beta(i',m) = 1 \\
@@ -47,15 +46,13 @@ which can also be expressed by letting
 The final objective can then be expressed as
 \begin{equation}\label{eqn:groups:objective}
 	J_{\text{select}} = \sum_{i,i',m} v(i,i',m).
-\end{equation} 
-Problems $p_1$ through $p_3$ have yielded preliminary estimates for charge schedules as well as groups into which the buses can be subdivided but have not addressed the problem of fragmentation, where each bus's schedule contains many small charge events where fewer are desired. Before we can address where buses should charge, we must first finalize each bus's charge schedule by decreasing the number of charge events.  
-\\[0.1in] \begin{tikzpicture}
+\end{equation}
+The final optimization problem may be expressed as shown below. \\[0.1in]
+\begin{tikzpicture}
 	\node[rectangle, rounded corners, fill=gray!8, draw=gray!60, minimum width=\columnwidth, minimum height=0.7in] at (0,0)(box){};
 	\node at (0,0.2in)(title){\underline{Summary for $p_3$}};
 	\node at ($(box.south)!0.6!(title.south)$)(text){$ 
 	\underset{\mathbf{y}}{\text{Min}} \ \eqref{eqn:groups:objective} \ \text{subject to} \ \eqref{eqn:groups:nBusPerGroup} \ \text{--} \ \eqref{eqn:groups:innerProd} % \ \eqref{eqn:groups:nTotalCharger}, \ \eqref{eqn:groups:groupId}, \ \eqref{eqn:groups:groupPower}, \ \eqref{eqn:groups:chargeLimit}, \ \eqref{eqn:groups:innerProd}
 $};
 \end{tikzpicture}
-
-
-
+\par Problems $P_1$ through $P_3$ have produced preliminary estimates for charge schedules as well as groups into which the buses can be subdivided but have not addressed the problem of fragmentation, where each bus's schedule contains many short charge sessions, whereas fewer charge sessions is desirable. Before we can address where buses should charge, we must first finalize each bus's charge schedule by decreasing the number of charge events.
