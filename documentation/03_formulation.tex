@@ -13,7 +13,6 @@ Before computing the total monthly cost of electricity, we must define expressio
 \par The set of constraints that buses do not use power when not in the station are given by
 \begin{equation}\label{eqn:obj:power2}\begin{aligned}
 	b_{p(i,j)} &= 0 \ \forall i,j \in \tilde{\mathcal{A}}  \\
-	b_{p(i,j)} &\le p_{\text{max}} \ \forall i,j \in \mathcal{A} \\
-	-b_{p(i,j)} &\le 0              \ \forall i,j \in \mathcal{A} 
+	0 \leq b_{p(i,j)} \leq p_{\text{max}} \ \forall i,j \in \mathcal{A}
 \end{aligned}\end{equation}
 
