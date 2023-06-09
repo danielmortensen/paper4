@@ -11,8 +11,8 @@ Demand is divided into two components.  The first is a facilities charge which i
 Before computing the total monthly cost of electricity, we must define expressions for the average power and energy over time.  Let each day be divided into time intervals of length $\Delta T$ where the average power consumed by bus $i$ during time $j$ is denoted $p(i,j)$ as shown in Fig.~\ref{fig:busPower} Note that $\Delta T$ may be chosen to be on the order of a second or minute, and expressions for 15-minute averages will be derived later. The solution will yield the average power consumed by each bus during each time interval.
 \par The time windows when each bus is available for charging must be accounted for as constraints.  The maximum average power is set to zero when a bus is away from the station. For example, if bus 1 were out on route for times $t_5, t_6,$ and $t_7$, then the average power for those periods would be equal to zero as shown in Fig.~\ref{fig:busAvail}. Let $\bm{b}_{p(i,j)}$ be the average power used by bus $i$ at time index $j$, and $\bm{b}$ be a vector which contains $b_{p(i,j)}$ for each bus and time index. Also let $\mathcal{A} \subset {i\times j}$  be the set of all indices where bus $i$ is in the station during time $t_j$ and let $\tilde{\mathcal{A}}$ be its complement. Also let $p_{\text{max}}$ be the maximum power that a charger can deliver. 
 \par The set of constraints that buses do not use power when not in the station are given by
-\begin{equation}\label{eqn:obj:power2}\begin{aligned}
-	b_{p(i,j)} &= 0 \ \forall i,j \in \tilde{\mathcal{A}}  \\
+\begin{gather}\label{eqn:obj:power2}
+	b_{p(i,j)} = 0 \ \forall i,j \in \tilde{\mathcal{A}}  \\
 	0 \leq b_{p(i,j)} \leq p_{\text{max}} \ \forall i,j \in \mathcal{A}
-\end{aligned}\end{equation}
+\end{gather}
 

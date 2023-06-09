@@ -21,7 +21,7 @@ From Fig.~\ref{fig:secondProgramVars}, we know that $a(i,r), b(i,r),f(i,r)$ and 
 	%f(i,r) \le d(i,r). 	
 %\end{aligned}
 \end{equation}
-where $a(i,r)$ and $d(i,r)$ are known from the previous optimization problem {\textbf [Name it]}, and $b(i,r)$ and $f(i,r)$ are optimization variables. 
+where $a(i,r)$ and $d(i,r)$ are known from $P_4$, and $b(i,r)$ and $f(i,r)$ are optimization variables. 
 \par To differentiate between different chargers, define $\sigma(i,r,k)$ as a binary selector variable which is one if charger $k$ services bus $i$ for session $r$ and zero otherwise. Because only one charger can charge each bus at a time and each charge session {\it must} be serviced, we have
 \begin{equation}\label{eqn:assignment:eqn2}
 	\sum_k \sigma(i,r,k) = 1  \ \forall i,r.
