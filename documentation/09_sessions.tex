@@ -72,7 +72,7 @@ $};
 
 
 \section{$P_6$: Optimizing Charge Schedules\label{sec:optimizingChargeSchedules}}
-Many times it is not feasible to compute the optimal set of charge schedules given in the previous sections. As the number of buses and charge sessions becomes large, computing a small-gap solution becomes untractable or time consuming. Using a large gap resolves issues related to computational complexity, but results in sub-optimal charge-time windows.  In this section, a more optimal set of charge windows is computed using the results from $P_5$ to infer charger assignment and ordering for each charge session. We also know that the optimal solution will expand the charge windows to use any available time where a charger is unused, implying that the ``stop'' time for each session will either be equal to its buse's departure time, or the start time of the next window which can be expressed as
+Many times it is not feasible to compute the optimal set of charge schedules given in the previous sections. As the number of buses and charge sessions becomes large, computing a small-gap solution becomes computationally untractable. Allowing solutions with larger optimality gaps decreases the number of computations, but results in sub-optimal charge-time windows.  In this section, a more optimal set of charge windows is computed using the results from $P_5$ to infer charger assignment and ordering for each charge session. We also know that the optimal solution will expand the charge windows to use any available time where a charger is unused, implying that the ``stop'' time for each session will either be equal to its buse's departure time, or the start time of the next window which can be expressed as
 \begin{equation}\label{eqn:optChargeSchedules:eqn1}
 \begin{cases}
 	c(s,i,r+1) = c(f,i,r) & c(d,i,r) > c(a,i,r+1)\\[0.08in]
@@ -87,7 +87,7 @@ The minimum charge length must also be used so that energy can be properly deliv
 \begin{equation}\label{eqn:optChargeSchedules:eqn2}
 	c(f,i,r) - c(s,i,r) \ge w(i,r)
 \end{equation}
-where $w(i,r)$ is the corresponding minimum charge time corresponding the session.
+where $w(i,r)$ is the minimum charge time for the corresponding session.
 \par The final step to optimizing the charge windows is to give preference to windows with larger power deliveries. Let the objective for the optimization program be 
 \begin{equation}\label{eqn:optChargeSchedule:objective}
 	J_{\text{window}} = \frac{1}{n}\sum_{i,r} \left \lVert \frac{c(f,i,r) - c(s,i,r)}{e(i,r)} \right \rVert^2_2.
