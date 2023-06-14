@@ -1,3 +1,6 @@
+\makeatletter
+\@ifundefined{doPgfSetup}{%
+\def\doPgfPlot{true}
 \pgfplotsset{
 	SmallBarPlot/.style={font=\footnotesize, ybar, width=\linewidth, ymin=0, xmin=0, xmax=1.8, xtick=data, xticklabel style={text width=1.5cm, rotate=0, legend pos=north west, align=center}},
 	SmallTimeSeriesPlot/.style={font=\footnotesize, width=\linewidth, height=2in, date coordinates in=x, xticklabel=\hour:\minute, ymin=0, ymax=100, legend pos=north west,
@@ -6,4 +9,5 @@
 	 grid=both, minor grid style={lightgray!25}, minor tick num=1},
 	TimeMatrix/.style={font=\footnotesize, width=\linewidth, height=2in, date coordinates in=x, xticklabel=\hour:\minute} 
 	}
-
+}
+\makeatother

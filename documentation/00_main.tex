@@ -1,32 +1,9 @@
 \documentclass[lettersize,journal]{IEEEtran} 
-\usepackage{bm}
-\usepackage{verbatim}
-\usepackage{calc}
-\usepackage{algorithm2e}
-\usepackage{array}
-\usepackage{booktabs}
-\usepackage{colortbl}
-\usepackage{supertabular}
-\usepackage{amsmath,amsfonts}
-\usepackage{tikz}
-\usetikzlibrary{calc}
-\usepackage{subfig}
-\usepackage{pgfplots} 
-\usepackage{pgfplotstable}
-\usepgfplotslibrary{patchplots}
-\pgfplotsset{compat=1.7}
-\usepgfplotslibrary{dateplot}
-\hyphenation{op-tical net-works semi-conduc-tor IEEE-Xplore}
-\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
-    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
-\usepackage{balance}
+\input{preamble}
 \usepackage[backend=bibtex, style=numeric, sorting=none]{biblatex}
+\def\rootdirectorythree{.}
 \bibliography{references}
-\usepackage{ifthen}
-\input{functions/pgf_setup.tex}
-\input{functions/comparisonBarChartDef.tex}
-\input{functions/comparisonTimeSeriesDef.tex}
-\begin{document}
+\begin{document} 
 \title{A Scalable Approach to Minimize Charging Cost for Electric Bus Fleets}
 \author{Daniel Mortensen, Jacob Gunther\thanks{}}
 

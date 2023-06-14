@@ -1,8 +1,9 @@
-\input{media/11_results/sessionImageStyle}
+\input{\rootdirectorythree/media/11_results/sessionImageStyle}
 \begin{figure*}
+\centering
 \begin{tikzpicture}
-	\begin{axis}[colorbar, ChargeSessionImage, width=7.2in, height=3in, point meta min=0, point meta max=350, xmin=0.5, xmax=4320.5, xtick={540, 1080, 1620, 2160, 2700, 3240, 3780, 4320}, xticklabels={3:00, 6:00, 9:00, 12:00, 15:00, 18:00, 21:00, 0:00}, ymin=0.5, ymax=18.5]
-		\addplot [forget plot] graphics [xmin=0.5, xmax=4320.5, ymin=0.5, ymax=18.5]{media/11_results/disoptimalRoutes-1.png};
+	\begin{axis}[colorbar, ChargeSessionImage, width=5.2in, height=2in, point meta min=0, point meta max=350, xmin=0.5, xmax=4320.5, xtick={540, 1080, 1620, 2160, 2700, 3240, 3780, 4320}, xticklabels={3:00, 6:00, 9:00, 12:00, 15:00, 18:00, 21:00, 0:00}, ymin=0.5, ymax=18.5]
+		\addplot [forget plot] graphics [xmin=0.5, xmax=4320.5, ymin=0.5, ymax=18.5]{\rootdirectorythree/media/11_results/disoptimalRoutes-1.png};
 	\end{axis}
 \end{tikzpicture}
 \caption{Routes with a large gap in the route placement problem}

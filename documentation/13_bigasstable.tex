@@ -1,10 +1,27 @@
-\onecolumn
+\makeatletter
+\if@twocolumn%
+	\onecolumn
+	\providecommand{\revertcolumn}{\twocolumn}
+\else%
+	\onecolumn
+	\providecommand{\revertcolumn}{\onecolumn}
+\fi
+
 \newcommand\mybar{\kern1pt\rule[-\dp\strutbox]{.8pt}{\baselineskip}\kern1pt}
+
+\@ifundefined{coloredhline}{%
 \newcommand{\coloredhline}{\arrayrulecolor{gray!20} \hline \\[0.01in]\arrayrulecolor{black}}
+}
+
+\@ifundefined{myendline}{%
 \newcommand{\myendline}{\\ \coloredhline}
+}
+
+\makeatother
+\newgeometry{left=0.5in,bottom=0.5in}
 \label{tab:paperVariables}
-\centering
-\begin{supertabular}{b{0.06\textwidth} m{0.3\textwidth} m{0.09\textwidth} m{0.06\textwidth} m{0.3\textwidth} m{0.09\textwidth}}
+\begin{center}\begin{singlespace}
+\begin{supertabular}{b{0.08\textwidth} m{0.3\textwidth} m{0.09\textwidth} m{0.08\textwidth} m{0.3\textwidth} m{0.09\textwidth}}
 	\toprule%----------------------------------------------------------------------------
 	\textbf{Variable} & \textbf{Description} & \textbf{Range} & \textbf{Variable} & \textbf{Description} & \textbf{Range}\\
 	\toprule%-----------------------------------------------------------------------------
@@ -69,4 +86,6 @@
 	\hline \\[-0.07in]
 	%
 \end{supertabular}
-\twocolumn
+\end{singlespace}\end{center}
+\restoregeometry
+\revertcolumn

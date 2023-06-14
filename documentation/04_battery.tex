@@ -1,16 +1,17 @@
 \subsection{Battery}
-\par Each bus must also maintain its state of charge above a minimum acceptable levels throughout the day.  When buses leave the station, each bus discharges energy as it traverses its route. Let $\delta(i,j)$ be the amount of charge lost by bus $i$ at time $j$ and let $h(i,j)$ be the state of charge of bus $i$ at time $j$. The state of charge for each bus can be defined as
+\par Each bus must also maintain its state of charge above acceptable levels throughout the day.  When buses leave the station, each bus discharges some quantity of energy throughout the course of the route. Let $\delta(i,j)$ be the amount of charge lost by bus $i$ at time $j$ and let $h(i,j)$ be the state of charge of bus $i$ at time $j$. The state of charge for each bus can be defined as
 \begin{equation}\label{eqn:battery:socPropagation}\begin{aligned}
 	h(i,j) &= h(i,j-1) + b_p(i,j - 1)\cdot \Delta T - \delta(i,j) \ \forall i,j>1 \\
 	h(i,1) &= \eta_i \ \forall i
 \end{aligned}\end{equation}
 where $\eta_i$ is the initial state of charge for bus $i$ and $\Delta T$ is the difference in time between $t_{i,j}$ and $t_{i,j+1}$.
-Now that each value for the state of charge is defined, each value for $h$ must be constrained so that it is greater than a minimum acceptable value, $h_{\text{min}}$ but does not exceed the maximum battery capacity $h_{\text{max}}$. This yields
+Now that each value for the state of charge is defined, each value for $h$ must be constrained so that it is greater than a given threshold, $h_{\text{min}}$ but does not exceed the maximum battery capacity $h_{\text{max}}$. This yields
 \begin{equation} \label{eqn:battery:soc}\begin{aligned}
-	h_{\text{min}} \leq h(i,j) \leq h_{\text{max}} \ \forall i,j
+	-h(i,j) &\le -h_{\text{min}}\ \forall i,j \\
+	h(i,j) &\le h_{\text{max}} \ \forall i,j. 
 \end{aligned}\end{equation}
 \par The final battery related constraint has to do with how we are planning for the bus.  The expenses that come from power are computed monthly, but we desire to simulate the movements of the bus for only a day, and use this to extrapolate what the monthly cost may be.  Therefore, the state of charge for a bus at the end of the day must reflect its starting value.  This yields the following constraint:
 \begin{equation}\label{eqn:battery:busPower}
-	h(i,\text{end}) = h(i,1) \ \forall i.
+	h_{i,\text{end}} = h(i,1) \ \forall i.
 \end{equation}
 
