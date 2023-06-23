@@ -18,6 +18,7 @@
 }
 
 \makeatother
+\savegeometry{originalGeometry2}
 \newgeometry{left=0.5in,bottom=0.5in}
 \label{tab:paperVariables}
 \begin{center}\begin{singlespace}
@@ -87,5 +88,5 @@
 	%
 \end{supertabular}
 \end{singlespace}\end{center}
-\restoregeometry
+\loadgeometry{originalGeometry2}
 \revertcolumn
