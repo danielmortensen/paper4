@@ -1,14 +1,19 @@
 \section{$P_1$: Unconstrained Schedule \label{sec:unconstrainedSchedule}}
+
 This section describes a program that finds a charge schedule where buses are allowed to charge without regard to the number of available chargers. This solution is considered ``optimal'' and will be used in later sections to formulate a feasible solution that accounts for the actual number of chargers available.
-\input{media/3_formulation/charges} 
+
+\input{media/3_formulation/charges}
 \input{media/3_formulation/busPower}
-\input{media/3_formulation/busAvail} 
-\subsection{Formulation \label{sec:formulation}} 
-The cost objective we minimize is based on the rate schedule from \cite{rocky_mountain_power_rocky_2021}, which contains two primary elements: the cost of energy, and power demand. Energy is billed per kWh using different rates for on-peak and off-peak hours.
+\input{media/3_formulation/busAvail}
+
+\subsection{Formulation \label{sec:formulation}}
+
+The cost objective we minimize is based on the rate schedule from \cite{rocky_mountain_power_rocky_2021}, which contains two primary elements: the cost of energy and power demand. Energy is billed per kWh using different rates for on-peak and off-peak hours.
 %The on-peak rate is more expensive because there is generally more demand for power during this time, whereas off-peak hours tend to be less expensive.
 Demand is divided into two components.  The first is a facilities charge which is billed per kW for the highest 15-minute average power use over the course of the month. The second is a demand charge, which is also billed per kW, but is only billed for the highest 15-minute average power usesd during on-peak hours. The rates for each component are given in Table~\ref{tab:charges}.  
 
-Before computing the total monthly cost of electricity, we must define expressions for the average power and energy over time.  Let each day be divided into time intervals of length $\Delta T$ where the average power consumed by bus $i$ during time $j$ is denoted $p(i,j)$ as shown in Fig.~\ref{fig:busPower} Note that $\Delta T$ may be chosen to be on the order of a second or minute, and expressions for 15-minute averages will be derived later. The solution will yield the average power consumed by each bus during each time interval.
+Before computing the total monthly cost of electricity, we must define expressions for the average power and energy over time.  Let each day be divided into time intervals of length $\Delta T$ where the average power consumed by bus $i$ during time $j$ is denoted $p(i,j)$ as shown in Fig.~\ref{fig:busPower}. Note that $\Delta T$ may be chosen to be on the order of a second or minute, and expressions for 15-minute averages will be derived later. The solution will yield the average power consumed by each bus during each time interval.
+
 \par The time windows when each bus is available for charging must be accounted for as constraints.  The maximum average power is set to zero when a bus is away from the station. For example, if bus 1 were out on route for times $t_5, t_6,$ and $t_7$, then the average power for those periods would be equal to zero as shown in Fig.~\ref{fig:busAvail}. Let $\bm{b}_{p(i,j)}$ be the average power used by bus $i$ at time index $j$, and $\bm{b}$ be a vector which contains $b_{p(i,j)}$ for each bus and time index. Also let $\mathcal{A} \subset {i\times j}$  be the set of all indices where bus $i$ is in the station during time $t_j$ and let $\tilde{\mathcal{A}}$ be its complement. Also let $p_{\text{max}}$ be the maximum power that a charger can deliver. 
 \par The set of constraints that buses do not use power when not in the station are given by
 \begin{gather}\label{eqn:obj:power2}

@@ -1,4 +1,5 @@
 \section{$P_3$: Group Assignment\label{sec:groupAssignment}}
+
 This section addresses the matter of problem size.  The complexity of the problem is strongly influenced by contention, which arises as multiple buses must share limited charging resources.  The number of binary variables in the optimization problem increases as $n^2$ where $n$ is the number of charge sessions.
 %An optimization problem for scheduling must evaluate all possible combinations of bus-to-charger assignments to select an optimal, contention-free schedule. Contention increases on the order of $O(n^2)$ with the number $n$ of charge sessions and requires that each combination be evaluated to find an optimal solution, the assignment problem is NP-hard \cite{kolesar_branch_1967}. {\textbf [I don't think $n^2$ is NP-hard.  It's just hard.]}
 Before we can formulate a solution to the bus problem that scales linearly with $n$, we propose a method to separate buses into groups to reduce the coupling between charge sessions.
@@ -10,23 +11,28 @@ We know that the number of cross-terms in future problems will be reduced when e
 	n^m_{\text{bus}} &\le \left \lceil \frac{n_{\text{bus}}}{n_{\text{group}}} \right \rceil,
 \end{aligned}\end{equation}
 where the values $n_\text{bus}$ and $n_\text{group}$ are user parameters.
+
 \par The number of chargers assigned to each group must be exactly equal to the number of available chargers so that
 \begin{equation}\label{eqn:groups:nTotalCharger}
 	n_{\text{charger}} = \sum_mn_{\text{charger}}^m.
 \end{equation}
+      
 \par The next set of constraints ensures that each bus is is part of a group exactly once. Let $\beta(i,m)$ be a binary variable which is one when bus $i$ is in group $m$. Each bus is constrained to be a member of exactly one group by letting
 \begin{equation}\label{eqn:groups:groupId}
 	\sum_m\beta(i,m) = 1 \ \forall i.
 \end{equation}
+      
 \par We must also ensure that buses are assigned to groups where the power delivered to each bus can be achieved with the number of chargers assigned to that group. Define a slack variable that gives the total power used in group $m$ at time step $j$ as $p(m,j)$. Recall, we also know the expected power use for each bus as this is a result of $P_1$ as $b_{p(i,j)}$, which allows us to describe the total power for any one group as
 \begin{equation}\label{eqn:groups:groupPower}
  p(m,j) = \sum_i\beta(i,m)b_{p(i,j)}.
 \end{equation}
+
 \par Next, we know that the total load of each group must be less than or equal to the collective capability of that group's chargers, which can be expressed as
 \begin{equation}\label{eqn:groups:chargeLimit}
 	n^m_{\text{charger}}\cdot p_{\text{max}} \ge p(m,j) \ \forall m,j
 \end{equation}
 so that the number of chargers is sufficient to charge the collective load of the group. 
+
 \par We also desire to group together buses whos routes have the least overlap. If two buses contain no overlap, they will be easiest to schedule on the same charger.  The overlap is measured using the inner product of their schedules from $P_1$.  If completely non-overlapping, the inner product will be equal to zero. Let
 \begin{equation*}
 \phi(i,i') = \mathbf{b}(i,:)^T\mathbf{b}(j,:),
@@ -58,4 +64,5 @@ The final optimization problem may be expressed as shown below. \\[0.1in]
 	\underset{\mathbf{y}}{\text{Min}} \ \eqref{eqn:groups:objective} \ \text{subject to} \ \eqref{eqn:groups:nBusPerGroup} \ \text{--} \ \eqref{eqn:groups:innerProd} % \ \eqref{eqn:groups:nTotalCharger}, \ \eqref{eqn:groups:groupId}, \ \eqref{eqn:groups:groupPower}, \ \eqref{eqn:groups:chargeLimit}, \ \eqref{eqn:groups:innerProd}
 $};
 \end{tikzpicture}
+
 \par Problems $P_1$ through $P_3$ have produced preliminary estimates for charge schedules as well as groups into which the buses can be subdivided but have not addressed the problem of fragmentation, where each bus's schedule contains many short charge sessions, whereas fewer charge sessions is desirable. Before we can address where buses should charge, we must first finalize each bus's charge schedule by decreasing the number of charge events.

@@ -1,4 +1,5 @@
 \subsection{Cumulative Load Management}
+
 \par While this formulation does not directly account for the number of available chargers, we do account for the cumulative load capacities of all chargers.  Let the number of chargers be denoted $n_{\text{charger}}$. We desire to maintain the average cumulative power for each time step at a level that is serviceable given $n_{\text{charger}}$. We define a slack variable $p_c(j)$ which represents the total average power consumed by all buses at time $j$.  The variable $p_c(j)$ is computed as the sum of average bus powers so that
 \begin{equation}\label{eqn:cumulative:power}
 	p_c(j) = \sum_ib_{p(i,j)}.

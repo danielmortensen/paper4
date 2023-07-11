@@ -1,5 +1,7 @@
 \section{$P_7:$ Constrained Schedule\label{sec:constrainedSchedule}}
+
 Up to this point, we have computed charge chedules which assume that any bus can charge regardless of the number of chargers. We then separated buses into groups to reduce the scale of the problem and treat each sub-problem separately while we defragment sessions and assign each charge session to specific chargers before determining the final start and stop times for each bus's charge session.
+
 \par The final step in this process is to determine how the energy will be delivered so that cost is minimised. We begin with constraints for bus power, energy, and cost from Section \ref{sec:unconstrainedSchedule} that are expressed as equations \eqref{eqn:obj:power2}, \eqref{eqn:battery:busPower}, \eqref{eqn:objective:pt}, \eqref{eqn:objective:p15}, \eqref{eqn:objective:pFac}, \eqref{eqn:objective:pDem} and \eqref{eqn:objective:energy}. Next, include constraints for energy so that the energy for each charge session is properly delivered using a modified version of \eqref{eqn:defragmentation:active} so that
 \begin{equation}\label{eqn:constrainedSchedule:modified}
 	\mathbf{b}(i,:)\rho(i,r) = \psi(i,r),
@@ -14,6 +16,7 @@ $};
 \end{tikzpicture}
 
 \section{$P_8:$ Constrained Smooth Schedule\label{sec:constrainedSmoothSchedule}}
+
  \par The charge schedule from $P_7$ will contain the same on-off switching defects as the solution to $P_1$ which can be managed as before by executing $P_7$ once again with the same modifications that lead to $P_2$: (1) constrain the cost terms in the objective to equal their values from $P_7$, and (2) reduce the difference of sequential charge rates with the smoothing objective from \ref{eqn:objective:smooth}.  The resulting optimization problem is given below.\\[0.1in] \begin{tikzpicture}
 	\node[rectangle, rounded corners, fill=gray!8, draw=gray!60, minimum width=\columnwidth, minimum height=0.7in] at (0,0)(box){};
 	\node at (0,0.2in)(title){\underline{Summary for $P_8$}};

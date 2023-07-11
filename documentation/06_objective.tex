@@ -1,8 +1,10 @@
 \subsection{Objective\label{sec:objective}}
+
 \par Now that the relevent constraints have been addressed, we turn attention to the objective function. We start by computing the total average power for the complete system. This total power is comprised of power used by the buses, and power used by external sources such as lights, ice melt, electric trains, etc which we refer to as ``uncontrolled loads'', where the average power for the uncontrolled loads at time step $j$ is denoted $u(j)$. We compute the total power as the sum of power used by the buses, $p_c(j)$ and the power consumed by uncontrolled loads $u(j)$ so that the total power, denoted $p_t(j)$ is computed as 
 \begin{equation}\label{eqn:objective:pt}
 	p_t(j) = p_c(j) + u(j).
 \end{equation}
+      
 \par The next step is to compute the fifteen minute average power use for each time step, denoted $p_{\text{15}}$. We do this by letting 
 \begin{equation}\label{eqn:objective:p15}
 p_{\text{15}}(j) = \frac{1}{n}\sum_{l \in \{j_{15}\}}p_t(l)
@@ -25,6 +27,7 @@ We can now compute the total monthly cost in dollars as
 \begin{equation}\label{sec:unconstrainedSchedule:objective}
 J_{\text{cost}} = \begin{bmatrix}e_{\text{on}} \\ e_{\text{off}} \\ p_{\text{facilities}} \\ p_{\text{demand}} \end{bmatrix}^T \begin{bmatrix} \mu_{\text{e-on}} \\ \mu_{\text{e-off}} \\ \mu_{\text{p-all}} \\ \mu_{\text{p-on}} \end{bmatrix} 
 \end{equation}
+
 \par The final optimization problem that computes a charge schedule without constraints on the number of chargers is descibed below.\\[0.1in]
 \begin{tikzpicture}
 	\node[rectangle, rounded corners, fill=gray!8, draw=gray!60, minimum width=\columnwidth, minimum height=0.7in] at (0,0)(box){};
@@ -33,9 +36,11 @@ J_{\text{cost}} = \begin{bmatrix}e_{\text{on}} \\ e_{\text{off}} \\ p_{\text{fac
 	\underset{\mathbf{y}}{\text{Min}}  \ \eqref{sec:unconstrainedSchedule:objective} \  \text{subject to} \ \eqref{eqn:obj:power2} \ \text{--} \ \eqref{eqn:objective:energy}.% \ \eqref{eqn:battery:socPropagation}, \ \eqref{eqn:battery:soc}, \ \eqref{eqn:battery:busPower}, \ \eqref{eqn:cumulative:power}, \ \eqref{eqn:objective:pt}, \ \eqref{eqn:objective:p15}, \ \eqref{eqn:objective:pFac}, \ \eqref{eqn:objective:pDem}, \ \eqref{eqn:objective:energy}
 $};
 \end{tikzpicture}
+
 \par We have observed that charge commands in solutions to $P_1$ tend to switch frequently between $0$ and $p_{\text{max}}$, which is difficult to implement in practice and imparts stress on charging hardware. Before additional steps can be taken, a smoother set of charge commands is computed, and this is the subject of the next section.
 
-\section{$P_2$: Unconstrained Smooth Schedule \label{sec:unconstrainedSmoothSchedule}} 
+\section{$P_2$: Unconstrained Smooth Schedule \label{sec:unconstrainedSmoothSchedule}}
+
 \par This section implements a smoothing criteria so that the frequent ``on-off'' switching patterns from $P_1$ are reduced. This is done by modifying $P_1$ in two ways. The first is that the demand, facilities, on-peak energy, and off-peak energy are removed from the objective and constrained to equal their values obtained in the solution to $P_1$ so that
 \begin{equation}\label{eqn:unconstrainedSmooth:equivalence}\begin{aligned}
 	e_{\text{on}} &= \tilde{e}_{\text{on}} \\
@@ -55,5 +60,6 @@ where $\mathcal{K}$ is the set of all $i,j$ where bus $i$ may charge during time
 	\node at ($(box.south)!0.6!(title.south)$)(text){$ 
 	\underset{\mathbf{y}}{\text{Min}} \ \eqref{eqn:objective:smooth} \ \text{Subject to} \ \eqref{eqn:obj:power2} \ \text{--} \ \eqref{eqn:objective:energy}, \ \eqref{eqn:unconstrainedSmooth:equivalence}
 $};
-\end{tikzpicture} 
+\end{tikzpicture}
+
 \par The solution to $P_2$ smooths charge schedules without increasing costs, but it presents the undesireable feature that the charge sessions tend to be fragmented into many short sessions. Additionally, the schedule does not account for the number of chargers or bus contention for charger use. Unfortunatly, addressing these problems requires the use of binary variables and optimization with binary variables becomes untractable for large numbers of buses and chargers. Before the fragmentation and charger assignment problems can be addressed, we first segment the buses into groups.  Successive processing can be done separately in groups which helps to manage the computational complexity for later problems that incorporate binary variables.
