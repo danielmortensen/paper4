@@ -1,7 +1,7 @@
 \begin{abstract}
-\textcolor{red}{Insert abstract here}
+Encorporating battery electric buses into bus fleets faces three primary challenges: a BEB's extended refuel time, the cost of charging, both by the consumer and the power provider, and large compute demands for planning methods. When BEBs charge, the additional demands on the grid may exceed hardware limitations and so power providers divide a consumer's energy needs into separate meters even though doing so is expensive for both power providers and consumers. Prior work has developed a number of strategies for computing charge schedules for bus fleets, however prior work has not worked to reduce cost by aggregating meters. Additionally, because many works use mixed integer linear programs, their compute needs make planning for commercial sized bus fleets intractable. This work presents a multi-program approach to computing charge plans for electric bus fleets. Rather than posing a single large MILP that incorporates every aspect of the charging problem, we solve a series of small subproblems in which the solution to the charging problem becomes successively more refined and moves closer to the optimal schedule. Our results show that intermediate subproblems can be solved with a dramatic reduction in runtimes allowing our method to be applied to significantly larger bus fleets. In fact, we will show that not only do the runtimes scale linearly with the number of buses, easily planning for fleets of 100+ buses, but the monthly cost does as well.
 \end{abstract}
 
 \begin{IEEEkeywords}
-\textcolor{red}{Insert keywords here}
+Battery Electric Bus, Charge Schedule, Mixed Integer Linear Program, Bus Fleet, Grid Management
 \end{IEEEkeywords}
