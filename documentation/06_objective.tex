@@ -1,5 +1,5 @@
 \subsection{Objective\label{sec:objective}}
-\par Now that the relevent constraints have been addressed, we must work towards computing the total objective function. We do so by first computing the total average power for the complete system. This total power is comprised of power used by the buses, and power used by external sources such as lights, ice melt, electric trains, etc which we refer to as ``uncontrolled loads'', where the average power for the uncontrolled loads at time step $j$ is denoted $u(j)$. We compute the total power as the sum of power used by the buses, $p_c(j)$ and the power consumed by uncontrolled loads $u(j)$ so that the total power, denoted $p_t(j)$ is computed as 
+\par Now that the relevant constraints have been addressed, we must work towards computing the total objective function. We do so by first computing the total average power for the complete system. This total power is comprised of power used by the buses, and power used by external sources such as lights, ice melt, electric trains, etc which we refer to as ``uncontrolled loads'', where the average power for the uncontrolled loads at time step $j$ is denoted $u(j)$. We compute the total power as the sum of power used by the buses, $p_c(j)$ and the power consumed by uncontrolled loads $u(j)$ so that the total power, denoted $p_t(j)$ is computed as 
 \begin{equation}\label{eqn:objective:pt}
 	p_t(j) = p_c(j) + u(j).
 \end{equation}
@@ -12,7 +12,7 @@ Next, note that the rate schedule requires both the maximum overall average powe
 \begin{equation}\label{eqn:objective:pFac}
 	p_{\text{facilities}} \ge p_{15}(j) \ \forall j.
 \end{equation}
-Because $p_{\text{facilities}}$ will be used in the objective function, the value for $p_{\text{facilities}}$ will be minimised until it is equal to the largest value in $p_{15}$. Following a similar logic, we also define a set of constraints for the maximum average on-peak power, $p_{\text{demand}}$ so that
+Because $p_{\text{facilities}}$ will be used in the objective function, the value for $p_{\text{facilities}}$ will be minimized until it is equal to the largest value in $p_{15}$. Following a similar logic, we also define a set of constraints for the maximum average on-peak power, $p_{\text{demand}}$ so that
 \begin{equation}\label{eqn:objective:pDem}
 	p_{15}(i) - p_{\text{demand}} \le 0 \ \forall i \in \mathcal{S}_{\text{on}}.
 \end{equation}
@@ -51,7 +51,7 @@ Next, we define an alternative objective which incentivizes ``smooth'' transitio
 	J_{\text{thrash}} = \frac{1}{n}\sum_{i,j, \in \mathcal{K}}\lVert b(i,j) - b(i,j-1) \rVert^2_2,
 \end{equation}
 where $\mathcal{K}$ is the set of all $i,j$ where bus $i$ may charge during time $j$ and $j - 1$.
-\par The smoothed schedule computed in $p_2$ minimises the cost of charging in a way that maintains smooth charge schedules but is undesireable because the charge sessions tend to be small so that many are requried. Additionally, the current schedule does not account for the number of chargers and contention. Unfortunatly, resolving these issues requires the use of binary variables and becomes untractable for large numbers of buses. Before the fragmentation and charger assignment problems can be addressed, we must first segment the buses into groups so that they can be processed separately which will better manage the computations for binary-centric problems.
+\par The smoothed schedule computed in $p_2$ minimizes the cost of charging in a way that maintains smooth charge schedules but is undesirable because the charge sessions tend to be small so that many are required. Additionally, the current schedule does not account for the number of chargers and contention. Unfortunately, resolving these issues requires the use of binary variables and becomes intractable for large numbers of buses. Before the fragmentation and charger assignment problems can be addressed, we must first segment the buses into groups so that they can be processed separately which will better manage the computations for binary-centric problems.
 \\[0.1in] \begin{tikzpicture}
 	\node[rectangle, rounded corners, fill=gray!8, draw=gray!60, minimum width=\columnwidth, minimum height=0.7in] at (0,0)(box){};
 	\node at (0,0.2in)(title){\underline{Summary for $p_2$}};

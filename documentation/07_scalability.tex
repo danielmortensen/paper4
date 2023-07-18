@@ -11,7 +11,7 @@ Before the bus charge problem can be solved, we need to address how the problem 
 \begin{equation}\label{eqn:groups:nTotalCharger}
 	n_{\text{charger}} = \sum_mn_{\text{charger}}^m,
 \end{equation}
-where $n_{\text{charger}}^m$ is the number of chargers assinged to group $m$.
+where $n_{\text{charger}}^m$ is the number of chargers assigned to group $m$.
 \par The next set of constraints ensures that each bus is is part of a group exactly once. Let $\beta(i,m)$ be a binary variable which is one when bus $i$ is in group $m$. We constrain each bus to be a member of exactly one group by letting
 \begin{equation}\label{eqn:groups:groupId}
 	\sum_m\beta(i,m) = 1 \ \forall i.
