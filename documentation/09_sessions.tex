@@ -16,7 +16,7 @@ If we examin just the schedule for Bus 1, we note that there are four essential 
 \begin{equation}\label{eqn:assignment:eqn1}\begin{aligned}
 	a(i,r) \le b(i,r) \\
 	b(i,r) \le f(i,r) \\
-	f(i,r) \le d(i,r). 	
+	f(i,r) \le d(i,r), 	
 \end{aligned}\end{equation}
 where $a(i,r)$ and $d(i,r)$ are known from the previous optimization problem, and $b(i,r)$ and $f(i,r)$ are optimization variables. 
 \par We must differentiate between chargers and so, define $\sigma(i,r,k)$ as a binary selector variable which is one if charger $k$ services bus $i$ for session $r$ and zero otherwise. We know that only one charger can charge each bus at a time. We also know that each charge session {\it must} be serviced, which implies that
@@ -29,7 +29,7 @@ where $a(i,r)$ and $d(i,r)$ are known from the previous optimization problem, an
 \end{equation}
 If we include constraints for a minimum time per session, then the previous expression becomes
 \begin{equation*}
-	w(i,r)_{\text{min}} = \text{max}\left ( w_{\text{min}}, \frac{e(i,r)}{p_\text{max}} \right )
+	w(i,r)_{\text{min}} = \text{max}\left ( w_{\text{min}}, \frac{e(i,r)}{p_\text{max}} \right ).
 \end{equation*}
 \par Because this is the minimum time window, we must ensure that the difference between the start and stop times is at least this large so that
 \begin{equation}\label{eqn:assignment:eqn4}
@@ -39,22 +39,22 @@ If we include constraints for a minimum time per session, then the previous expr
 \begin{equation}
 	\begin{cases}
 		f(i,r) \le b(i',r') & l(i,r,i',r') = 1 \\
-		f(i',r') \le b(i',r') & l(i,r,i',r') = 0 
+		f(i',r') \le b(i',r') & l(i,r,i',r') = 0. 
 	\end{cases}
 \end{equation}
 Here we can expand this thought through use of the ``big-M'' technique.  Let $M$ be large. In this case, we can set it equal to the number of seconds in a day. We know what the top constraint must be trivially satisfied when $l(i,r,i',r') = 0$ and the bottom must also when $l(i,r,i',r') = 1$.  This leads to a reformulation so that
 \begin{equation*}\begin{aligned}
 		f(i,r) - b(i',r') & \le M(1 - l(i,r,i',r')\\
-		f(i',r') - b(i,r) & \le l(i,r,i',r')M  
+		f(i',r') - b(i,r) & \le l(i,r,i',r')M.  
 \end{aligned}\end{equation*}
 However, this constraint {\it only} needs to hold when sessions $i,r$ and $i',r'$ are scheduled to charge on the same charger or that $\sigma(i,r,k) = \sigma(i',r',k) = 1$. We can reformulate the above constraint to satisfy this condition by letting
 \begin{equation}\label{eqn:assignment:eqn5}\begin{aligned}
 	f(i,r) - b(i',r') & \le M(3 - \sigma(i,r,k) - \sigma(i',r',k) - l(i,r,i',r')) \\
-	f(i',r') - b(i,r) & \le M(2 - \sigma(i,r,k) - \sigma(i',r',k) + l(i,r,i',r'))
+	f(i',r') - b(i,r) & \le M(2 - \sigma(i,r,k) - \sigma(i',r',k) + l(i,r,i',r')).
 \end{aligned}\end{equation}
 \par Finally, we desire the schedule to closly match the charge plan from $p_4$, which occures when each charge session matches the durations given in $p_4$ and so we formulated an objective function which minimizes the differences in the given plan and the results from $p_4$ by letting the objective be
 \begin{equation}\label{eqn:assignment:eqn6}
-	\underset{f,b}{\text{min}} \sum_{i,r}\lVert b(i,r) - a(i,r)\rVert_2^2 + \lVert f(i,r) - d(i,r) \rVert_2^2
+	\underset{f,b}{\text{min}} \sum_{i,r}\lVert b(i,r) - a(i,r)\rVert_2^2 + \lVert f(i,r) - d(i,r) \rVert_2^2,
 \end{equation}
 which has the effect of driving each variable to the desired value and more heavily penalizing values that are further from their optimal.
 \par Ideally, when $p_5$ is solved to optimality, the chargers are fully utilized. However, optimality for $p_5$ is computationally demanding and scalable solutions may require relaxations in the optimality gap so that time on the chargers is not fully utilized. The next section uses the ordering from $p_5$, but recomputes session start/stop times to better utilize the charger availability even when sub-optimal gaps are given for $p_5$.
@@ -75,13 +75,13 @@ Many times it is not feasible to compute the optimal set of charge schedules giv
 	\begin{aligned}
 	c(s,i,r+1) &= c(a,i,r+1) \\
 	c(f,i,r) &= c(d,i,r)
-	\end{aligned} & c(d,i,r) <= c(a,i,r+1) \\
+	\end{aligned} & c(d,i,r) <= c(a,i,r+1), 
 \end{cases}
 \end{equation}
 where $c(s,i,r)$ is the start time for charger $i$'s $r^{\text{th}}$ charge session, $c(f,i,r)$ is the stop time for charger $i$'s $r^{\text{th}}$ charge session, $c(d,i,r)$ is the departure time for the bus scheduled for charger $i$'s $r^{\text{th}}$ charge session, and $c(a,i,r)$ is the arrival time for the bus scheduled for charger $i$'s $r^{\text{th}}$ charge session. 
 The minimum charge length must also be used so that energy can be properly delivered, so that
 \begin{equation}\label{eqn:optChargeSchedules:eqn2}
-	c(f,i,r) - c(s,i,r) \ge w(i,r)
+	c(f,i,r) - c(s,i,r) \ge w(i,r),
 \end{equation}
 where $w(i,r)$ is the corresponding minimum charge time corresponding the session.
 \par The final step to optimizing the charge windows is to give preference to windows with larger power deliveries. Let the objective for the optimization program be 

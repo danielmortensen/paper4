@@ -1,24 +1,24 @@
 \section{$p_3$: Group Assignment\label{sec:groupAssignment}}
-Before the bus charge problem can be solved, we need to address how the problem will scale. Historically, when buses are routed to chargers it requires a program which will evaluate all possible combinations to select an optimal, contention-free schedule. 
+Before the bus charge problem can be solved, we need to address how the problem will scale. In previous attempts to solve the charge problem, routing buses to chargers requires a program which selects an optimal, contention-free schedule by evaluating all possible combinations.
 \par Because contention increases on the order of $O(n^2)$ with the number of charge sessions and requires that each combination be evaluated to find an optimal solution, the placement problem is NP-hard \cite{kolesar_branch_1967}. Before we can formulate a scalable solution to the bus problem, we need a method to separate buses into groups to reduce the coupling between charge sessions.
 \par The group assignment problem separates buses into $n_{\text{group}}$ groups, where group $m$ is allocated $n^m_{\text{charger}}$ chargers and $n^m_{\text{bus}}$ buses. Each group must have sufficient chargers to fill it's needs and prefer buses with dissimilar schedules to better avoid contention. 
 \par We know that the number of cross-terms in future problems will be reduced when each group has the same number of buses. Therefore, let $n^m_{\text{bus}}$ be described as
 \begin{equation}\label{eqn:groups:nBusPerGroup}\begin{aligned}
 	n^m_{\text{bus}} &\ge \left \lfloor \frac{n_{\text{bus}}}{n_{\text{group}}} \right \rfloor \\
-	n^m_{\text{bus}} &\le \left \lceil \frac{n_{\text{bus}}}{n_{\text{group}}} \right \rceil
+	n^m_{\text{bus}} &\le \left \lceil \frac{n_{\text{bus}}}{n_{\text{group}}} \right \rceil.
 \end{aligned}\end{equation}
 \par We must also ensure that the number of chargers assigned to each group is exactly equal to the number of available chargers so that
 \begin{equation}\label{eqn:groups:nTotalCharger}
-	n_{\text{charger}} = \sum_mn_{\text{charger}}^m
+	n_{\text{charger}} = \sum_mn_{\text{charger}}^m,
 \end{equation}
 where $n_{\text{charger}}^m$ is the number of chargers assinged to group $m$.
 \par The next set of constraints ensures that each bus is is part of a group exactly once. Let $\beta(i,m)$ be a binary variable which is one when bus $i$ is in group $m$. We constrain each bus to be a member of exactly one group by letting
 \begin{equation}\label{eqn:groups:groupId}
-	\sum_m\beta(i,m) = 1 \ \forall i
+	\sum_m\beta(i,m) = 1 \ \forall i.
 \end{equation}
 \par We must also ensure that buses are assigned to groups where the power delivered to each bus can be achieved with the number of chargers assigned to that group. First, we define a slack variable which gives the total power used in group $m$ at time step $j$ as $p(m,j)$. Recall, we also know the expected power use for each bus as this is a result of $p_1$ as $b_{p(i,j)}$, which allows us to describe the total power for any one group as
 \begin{equation}\label{eqn:groups:groupPower}
- p(m,j) = \sum_i\beta(i,m)b_{p(i,j)}
+ p(m,j) = \sum_i\beta(i,m)b_{p(i,j)}.
 \end{equation}
 \par Next, we know that the total load of each group must be less than or equal to the collective capability of that group's chargers, which can be expressed as
 \begin{equation}\label{eqn:groups:chargeLimit}
@@ -33,7 +33,7 @@ where $\mathbf{b}(i,:)$ is the charge schedule for bus $i$ as computed in the $p
 \begin{equation*}
 	\begin{cases}
 		v(i,i',m) = \phi(i,i') & \beta(i,m) = 1, \beta(i',m) = 1 \\
-		v(i,i',m) = 0 & \text{otherwise}
+		v(i,i',m) = 0 & \text{otherwise},
 	\end{cases}
 \end{equation*}
 which can also be expressed by letting

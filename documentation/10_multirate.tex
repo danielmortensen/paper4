@@ -1,8 +1,8 @@
 \section{$p_7:$ Constrained Schedule\label{sec:constrainedSchedule}}
 Up to this point, we have computed the ``optimal'' schedule which assumes any bus can charge without regard to the number of chargers. We then separate buses into groups to reduce the scope of the problem and treat each sub-problem separately while we defragment and assign each charge session to specific chargers before determining the final start and stop times for each bus's charge session.
-\par The final step in this process is to determine how the energy will be delivered so that cost is minimised. Begin with constraints for bus power, energy, and cost from Section \ref{sec:unconstrainedSchedule} that are expressed as equations \eqref{eqn:obj:power2}, \eqref{eqn:battery:busPower}, \eqref{eqn:objective:pt}, \eqref{eqn:objective:p15}, \eqref{eqn:objective:pFac}, \eqref{eqn:objective:pDem} and \eqref{eqn:objective:energy}. Next, include constraints for energy so that the energy for each charge session is properly delivered using a modified version of Eqn. \eqref{eqn:defragmentation:active} so that
+\par The final step in this process is to determine how the energy will be delivered so that cost is minimised. Begin with constraints for bus power, energy, and cost from Section \ref{sec:unconstrainedSchedule} that are given in \eqref{eqn:obj:power2}, \eqref{eqn:battery:busPower}, \eqref{eqn:objective:pt}, \eqref{eqn:objective:p15}, \eqref{eqn:objective:pFac}, \eqref{eqn:objective:pDem} and \eqref{eqn:objective:energy}. Next, include constraints for energy so that the energy for each charge session is properly delivered using a modified version of Eqn. \eqref{eqn:defragmentation:active} so that
 \begin{equation}\label{eqn:constrainedSchedule:modified}
-	\mathbf{b}(i,:)\rho(i,r) = \psi(i,r)
+	\mathbf{b}(i,:)\rho(i,r) = \psi(i,r),
 \end{equation}
 where $\psi(i,r)$ is the required energy for bus $i$ during rest period $r$ as computed from the solution of the De-Fragmentation problem.
 \\[0.1in] \begin{tikzpicture}
@@ -13,7 +13,7 @@ where $\psi(i,r)$ is the required energy for bus $i$ during rest period $r$ as c
 $};
 \end{tikzpicture}
 \section{$p_8:$ Constrained Smooth Schedule\label{sec:constrainedSmoothSchedule}}
- \par The charge schedule from $p_7$ will contain the same on-off defects as the solution to $p_1$ which can be managed as before by executing $p_7$ once again with two changes: The first constrains the objective so that it achieves the optimal cost. The second reduces the difference of adjacent charge rates with the smoothing objective from Eqn. \ref{eqn:objective:smooth}.
+ \par The charge schedule from $p_7$ will contain the same on-off defects as the solution to $p_1$ which can be managed as before by executing $p_7$ once again with two changes: The first constrains the objective so that it achieves the optimal cost. The second reduces the difference of adjacent charge rates with the smoothing objective from \eqref{eqn:objective:smooth}.
 \\[0.1in] \begin{tikzpicture}
 	\node[rectangle, rounded corners, fill=gray!8, draw=gray!60, minimum width=\columnwidth, minimum height=0.7in] at (0,0)(box){};
 	\node at (0,0.2in)(title){\underline{Summary for $p_8$}};
