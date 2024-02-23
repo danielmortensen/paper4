@@ -1,5 +1,6 @@
 \begin{figure*}
 \centering
+\scalebox{0.8}{
 \begin{tikzpicture}
 	\node[rectangle, draw=gray!50, fill=gray!10, minimum width=5.8in, minimum height=0.4in](bus1Box) at (7.75,0.8){};
 	\node(bus1BoxLabel) at (-0.2, 0.8){Bus 1}; 
@@ -24,7 +25,7 @@
 			\draw[dashed, line width=0.5pt, black!50, opacity=0.5] (b\c.north) -- (t.north); 
 		}
 		\path (b9.south) -- node[midway, below=0.1in]{$\hdots$}(b10.south); 
-\end{tikzpicture}
+\end{tikzpicture}}
 \caption{Demonstrates how results from $p_4$ can be reexpressed in terms of continuous variables} 
 \label{fig:refactorExample}
 \end{figure*}

@@ -2,9 +2,11 @@
 \newcommand\mybar{\kern1pt\rule[-\dp\strutbox]{.8pt}{\baselineskip}\kern1pt}
 \newcommand{\coloredhline}{\arrayrulecolor{gray!20} \hline \\[0.01in]\arrayrulecolor{black}}
 \newcommand{\myendline}{\\ \coloredhline}
+\begingroup
+\fontsize{8pt}{10pt}\selectfont
 \label{tab:paperVariables}
 \centering
-\begin{supertabular}{b{0.06\textwidth} m{0.3\textwidth} m{0.09\textwidth} m{0.06\textwidth} m{0.3\textwidth} m{0.09\textwidth}}
+\begin{supertabular}{b{0.05\textwidth} m{0.25\textwidth} m{0.06\textwidth} m{0.05\textwidth} m{0.25\textwidth} m{0.06\textwidth}}
 	\toprule%----------------------------------------------------------------------------
 	\textbf{Variable} & \textbf{Description} & \textbf{Range} & \textbf{Variable} & \textbf{Description} & \textbf{Range}\\
 	\toprule%-----------------------------------------------------------------------------
@@ -14,10 +16,10 @@
   m & group index   & $\mathbb{N}$ &   &             \\[0.15in]
 	\hline \\[-5pt]
 	\multicolumn{6}{l}{Optimal Solution | Formulation} \\[-9pt]\myendline
-	$n_{\text{bus}}$&\parbox{0.3\textwidth}{The number of buses in the optimization framework.}                                                           & $\mathbb{Z}$            & $n_{\text{time}}$                      &\parbox{0.3\textwidth}{ The number of time indices in a day.                                                                                 }      & $\mathbb{Z}^+$ \\\myendline
-	$b_{p(i,j)}$   & \parbox{0.3\textwidth}{The average power consumed by bus $i$ during time period $j$.}                                                                              & $\mathbb{R}$           & $t_j$         &\parbox{0.3\textwidth}{ The time at time index $j$. This paper also refers to the period of time from $t_j$ to $t_{j+1}$ as ``period $t_j$''.}      & $\mathbb{R}$\\\myendline 
-	$\bm{b}$       & \parbox{0.3\textwidth}{A vector containing each value for $b_{p(i,j)}$.}                                                                                          & $\mathbb{R}^{n_{\text{bus}}\cdot n_{\text{time}}}$           & 	$\mathcal{\tilde{A}}$  & \parbox{0.3\textwidth}{The complement of $\mathcal{A}$.}                                                                        & $i\times j$\\\myendline 
-	$\mathcal{A}$  & \parbox{0.3\textwidth}{The set of all $i\times j$ elements where bus $i$ can charge at time index $j$}                                  & $i\times j$             & $p_{\text{max}}$ &\parbox{0.3\textwidth}{The maximum power a bus charger can deliver to a bus in kW. This paper assumes a value of 350 for most examples and results.} & $\mathbb{R}^+  $\\[0.5in]
+	$n_{\text{bus}}$&\parbox{0.2\textwidth}{The number of buses in the optimization framework.}                                                           & $\mathbb{Z}$            & $n_{\text{time}}$                      &\parbox{0.2\textwidth}{ The number of time indices in a day.                                                                                 }      & $\mathbb{Z}^+$ \\\myendline
+	$b_{p(i,j)}$   & \parbox{0.2\textwidth}{The average power consumed by bus $i$ during time period $j$.}                                                                              & $\mathbb{R}$           & $t_j$         &\parbox{0.2\textwidth}{ The time at time index $j$. This paper also refers to the period of time from $t_j$ to $t_{j+1}$ as ``period $t_j$''.}      & $\mathbb{R}$\\\myendline 
+	$\bm{b}$       & \parbox{0.2\textwidth}{A vector containing each value for $b_{p(i,j)}$.}                                                                                          & $\mathbb{R}^{n_{\text{bus}}\cdot n_{\text{time}}}$           & 	$\mathcal{\tilde{A}}$  & \parbox{0.2\textwidth}{The complement of $\mathcal{A}$.}                                                                        & $i\times j$\\\myendline 
+	$\mathcal{A}$  & \parbox{0.2\textwidth}{The set of all $i\times j$ elements where bus $i$ can charge at time index $j$}                                  & $i\times j$             & $p_{\text{max}}$ &\parbox{0.2\textwidth}{The maximum power a bus charger can deliver to a bus in kW. This paper assumes a value of 350 for most examples and results.} & $\mathbb{R}^+  $\\[0.5in]
 	\hline \\[-0.07in]
 	\multicolumn{6}{l}{Optimal Solution | Battery} \\[-9pt] \myendline
 	$h_{\text{min}}$ & The minimum allowable state of charge                           & $\left ( 0,h_{\text{max}} \right )$                & $h_{\text{max}}$  & The maximum state of charge                                                   & $\mathbb{R}^+$                                     \\ \myendline 
@@ -69,4 +71,4 @@
 	\hline \\[-0.07in]
 	%
 \end{supertabular}
-\twocolumn
+\endgroup 
